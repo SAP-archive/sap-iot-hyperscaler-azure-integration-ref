@@ -1,0 +1,18 @@
+{
+  "operation": "PATCH",
+  "timestamp": 1589400718573,
+  "type": "com.sap.iot.i4c.Structure",
+  "changeEntity": "%s",
+  "tenant": "643751ab-65be-46f8-b20e-2b648cf42336",
+  "changeList": [{
+    "type": "com.sap.iot.i4c.StructureProperty",
+    "entity": "%s",
+    "operation": "UPDATE",
+    "additionalEntityData": [{
+      "name": "dataType",
+      "value": "%s"
+    }]
+  }],
+  "version": "0",
+  "entityDataList": []
+}

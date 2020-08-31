@@ -1,0 +1,15 @@
+{
+  "specversion": "1.0",
+  "type": "com.sap.iot.abstraction.device.management.delete.v1",
+  "source": "sap-iot-abstraction",
+  "id": "1b8a80e9-7903-4c63-83c3-2ca4545a965c",
+  "time": "2020-06-05T17:31:00Z",
+  "comSapIoTAbstractionExtension": {
+    "transactionId": "a1b3032f-cb1b-4539-8b4b-bd87664af99c",
+    "sequenceNumber": "0"
+  },
+  "datacontenttype": "application/json",
+  "data": {
+    "deviceId": "d1"
+  }
+}

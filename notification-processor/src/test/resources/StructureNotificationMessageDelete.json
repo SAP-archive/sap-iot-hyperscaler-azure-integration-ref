@@ -1,0 +1,10 @@
+{
+  "operation": "DELETE",
+  "timestamp": 1589401317988,
+  "type": "com.sap.iot.i4c.Structure",
+  "changeEntity": "%s",
+  "tenant": "643751ab-65be-46f8-b20e-2b648cf42336",
+  "changeList": [],
+  "version": "0",
+  "entityDataList": []
+}

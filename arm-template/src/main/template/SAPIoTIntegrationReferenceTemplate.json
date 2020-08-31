@@ -1,0 +1,1893 @@
+{
+	"parameters": {
+		"name": {
+			"type": "string",
+			"maxLength": 25,
+			"metadata": {
+				"description": "Defines a value for resource creation."
+			}
+		},
+		"AADApplicationClientIdForAzureFunctions": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a secure value for Azure active directory application client ID for Azure functions. This value will be used to create ADX service principal with User role."
+			}
+		},
+		"AADApplicationClientIdForSapIotAbstraction": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a secure value for Azure active directory application client id for SAP IoT abstraction. This value will be used to create ADX service principal with Viewer role."
+			}
+		},
+		"AADClientSecret": {
+			"type": "securestring",
+			"metadata": {
+				"description": "Defines a secure value for Azure active directory client secret."
+			}
+		},
+		"AADTenantID": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a secure value for Azure active directory tenant id."
+			}
+		},
+		"SAPIotTenantAuthenticationTokenEndpoint": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a value for SAP IoT tenant authentication token endpoint."
+			}
+		},
+		"SAPIotTenantID": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a value for SAP IoT tenant id."
+			}
+		},
+		"SAPIotTenantClientID": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a secure value for SAP IoT tenant client id."
+			}
+		},
+		"SAPIotTenantClientSecret": {
+			"type": "securestring",
+			"metadata": {
+				"description": "Defines a secure value for SAP IoT tenant client secret."
+			}
+		},
+		"scopesToAccessSAPIotApis": {
+			"type": "string",
+			"metadata": {
+				"description": "List of authorization scopes required to access the Mapping and Configuration Lookup APIs. You can provide comma separated values for multiple scopes."
+			}
+		},
+		"modelConfigurationAppHost": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a value for model configuration app host."
+			}
+		},
+		"modelMappingAppHost": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a value for model mapping app host."
+			}
+		},
+		"mappingFunctionZipURI": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a value for mapping function Zip URI."
+			}
+		},
+		"notificationFunctionZipURI": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a value for notification function Zip URI."
+			}
+		},
+		"deviceManagementFunctionZipURI": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a value for device management function Zip URI."
+			}
+		},
+		"enableDiagnosticsSettingsForServices": {
+			"type": "string",
+			"defaultValue": "Yes",
+			"allowedValues": [
+				"Yes",
+				"No"
+			],
+			"metadata": {
+				"description": "Diagnostic settings are used to configure streaming export of platform logs and metrics for a resource to the destination of your choice."
+			}
+		},
+		"diagnosticsLogsRetentionInDays": {
+			"type": "int",
+			"defaultValue": 0,
+			"minValue": 0,
+			"maxValue": 365,
+			"metadata": {
+				"description": "Defines the number of days that the logs are retained. If you do not want to apply any retention policy and retain data forever, set value to 0."
+			}
+		},
+		"iotHubSKUName": {
+			"type": "string",
+			"defaultValue": "S1",
+			"allowedValues": [
+				"F1",
+				"B1",
+				"B2",
+				"B3",
+				"S1",
+				"S2",
+				"S3"
+			],
+			"metadata": {
+				"description": "Defines IoT Hub's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/iot-hub/"
+			}
+		},
+		"iotHubSKUCapacity": {
+			"type": "int",
+			"defaultValue": 1,
+			"minValue": 1,
+			"metadata": {
+				"description": "Defines IoT Hub's SKU capacity. Check details at https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-scaling"
+			}
+		},
+		"iotHubPartitionCount": {
+			"type": "int",
+			"defaultValue": 4,
+			"minValue": 2,
+			"metadata": {
+				"description": "Defines IoT Hub's Partition Count. Check details at https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-scaling#partitions"
+			}
+		},
+		"AzureDataExplorerSKUName": {
+			"type": "string",
+			"defaultValue": "Standard_D11_v2",
+			"allowedValues": [
+				"Dev(No SLA)_Standard_D11_v2",
+				"Standard_D11_v2",
+				"Standard_D12_v2",
+				"Standard_D13_v2",
+				"Standard_D14_v2",
+				"Standard_DS13_v2+1TB_PS",
+				"Standard_DS13_v2+2TB_PS",
+				"Standard_DS14_v2+3TB_PS",
+				"Standard_DS14_v2+4TB_PS",
+				"Standard_L16s",
+				"Standard_L4s",
+				"Standard_L8s"
+			],
+			"metadata": {
+				"description": "Defines ADX cluster SKU name. Check details at https://docs.microsoft.com/en-us/azure/data-explorer/manage-cluster-choose-sku"
+			}
+		},
+		"AzureDataExplorerSKUTier": {
+			"type": "string",
+			"defaultValue": "Standard",
+			"allowedValues": [
+				"Standard",
+				"Basic"
+			],
+			"metadata": {
+				"description": "Defines ADX cluster SKU tier. Check details at https://docs.microsoft.com/en-us/rest/api/azurerekusto/clusters/listskus#azureskutier"
+			}
+		},
+		"AzureDataExplorerSKUCapacity": {
+			"type": "int",
+			"defaultValue": 2,
+			"allowedValues": [
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16
+			],
+			"metadata": {
+				"description": "Defines the number of instances of the ADX cluster. Check details at https://docs.microsoft.com/en-us/rest/api/azurerekusto/clusters/listskus"
+			}
+		},
+		"databaseHotCachePeriod": {
+			"type": "int",
+			"defaultValue": 90,
+			"minValue": 1,
+			"maxValue": 36500,
+			"metadata": {
+				"description": "Defines the number of days to retain data in cache for quick access (minValue=1, maxValue=36500)."
+			}
+		},
+		"eventHubSKUTier": {
+			"type": "string",
+			"defaultValue": "Standard",
+			"allowedValues": [
+				"Standard",
+				"Basic"
+			],
+			"metadata": {
+				"description": "Defines the billing tier of event hub namespaces SKU."
+			}
+		},
+		"eventHubSKUCapacity": {
+			"type": "int",
+			"defaultValue": 1,
+			"allowedValues": [
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20
+			],
+			"metadata": {
+				"description": "Defines event hubs throughput units."
+			}
+		},
+		"eventHubPartitionsForADXTimeseries": {
+			"type": "int",
+			"defaultValue": 5,
+			"allowedValues": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32
+			],
+			"metadata": {
+				"description": "Defines number of event hub partitions for ADX Timeseries."
+			}
+		},
+		"eventHubPartitionsForProcessedTimeseriesIn": {
+			"type": "int",
+			"defaultValue": 5,
+			"allowedValues": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32
+			],
+			"metadata": {
+				"description": "Defines number of event hub partitions for Processed Timeseries In."
+			}
+		},
+		"eventHubPartitionsForProcessedTimeseriesOut": {
+			"type": "int",
+			"defaultValue": 5,
+			"allowedValues": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32
+			],
+			"metadata": {
+				"description": "Defines number of event hub partitions for Processed Timeseries Out."
+			}
+		},
+		"eventHubPartitionsForModelChangeNotification": {
+			"type": "int",
+			"defaultValue": 1,
+			"allowedValues": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32
+			],
+			"metadata": {
+				"description": "Defines number of event hub partitions for ADX Notification."
+			}
+		},
+		"eventHubPartitionsForDeviceManagementRequest": {
+			"type": "int",
+			"defaultValue": 3,
+			"allowedValues": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32
+			],
+			"metadata": {
+				"description": "Defines number of event hub partitions for Device Management Request."
+			}
+		},
+		"eventHubPartitionsForDeviceManagementStatus": {
+			"type": "int",
+			"defaultValue": 1,
+			"allowedValues": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32
+			],
+			"metadata": {
+				"description": "Defines number of event hub partitions for Device Management Status."
+			}
+		},
+		"keyVaultSKUName": {
+			"type": "string",
+			"defaultValue": "Standard",
+			"allowedValues": [
+				"Standard",
+				"Premium"
+			],
+			"metadata": {
+				"description": "Defines whether the key vault is a standard vault or a premium vault."
+			}
+		},
+		"redisCacheSKUName": {
+			"type": "string",
+			"defaultValue": "Standard",
+			"allowedValues": [
+				"Basic",
+				"Standard",
+				"Premium"
+			],
+			"metadata": {
+				"description": "Defines the type of Redis cache."
+			}
+		},
+		"redisCacheSKUCapacity": {
+			"type": "int",
+			"defaultValue": 1,
+			"allowedValues": [
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6
+			],
+			"metadata": {
+				"description": "Defines the size of Redis cache. (Family C: 0, 1, 2, 3, 4, 5, 6 - Family P: 1, 2, 3, 4)."
+			}
+		}
+	},
+	"variables": {
+		"SAPIoTAzureRefTemplateVersion": "${project.version}",
+		"uniqueAppName": "[concat(parameters('name'), '-', uniqueString(resourceGroup().id))]",
+		"storageName": "[toLower(substring(concat('stingestion', uniqueString(variables('uniqueAppName'))), 0, 24))]",
+		"notificationStorageName": "[toLower(substring(concat('stnotification', uniqueString(variables('uniqueAppName'))), 0, 24))]",
+		"deviceStorageName": "[toLower(substring(concat('stdevicemanagement', uniqueString(variables('uniqueAppName'))), 0, 24))]",
+		"diagnosticStorageName": "[toLower(substring(concat('stdiagnostic', uniqueString(variables('uniqueAppName'))), 0, 24))]",
+		"iotHubName": "[substring(concat('iot-', uniqueString(resourceGroup().id), '-', parameters('name')), 0, 16)]",
+		"iotHubAccountId": "[concat(resourceGroup().id,'/providers/Microsoft.Devices/IotHubs/', variables('iotHubName'))]",
+		"ADXClustersName": "[substring(concat('kusto', uniqueString(variables('uniqueAppName'))), 0, 10)]",
+		"ADXClustersDatabaseName": "timeseries-db",
+		"ADXResourceLocation": "[resourceGroup().location]",
+		"ADXIngestion": "[substring(concat('ingest-', uniqueString(variables('uniqueAppName'))), 0, 10)]",
+		"redisCacheName": "[substring(concat('redis-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
+		"eventHubNamespaces": "[substring(concat('evh-ns-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
+		"eventHubNamespacesExternalID": "[resourceId('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+		"eventHubADXIngestion": "sap.iot.abstract.adx_timeseries.v1",
+		"eventHubADXIngestionPolicyListen": "adx-timeseries-policy-listen",
+		"eventHubADXIngestionPolicySend": "adx-timeseries-policy-send",
+		"eventHubADXIngestionConsumerGroup": "sap-iot-ingestion-adx-cg",
+		"eventHubModelChangeNotification": "sap.iot.modelabstraction.meta.change.v1",
+		"eventHubModelChangeNotificationPolicyListen": "model-change-notification-policy-listen",
+		"eventHubModelChangeNotificationPolicySend": "model-change-notification-policy-send",
+		"eventHubModelChangeNotificationConsumerGroup": "sap-iot-notification-handler-cg",
+		"eventHubProcessedTimeseriesOut": "sap.iot.abstract.processed_timeseries_out.v1",
+		"eventHubProcessedTimeseriesOutPolicyListen": "processed-timeseries-out-policy-listen",
+		"eventHubProcessedTimeseriesOutPolicySend": "processed-timeseries-out-policy-send",
+		"eventHubProcessedTimeseriesIn": "sap.iot.abstract.processed_timeseries_in.v1",
+		"eventHubProcessedTimeseriesInPolicyListen": "processed-timeseries-in-policy-listen",
+		"eventHubProcessedTimeseriesInPolicySend": "processed-timeseries-in-policy-send",
+		"eventHubDeviceManagementRequest": "sap.iot.abstraction.device.management.request",
+		"eventHubDeviceManagementRequestPolicyListen": "device-management-request-policy-listen",
+		"eventHubDeviceManagementRequestPolicySend": "device-management-request-policy-send",
+		"eventHubDeviceManagementRequestConsumerGroup": "sap-iot-device-management-request-cg",
+		"eventHubDeviceManagementStatus": "sap.iot.abstraction.device.management.status",
+		"eventHubDeviceManagementStatusPolicyListen": "device-management-status-policy-listen",
+		"eventHubDeviceManagementStatusPolicySend": "device-management-status-policy-send",
+		"eventHubDeviceManagementStatusConsumerGroup": "sap-iot-device-management-status-cg",
+		"vaultName": "[substring(concat('kv-', uniqueString(variables('uniqueAppName'))), 0, 10)]",
+		"SPAclientId": "service-principal-application-client-id",
+		"SPAKey": "service-principal-application-key",
+		"SPAuthoriyId": "service-principal-authority-id",
+		"clientId": "client-id",
+		"clientSecret": "client-secret",
+		"ADXSourceConnectionString": "adx-source-connection-string",
+		"processedTimeseriesConnectionString": "processed-timeseries-connection-string",
+		"processedTimeseriesIn": "processed-timeseries-in-connection-string",
+		"eventProcessHubConnectionString": "event-process-hub-connection-string",
+		"deviceManagementRequestConnectionString": "device-management-request-connection-string",
+		"deviceManagementStatusConnectionString": "device-management-status-connection-string",
+		"azureCacheKey": "azure-cache-key",
+		"functionAppIngestionDiagnosticName": "[substring(concat('ingest-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
+		"functionAppNotificationDiagnosticName": "[substring(concat('notify-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
+		"functionAppDeviceManagementDiagnosticName": "[substring(concat('device-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
+		"iotHubDiagnosticName": "[substring(concat('iot-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
+		"ADXDiagnosticName": "[substring(concat('adx-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
+		"eventHubDiagnosticName": "[substring(concat('evh-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
+		"keyVaultDiagnosticName": "[substring(concat('kv-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
+		"redisCacheDiagnosticName": "[substring(concat('redis-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
+		"notificationEventhubConnectionString": "notification-eventhub-connection-string",
+		"iothubRegistryConnectionString": "iothub-registry-connection-string",
+		"enabledSettings": "Yes"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Web/serverfarms",
+			"apiVersion": "2018-02-01",
+			"name": "[ variables('uniqueAppName')]",
+			"location": "[resourceGroup().location]",
+			"sku": {
+				"name": "Y1",
+				"tier": "Dynamic"
+			},
+			"properties": {
+				"name": "[ variables('uniqueAppName')]",
+				"computeMode": "Dynamic"
+			}
+		},
+		{
+			"apiVersion": "2016-03-01",
+			"name": "[variables('uniqueAppName')]",
+			"type": "Microsoft.Web/sites",
+			"properties": {
+				"name": "[variables('uniqueAppName')]",
+				"httpsOnly": true
+			},
+			"tags": {
+				"SAPIoTAzureRefTemplateVersion": "[variables('SAPIoTAzureRefTemplateVersion')]"
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+				"[resourceId('Microsoft.Web/serverfarms', variables('uniqueAppName'))]"
+			],
+			"resources": [
+				{
+					"apiVersion": "2018-02-01",
+					"name": "appsettings",
+					"type": "config",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/sites/', variables('uniqueAppName'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('SPAclientId'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('SPAKey'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('SPAuthoriyId'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('clientId'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('clientSecret'))]"
+					],
+					"properties": {
+						"FUNCTIONS_WORKER_RUNTIME": "java",
+						"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2019-04-01').keys[0].value)]",
+						"FUNCTIONS_EXTENSION_VERSION": "~2",
+						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2019-04-01').keys[0].value)]",
+						"WEBSITE_CONTENTSHARE": "[concat(toLower(variables('uniqueAppName')))]",
+						"WEBSITE_RUN_FROM_ZIP": "[parameters('mappingFunctionZipURI')]",
+						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('uniqueAppName')), '2018-05-01-preview').InstrumentationKey]",
+						"WEBSITE_RUN_FROM_PACKAGE": "1",
+						"service-principal-application-client-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAclientId'))).secretUriWithVersion, ')')]",
+						"service-principal-application-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAKey'))).secretUriWithVersion, ')')]",
+						"service-principal-authority-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAuthoriyId'))).secretUriWithVersion, ')')]",
+						"client-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('clientId'))).secretUriWithVersion, ')')]",
+						"client-secret": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('clientSecret'))).secretUriWithVersion, ')')]",
+						"azure-cache-host": "[concat(variables('redisCacheName'), '.redis.cache.windows.net')]",
+						"adx-resource-uri": "[concat('https://', variables('ADXClustersName'), '.', variables('ADXResourceLocation'), '.kusto.windows.net')]",
+						"adx-source-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('ADXSourceConnectionString'))).secretUriWithVersion, ')')]",
+						"processed-timeseries-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('processedTimeseriesConnectionString'))).secretUriWithVersion, ')')]",
+						"processed-timeseries-in-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('processedTimeseriesIn'))).secretUriWithVersion, ')')]",
+						"iothub-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('eventProcessHubConnectionString'))).secretUriWithVersion, ')')]",
+						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', variables('uniqueAppName')), '2018-05-01-preview').InstrumentationKey)]",
+						"azure-cache-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('azureCacheKey'))).secretUriWithVersion, ')')]",
+						"transform-default-message-type": "IOTS",
+						"sap-iot-tenant": "[parameters('SAPIotTenantID')]",
+						"adx-database-name": "[variables('ADXClustersDatabaseName')]",
+						"eventhub-sku-tier": "[parameters('eventHubSKUTier')]",
+						"lookup-app-host": "[parameters('modelConfigurationAppHost')]",
+						"mapping-app-host": "[parameters('modelMappingAppHost')]",
+						"token-endpoint": "[parameters('SAPIotTenantAuthenticationTokenEndpoint')]",
+						"sap-iot-required-api-scopes": "[parameters('scopesToAccessSAPIotApis')]"
+					}
+				},
+				{
+					"condition": "[equals(parameters('enableDiagnosticsSettingsForServices'), variables('enabledSettings'))]",
+					"type": "Microsoft.Web/sites/providers/diagnosticsettings",
+					"name": "[concat(variables('uniqueAppName'),'/microsoft.insights/', variables('functionAppIngestionDiagnosticName'))]",
+					"apiVersion": "2017-05-01-preview",
+					"location": "[resourceGroup().location]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/sites/', variables('uniqueAppName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('diagnosticStorageName'))]"
+					],
+					"properties": {
+						"storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageName'))]",
+						"logs": [
+							{
+								"category": "FunctionAppLogs",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						],
+						"metrics": [
+							{
+								"category": "AllMetrics",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						]
+					}
+				}
+			],
+			"location": "[resourceGroup().location]",
+			"identity": {
+				"type": "SystemAssigned"
+			},
+			"kind": "functionapp"
+		},
+		{
+			"apiVersion": "2016-03-01",
+			"name": "[concat(variables('uniqueAppName'), '-notify')]",
+			"type": "Microsoft.Web/sites",
+			"properties": {
+				"name": "[concat(variables('uniqueAppName'), '-notify')]",
+				"httpsOnly": true
+			},
+			"tags": {
+				"SAPIoTAzureRefTemplateVersion": "[variables('SAPIoTAzureRefTemplateVersion')]"
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Storage/storageAccounts', variables('notificationStorageName'))]",
+				"[resourceId('Microsoft.Web/serverfarms', variables('uniqueAppName'))]"
+			],
+			"resources": [
+				{
+					"apiVersion": "2018-02-01",
+					"name": "appsettings",
+					"type": "config",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/sites/', concat(variables('uniqueAppName'), '-notify'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('SPAclientId'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('SPAKey'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('SPAuthoriyId'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('clientId'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('clientSecret'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('notificationEventhubConnectionString'))]"
+					],
+					"properties": {
+						"FUNCTIONS_WORKER_RUNTIME": "java",
+						"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('notificationStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('notificationStorageName')), '2019-04-01').keys[0].value)]",
+						"FUNCTIONS_EXTENSION_VERSION": "~2",
+						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('notificationStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('notificationStorageName')), '2019-04-01').keys[0].value)]",
+						"WEBSITE_CONTENTSHARE": "[concat(toLower(concat(variables('uniqueAppName'), '-notify')))]",
+						"WEBSITE_RUN_FROM_ZIP": "[parameters('notificationFunctionZipURI')]",
+						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', concat(variables('uniqueAppName'))), '2018-05-01-preview').InstrumentationKey]",
+						"WEBSITE_RUN_FROM_PACKAGE": "1",
+						"service-principal-application-client-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAclientId'))).secretUriWithVersion, ')')]",
+						"service-principal-application-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAKey'))).secretUriWithVersion, ')')]",
+						"service-principal-authority-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAuthoriyId'))).secretUriWithVersion, ')')]",
+						"client-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('clientId'))).secretUriWithVersion, ')')]",
+						"client-secret": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('clientSecret'))).secretUriWithVersion, ')')]",
+						"azure-cache-host": "[concat(variables('redisCacheName'), '.redis.cache.windows.net')]",
+						"adx-resource-uri": "[concat('https://', variables('ADXClustersName'), '.', variables('ADXResourceLocation'), '.kusto.windows.net')]",
+						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', concat(variables('uniqueAppName'))), '2018-05-01-preview').InstrumentationKey)]",
+						"azure-cache-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('azureCacheKey'))).secretUriWithVersion, ')')]",
+						"adx-database-name": "[variables('ADXClustersDatabaseName')]",
+						"eventhub-sku-tier": "[parameters('eventHubSKUTier')]",
+						"lookup-app-host": "[parameters('modelConfigurationAppHost')]",
+						"mapping-app-host": "[parameters('modelMappingAppHost')]",
+						"token-endpoint": "[parameters('SAPIotTenantAuthenticationTokenEndpoint')]",
+						"notification-eventhub-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('notificationEventhubConnectionString'))).secretUriWithVersion, ')')]",
+						"sap-iot-required-api-scopes": "[parameters('scopesToAccessSAPIotApis')]"
+					}
+				},
+				{
+					"condition": "[equals(parameters('enableDiagnosticsSettingsForServices'), variables('enabledSettings'))]",
+					"type": "Microsoft.Web/sites/providers/diagnosticsettings",
+					"name": "[concat(variables('uniqueAppName'), '-notify','/microsoft.insights/', variables('functionAppNotificationDiagnosticName'))]",
+					"apiVersion": "2017-05-01-preview",
+					"location": "[resourceGroup().location]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/sites/', concat(variables('uniqueAppName'), '-notify'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('diagnosticStorageName'))]"
+					],
+					"properties": {
+						"storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageName'))]",
+						"logs": [
+							{
+								"category": "FunctionAppLogs",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						],
+						"metrics": [
+							{
+								"category": "AllMetrics",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						]
+					}
+				}
+			],
+			"location": "[resourceGroup().location]",
+			"identity": {
+				"type": "SystemAssigned"
+			},
+			"kind": "functionapp"
+		},
+		{
+			"apiVersion": "2016-03-01",
+			"name": "[concat(variables('uniqueAppName'), '-device')]",
+			"type": "Microsoft.Web/sites",
+			"properties": {
+				"name": "[concat(variables('uniqueAppName'), '-device')]",
+				"httpsOnly": true
+			},
+			"tags": {
+				"SAPIoTAzureRefTemplateVersion": "[variables('SAPIoTAzureRefTemplateVersion')]"
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Storage/storageAccounts', variables('deviceStorageName'))]",
+				"[resourceId('Microsoft.Web/serverfarms', variables('uniqueAppName'))]"
+			],
+			"resources": [
+				{
+					"apiVersion": "2018-02-01",
+					"name": "appsettings",
+					"type": "config",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/sites/', concat(variables('uniqueAppName'), '-device'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('deviceManagementRequestConnectionString'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('deviceManagementStatusConnectionString'))]"
+					],
+					"properties": {
+						"FUNCTIONS_WORKER_RUNTIME": "java",
+						"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deviceStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deviceStorageName')), '2019-04-01').keys[0].value)]",
+						"FUNCTIONS_EXTENSION_VERSION": "~2",
+						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deviceStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deviceStorageName')), '2019-04-01').keys[0].value)]",
+						"WEBSITE_CONTENTSHARE": "[concat(toLower(concat(variables('uniqueAppName'), '-device')))]",
+						"WEBSITE_RUN_FROM_ZIP": "[parameters('deviceManagementFunctionZipURI')]",
+						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', concat(variables('uniqueAppName'))), '2018-05-01-preview').InstrumentationKey]",
+						"WEBSITE_RUN_FROM_PACKAGE": "1",
+						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', concat(variables('uniqueAppName'))), '2018-05-01-preview').InstrumentationKey)]",
+						"device-management-request-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deviceManagementRequestConnectionString'))).secretUriWithVersion, ')')]",
+						"device-management-status-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deviceManagementStatusConnectionString'))).secretUriWithVersion, ')')]",
+						"iothub-registry-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('iothubRegistryConnectionString'))).secretUriWithVersion, ')')]"
+					}
+				},
+				{
+					"condition": "[equals(parameters('enableDiagnosticsSettingsForServices'), variables('enabledSettings'))]",
+					"type": "Microsoft.Web/sites/providers/diagnosticsettings",
+					"name": "[concat(variables('uniqueAppName'), '-device','/microsoft.insights/', variables('functionAppDeviceManagementDiagnosticName'))]",
+					"apiVersion": "2017-05-01-preview",
+					"location": "[resourceGroup().location]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/sites/', concat(variables('uniqueAppName'), '-device'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('diagnosticStorageName'))]"
+					],
+					"properties": {
+						"storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageName'))]",
+						"logs": [
+							{
+								"category": "FunctionAppLogs",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						],
+						"metrics": [
+							{
+								"category": "AllMetrics",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						]
+					}
+				}
+			],
+			"location": "[resourceGroup().location]",
+			"identity": {
+				"type": "SystemAssigned"
+			},
+			"kind": "functionapp"
+		},
+		{
+			"apiVersion": "2019-04-01",
+			"type": "Microsoft.Storage/storageAccounts",
+			"name": "[variables('storageName')]",
+			"location": "[resourceGroup().location]",
+			"kind": "StorageV2",
+			"sku": {
+				"name": "Standard_RAGRS"
+			},
+			"properties": {
+				"networkAcls": {
+					"bypass": "AzureServices",
+					"virtualNetworkRules": [],
+					"ipRules": [],
+					"defaultAction": "Allow"
+				},
+				"supportsHttpsTrafficOnly": true
+			}
+		},
+		{
+			"apiVersion": "2019-04-01",
+			"type": "Microsoft.Storage/storageAccounts",
+			"name": "[variables('notificationStorageName')]",
+			"location": "[resourceGroup().location]",
+			"kind": "StorageV2",
+			"sku": {
+				"name": "Standard_RAGRS"
+			},
+			"properties": {
+				"networkAcls": {
+					"bypass": "AzureServices",
+					"virtualNetworkRules": [],
+					"ipRules": [],
+					"defaultAction": "Allow"
+				},
+				"supportsHttpsTrafficOnly": true
+			}
+		},
+		{
+			"apiVersion": "2019-04-01",
+			"type": "Microsoft.Storage/storageAccounts",
+			"name": "[variables('deviceStorageName')]",
+			"location": "[resourceGroup().location]",
+			"kind": "StorageV2",
+			"sku": {
+				"name": "Standard_RAGRS"
+			},
+			"properties": {
+				"networkAcls": {
+					"bypass": "AzureServices",
+					"virtualNetworkRules": [],
+					"ipRules": [],
+					"defaultAction": "Allow"
+				},
+				"supportsHttpsTrafficOnly": true
+			}
+		},
+		{
+			"apiVersion": "2019-04-01",
+			"type": "Microsoft.Storage/storageAccounts",
+			"name": "[variables('diagnosticStorageName')]",
+			"location": "[resourceGroup().location]",
+			"kind": "StorageV2",
+			"sku": {
+				"name": "Standard_RAGRS"
+			},
+			"properties": {
+				"networkAcls": {
+					"bypass": "AzureServices",
+					"virtualNetworkRules": [],
+					"ipRules": [],
+					"defaultAction": "Allow"
+				},
+				"accessTier": "Cool",
+				"supportsHttpsTrafficOnly": true
+			}
+		},
+		{
+			"apiVersion": "2018-05-01-preview",
+			"name": "[variables('uniqueAppName')]",
+			"type": "Microsoft.Insights/components",
+			"location": "[resourceGroup().location]",
+			"kind": "web",
+			"tags": {
+				"displayName": "AppInsightsComponent"
+			},
+			"properties": {
+				"Application_Type": "web",
+				"Request_Source": "IbizaWebAppExtensionCreate"
+			}
+		},
+		{
+			"name": "[variables('ADXClustersName')]",
+			"type": "Microsoft.Kusto/clusters",
+			"sku": {
+				"name": "[parameters('AzureDataExplorerSKUName')]",
+				"tier": "[parameters('AzureDataExplorerSKUTier')]",
+				"capacity": "[parameters('AzureDataExplorerSKUCapacity')]"
+			},
+			"apiVersion": "2019-11-09",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"enableDiskEncryption": true
+			},
+			"resources": [
+				{
+					"condition": "[equals(parameters('enableDiagnosticsSettingsForServices'), variables('enabledSettings'))]",
+					"type": "Microsoft.Kusto/clusters/providers/diagnosticSettings",
+					"name": "[concat(variables('ADXClustersName'),'/microsoft.insights/', variables('ADXDiagnosticName'))]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Kusto/Clusters', variables('ADXClustersName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('diagnosticStorageName'))]"
+					],
+					"apiVersion": "2017-05-01-preview",
+					"properties": {
+						"storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('diagnosticStorageName'))]",
+						"logs": [
+							{
+								"category": "FailedIngestion",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						],
+						"metrics": [
+							{
+								"category": "Cluster health",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							},
+							{
+								"category": "Query performance",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							},
+							{
+								"category": "Ingestion health and performance",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							},
+							{
+								"category": "Export health and performance",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "[concat(variables('ADXClustersName'), '/', variables('ADXClustersDatabaseName'))]",
+			"type": "Microsoft.Kusto/clusters/databases",
+			"apiVersion": "2019-11-09",
+			"location": "[resourceGroup().location]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Kusto/clusters', variables('ADXClustersName'))]"
+			],
+			"kind": "ReadWrite",
+			"properties": {
+				"hotCachePeriodInDays": "[parameters('databaseHotCachePeriod')]"
+			},
+			"resources": [
+				{
+					"type": "Microsoft.Kusto/Clusters/Databases/DataConnections",
+					"apiVersion": "2019-11-09",
+					"name": "[concat(variables('ADXClustersName'), '/', variables('ADXClustersDatabaseName'), '/', variables('ADXIngestion'))]",
+					"location": "[resourceGroup().location]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Kusto/Clusters/Databases', variables('ADXClustersName'), variables('ADXClustersDatabaseName'))]",
+						"[resourceId('Microsoft.Kusto/Clusters', variables('ADXClustersName'))]"
+					],
+					"kind": "EventHub",
+					"properties": {
+						"eventHubResourceId": "[concat(resourceId('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces')), '/eventhubs/sap.iot.abstract.adx_timeseries.v1')]",
+						"consumerGroup": "[variables('eventHubADXIngestionConsumerGroup')]",
+						"tableName": "",
+						"eventSystemProperties": [
+							"x-opt-enqueued-time"
+						]
+					}
+				},
+				{
+					"type": "Microsoft.Kusto/Clusters/Databases/PrincipalAssignments",
+					"apiVersion": "2020-02-15",
+					"name": "[concat(variables('ADXClustersName'), '/', variables('ADXClustersDatabaseName'), '/', variables('ADXClustersDatabaseName'), 'user')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Kusto/Clusters/Databases', variables('ADXClustersName'), variables('ADXClustersDatabaseName'))]",
+						"[resourceId('Microsoft.Kusto/Clusters', variables('ADXClustersName'))]"
+					],
+					"properties": {
+						"principalId": "[parameters('AADApplicationClientIdForAzureFunctions')]",
+						"role": "User",
+						"principalType": "App",
+						"tenantId": "[parameters('AADTenantID')]"
+					}
+				},
+				{
+					"type": "Microsoft.Kusto/Clusters/Databases/PrincipalAssignments",
+					"apiVersion": "2020-02-15",
+					"name": "[concat(variables('ADXClustersName'), '/', variables('ADXClustersDatabaseName'), '/', variables('ADXClustersDatabaseName'), 'viewer')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Kusto/Clusters/Databases', variables('ADXClustersName'), variables('ADXClustersDatabaseName'))]",
+						"[resourceId('Microsoft.Kusto/Clusters', variables('ADXClustersName'))]"
+					],
+					"properties": {
+						"principalId": "[parameters('AADApplicationClientIdForSapIotAbstraction')]",
+						"role": "Viewer",
+						"principalType": "App",
+						"tenantId": "[parameters('AADTenantID')]"
+					}
+				}
+			]
+		},
+		{
+			"type": "Microsoft.Cache/Redis",
+			"apiVersion": "2019-07-01",
+			"name": "[variables('redisCacheName')]",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"sku": {
+					"name": "[parameters('redisCacheSKUName')]",
+					"family": "[if(equals(parameters('redisCacheSKUName'), 'Premium'), 'P', 'C')]",
+					"capacity": "[parameters('redisCacheSKUCapacity')]"
+				},
+				"enableNonSslPort": false,
+				"redisConfiguration": {
+				}
+			},
+			"resources": [
+				{
+					"condition": "[equals(parameters('enableDiagnosticsSettingsForServices'), variables('enabledSettings'))]",
+					"type": "Microsoft.Cache/Redis/providers/diagnosticsettings",
+					"name": "[concat(variables('redisCacheName'),'/microsoft.insights/', variables('redisCacheDiagnosticName'))]",
+					"apiVersion": "2017-05-01-preview",
+					"location": "[resourceGroup().location]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Cache/Redis/', variables('redisCacheName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('diagnosticStorageName'))]"
+					],
+					"properties": {
+						"storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageName'))]",
+						"metrics": [
+							{
+								"category": "AllMetrics",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						]
+					}
+				}
+			]
+		},
+		{
+			"type": "Microsoft.Devices/IotHubs",
+			"apiVersion": "2018-04-01",
+			"location": "[resourceGroup().location]",
+			"name": "[variables('iotHubName')]",
+			"properties": {
+				"eventHubEndpoints": {
+					"events": {
+						"retentionTimeInDays": 1,
+						"partitionCount": "[parameters('iotHubPartitionCount')]"
+					},
+					"operationsMonitoringEvents": {
+						"retentionTimeInDays": "1",
+						"partitionCount": "[parameters('iotHubPartitionCount')]"
+					}
+				}
+			},
+			"sku": {
+				"name": "[parameters('iotHubSKUName')]",
+				"capacity": "[parameters('iotHubSKUCapacity')]"
+			},
+			"resources": [
+				{
+					"type": "Microsoft.Devices/iotHubs/eventhubEndpoints/ConsumerGroups",
+					"apiVersion": "2018-04-01",
+					"name": "[concat(variables('iotHubName'), '/events/sap-iot-ingestion-mapping-cg')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))]"
+					]
+				},
+				{
+					"condition": "[equals(parameters('enableDiagnosticsSettingsForServices'), variables('enabledSettings'))]",
+					"type": "Microsoft.Devices/iotHubs/providers/diagnosticsettings",
+					"name": "[concat(variables('iotHubName'),'/microsoft.insights/', variables('iotHubDiagnosticName'))]",
+					"apiVersion": "2017-05-01-preview",
+					"location": "[resourceGroup().location]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Devices/IotHubs/', variables('iotHubName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('diagnosticStorageName'))]"
+					],
+					"properties": {
+						"storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageName'))]",
+						"logs": [
+							{
+								"category": "Connections",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							},
+							{
+								"category": "DeviceTelemetry",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						],
+						"metrics": [
+							{
+								"category": "AllMetrics",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						]
+					}
+				}
+			]
+		},
+		{
+			"type": "Microsoft.EventHub/namespaces",
+			"apiVersion": "2017-04-01",
+			"name": "[variables('eventHubNamespaces')]",
+			"location": "[resourceGroup().location]",
+			"sku": {
+				"name": "[parameters('eventHubSKUTier')]",
+				"tier": "[parameters('eventHubSKUTier')]",
+				"capacity": "[parameters('eventHubSKUCapacity')]"
+			},
+			"properties": {
+				"zoneRedundant": false,
+				"isAutoInflateEnabled": false,
+				"maximumThroughputUnits": 0,
+				"kafkaEnabled": false
+			},
+			"resources": [
+				{
+					"apiVersion": "2017-04-01",
+					"name": "[variables('eventHubADXIngestion')]",
+					"type": "eventhubs",
+					"dependsOn": [
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]"
+					],
+					"properties": {
+						"messageRetentionInDays": 3,
+						"partitionCount": "[parameters('eventHubPartitionsForADXTimeseries')]"
+					},
+					"resources": [
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubADXIngestionConsumerGroup')]",
+							"type": "consumergroups",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubADXIngestion'))]"
+							],
+							"properties": {
+								"userMetadata": "User Metadata"
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubADXIngestionPolicyListen')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubADXIngestion'))]"
+							],
+							"properties": {
+								"rights": [
+									"Listen"
+								]
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubADXIngestionPolicySend')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubADXIngestion'))]"
+							],
+							"properties": {
+								"rights": [
+									"Send"
+								]
+							}
+						}
+					]
+				},
+				{
+					"apiVersion": "2017-04-01",
+					"name": "[variables('eventHubModelChangeNotification')]",
+					"type": "eventhubs",
+					"dependsOn": [
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]"
+					],
+					"properties": {
+						"messageRetentionInDays": 3,
+						"partitionCount": "[parameters('eventHubPartitionsForModelChangeNotification')]"
+					},
+					"resources": [
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubModelChangeNotificationConsumerGroup')]",
+							"type": "consumergroups",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubModelChangeNotification'))]"
+							],
+							"properties": {
+								"userMetadata": "User Metadata"
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubModelChangeNotificationPolicyListen')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubModelChangeNotification'))]"
+							],
+							"properties": {
+								"rights": [
+									"Listen"
+								]
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubModelChangeNotificationPolicySend')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubModelChangeNotification'))]"
+							],
+							"properties": {
+								"rights": [
+									"Send"
+								]
+							}
+						}
+
+					]
+				},
+				{
+					"apiVersion": "2017-04-01",
+					"name": "[variables('eventHubProcessedTimeseriesOut')]",
+					"type": "eventhubs",
+					"dependsOn": [
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]"
+					],
+					"properties": {
+						"messageRetentionInDays": 3,
+						"partitionCount": "[parameters('eventHubPartitionsForProcessedTimeseriesOut')]"
+					},
+					"resources": [
+						{
+							"apiVersion": "2017-04-01",
+							"name": "sap-iot-processed-ts-cg",
+							"type": "consumergroups",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesOut'))]"
+							],
+							"properties": {
+								"userMetadata": "User Metadata"
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubProcessedTimeseriesOutPolicyListen')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesOut'))]"
+							],
+							"properties": {
+								"rights": [
+									"Listen"
+								]
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubProcessedTimeseriesOutPolicySend')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesOut'))]"
+							],
+							"properties": {
+								"rights": [
+									"Send"
+								]
+							}
+						}
+					]
+				},
+				{
+					"apiVersion": "2017-04-01",
+					"name": "[variables('eventHubProcessedTimeseriesIn')]",
+					"type": "eventhubs",
+					"dependsOn": [
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]"
+					],
+					"properties": {
+						"messageRetentionInDays": 3,
+						"partitionCount": "[parameters('eventHubPartitionsForProcessedTimeseriesIn')]"
+					},
+					"resources": [
+						{
+							"apiVersion": "2017-04-01",
+							"name": "sap-iot-ingestion-avro-parser-cg",
+							"type": "consumergroups",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesIn'))]"
+							],
+							"properties": {
+								"userMetadata": "User Metadata"
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubProcessedTimeseriesInPolicyListen')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesIn'))]"
+							],
+							"properties": {
+								"rights": [
+									"Listen"
+								]
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubProcessedTimeseriesInPolicySend')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesIn'))]"
+							],
+							"properties": {
+								"rights": [
+									"Send"
+								]
+							}
+						}
+					]
+				},
+				{
+					"apiVersion": "2017-04-01",
+					"name": "[variables('eventHubDeviceManagementRequest')]",
+					"type": "eventhubs",
+					"dependsOn": [
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]"
+					],
+					"properties": {
+						"messageRetentionInDays": 3,
+						"partitionCount": "[parameters('eventHubPartitionsForDeviceManagementRequest')]"
+					},
+					"resources": [
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeviceManagementRequestConsumerGroup')]",
+							"type": "consumergroups",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementRequest'))]"
+							],
+							"properties": {
+								"userMetadata": "User Metadata"
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeviceManagementRequestPolicyListen')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementRequest'))]"
+							],
+							"properties": {
+								"rights": [
+									"Listen"
+								]
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeviceManagementRequestPolicySend')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementRequest'))]"
+							],
+							"properties": {
+								"rights": [
+									"Send"
+								]
+							}
+						}
+
+					]
+				},
+				{
+					"apiVersion": "2017-04-01",
+					"name": "[variables('eventHubDeviceManagementStatus')]",
+					"type": "eventhubs",
+					"dependsOn": [
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]"
+					],
+					"properties": {
+						"messageRetentionInDays": 3,
+						"partitionCount": "[parameters('eventHubPartitionsForDeviceManagementStatus')]"
+					},
+					"resources": [
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeviceManagementStatusConsumerGroup')]",
+							"type": "consumergroups",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementStatus'))]"
+							],
+							"properties": {
+								"userMetadata": "User Metadata"
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeviceManagementStatusPolicyListen')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementStatus'))]"
+							],
+							"properties": {
+								"rights": [
+									"Listen"
+								]
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeviceManagementStatusPolicySend')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementStatus'))]"
+							],
+							"properties": {
+								"rights": [
+									"Send"
+								]
+							}
+						}
+
+					]
+				},
+				{
+					"condition": "[equals(parameters('enableDiagnosticsSettingsForServices'), variables('enabledSettings'))]",
+					"type": "Microsoft.EventHub/namespaces/providers/diagnosticSettings",
+					"name": "[concat(variables('eventHubNamespaces'),'/microsoft.insights/', variables('eventHubDiagnosticName'))]",
+					"dependsOn": [
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('diagnosticStorageName'))]"
+					],
+					"apiVersion": "2017-05-01-preview",
+					"properties": {
+						"storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageName'))]",
+						"logs": [
+							{
+								"category": "AutoScaleLogs",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							},
+							{
+								"category": "OperationalLogs",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						],
+						"metrics": [
+							{
+								"category": "AllMetrics",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						]
+					}
+				},
+				{
+					"type": "Microsoft.EventHub/namespaces/networkRuleSets",
+					"apiVersion": "2018-01-01-preview",
+					"name": "[concat(variables('eventHubNamespaces'), '/default')]",
+					"location": "[resourceGroup().location]",
+					"dependsOn": [
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]"
+					],
+					"properties": {
+						"defaultAction": "Allow",
+						"virtualNetworkRules": [],
+						"ipRules": []
+					}
+				}
+			]
+		},
+		{
+			"type": "Microsoft.KeyVault/vaults",
+			"name": "[variables('vaultName')]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Web/Sites', variables('uniqueAppName'))]",
+				"[resourceId('Microsoft.Web/Sites', concat(variables('uniqueAppName'), '-notify'))]",
+				"[resourceId('Microsoft.Web/Sites', concat(variables('uniqueAppName'), '-device'))]"
+			],
+			"apiVersion": "2018-02-14",
+			"location": "[resourceGroup().location]",
+			"properties": {
+				"enabledForDeployment": true,
+				"enabledForDiskEncryption": false,
+				"enabledForTemplateDeployment": true,
+				"tenantId": "[subscription().tenantId]",
+				"accessPolicies": [
+					{
+						"objectId": "[reference(resourceId('Microsoft.Web/sites', variables('uniqueAppName')), '2018-02-01', 'Full').identity.principalId]",
+						"tenantId": "[reference(resourceId('Microsoft.Web/sites', variables('uniqueAppName')), '2018-02-01', 'Full').identity.tenantId]",
+						"permissions": {
+							"secrets": [
+								"get",
+								"list",
+								"set"
+							]
+						}
+					},
+					{
+						"objectId": "[reference(resourceId('Microsoft.Web/sites', concat(variables('uniqueAppName'), '-notify')), '2018-02-01', 'Full').identity.principalId]",
+						"tenantId": "[reference(resourceId('Microsoft.Web/sites', concat(variables('uniqueAppName'), '-notify')), '2018-02-01', 'Full').identity.tenantId]",
+						"permissions": {
+							"secrets": [
+								"get",
+								"list",
+								"set"
+							]
+						}
+					},
+					{
+						"objectId": "[reference(resourceId('Microsoft.Web/sites', concat(variables('uniqueAppName'), '-device')), '2018-02-01', 'Full').identity.principalId]",
+						"tenantId": "[reference(resourceId('Microsoft.Web/sites', concat(variables('uniqueAppName'), '-device')), '2018-02-01', 'Full').identity.tenantId]",
+						"permissions": {
+							"secrets": [
+								"get",
+								"list",
+								"set"
+							]
+						}
+					}
+				],
+				"sku": {
+					"name": "[parameters('keyVaultSKUName')]",
+					"family": "A"
+				},
+				"networkAcls": {
+					"defaultAction": "Allow",
+					"bypass": "AzureServices"
+				}
+			},
+			"resources": [
+				{
+					"type": "secrets",
+					"apiVersion": "2018-02-14",
+					"name": "[variables('SPAclientId')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]"
+					],
+					"properties": {
+						"value": "[parameters('AADApplicationClientIdForAzureFunctions')]"
+					}
+				},
+				{
+					"type": "secrets",
+					"apiVersion": "2018-02-14",
+					"name": "[variables('SPAKey')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]"
+					],
+					"properties": {
+						"value": "[parameters('AADClientSecret')]"
+					}
+				},
+				{
+					"type": "secrets",
+					"apiVersion": "2018-02-14",
+					"name": "[variables('SPAuthoriyId')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]"
+					],
+					"properties": {
+						"value": "[parameters('AADTenantID')]"
+					}
+				},
+				{
+					"type": "secrets",
+					"apiVersion": "2018-02-14",
+					"name": "[variables('clientId')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]"
+					],
+					"properties": {
+						"value": "[parameters('SAPIotTenantClientID')]"
+					}
+				},
+				{
+					"type": "secrets",
+					"apiVersion": "2018-02-14",
+					"name": "[variables('clientSecret')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]"
+					],
+					"properties": {
+						"value": "[parameters('SAPIotTenantClientSecret')]"
+					}
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('eventProcessHubConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[concat('Endpoint=',reference(variables('iotHubAccountId')).eventHubEndpoints.events.endpoint,';SharedAccessKeyName=iothubowner;SharedAccessKey=',listKeys(variables('iotHubAccountId'),'2018-04-01').value[0].primaryKey,';EntityPath=',reference(variables('iotHubAccountId')).eventHubEndpoints.events.path)]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+						"[resourceId('Microsoft.Devices/IotHubs/', variables('iotHubName'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('ADXSourceConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubADXIngestion'), variables('eventHubADXIngestionPolicySend')), '2017-04-01').primaryConnectionString]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubADXIngestion'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('processedTimeseriesConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubProcessedTimeseriesOut'), variables('eventHubProcessedTimeseriesOutPolicySend')), '2017-04-01').primaryConnectionString]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubProcessedTimeseriesOut'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('processedTimeseriesIn')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubProcessedTimeseriesIn'), variables('eventHubProcessedTimeseriesInPolicyListen')), '2017-04-01').primaryConnectionString]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubProcessedTimeseriesIn'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('azureCacheKey')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[listKeys(resourceId('Microsoft.Cache/Redis', variables('redisCacheName')), '2015-08-01').primaryKey]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+						"[concat('Microsoft.Cache/Redis/', variables('redisCacheName'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('notificationEventhubConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubModelChangeNotification'), variables('eventHubModelChangeNotificationPolicyListen')), '2017-04-01').primaryConnectionString]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('notificationStorageName'))]",
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubModelChangeNotification'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('deviceManagementRequestConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubDeviceManagementRequest'), variables('eventHubDeviceManagementRequestPolicyListen')), '2017-04-01').primaryConnectionString]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deviceStorageName'))]",
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubDeviceManagementRequest'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('deviceManagementStatusConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubDeviceManagementStatus'), variables('eventHubDeviceManagementStatusPolicySend')), '2017-04-01').primaryConnectionString]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deviceStorageName'))]",
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubDeviceManagementStatus'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('iothubRegistryConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[concat('HostName=', reference(variables('iotHubAccountId')).hostName, ';SharedAccessKeyName=registryReadWrite', ';SharedAccessKey=', listkeys(variables('iotHubAccountId'), '2018-04-01').value[4].primaryKey)]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deviceStorageName'))]",
+						"[resourceId('Microsoft.Devices/IotHubs/', variables('iotHubName'))]"
+					]
+				},
+				{
+					"condition": "[equals(parameters('enableDiagnosticsSettingsForServices'), variables('enabledSettings'))]",
+					"type": "Microsoft.KeyVault/vaults/providers/diagnosticsettings",
+					"name": "[concat(variables('vaultName'),'/microsoft.insights/', variables('keyVaultDiagnosticName'))]",
+					"apiVersion": "2017-05-01-preview",
+					"location": "[resourceGroup().location]",
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('diagnosticStorageName'))]"
+					],
+					"properties": {
+						"storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageName'))]",
+						"logs": [
+							{
+								"category": "AuditEvent",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						],
+						"metrics": [
+							{
+								"category": "AllMetrics",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						]
+					}
+				}
+			]
+		}
+	],
+	"$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0"
+}

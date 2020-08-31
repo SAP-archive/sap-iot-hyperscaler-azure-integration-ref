@@ -1,0 +1,29 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "java",
+    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=<AccountName>;AccountKey=<AccountKey>;EndpointSuffix=core.windows.net",
+    "transform-default-message-type": "IOTS",
+    "iothub-connection-string": "Endpoint=sb://<EndpointHost>/;SharedAccessKeyName=<SharedAccessKeyName>;SharedAccessKey=<SharedAccessKey>;EntityPath=<EntityPath>",
+    "processed-timeseries-connection-string": "Endpoint=sb://<EndpointHost>/;SharedAccessKeyName=<SharedAccessKeyName>;SharedAccessKey=<SharedAccessKey>;EntityPath=<EntityPath>",
+    "adx-source-connection-string": "Endpoint=sb://<EndpointHost>/;SharedAccessKeyName=<SharedAccessKeyName>;SharedAccessKey=<SharedAccessKey>;EntityPath=<EntityPath>",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "GUID",
+    "adx-resource-uri": "https://<host>.kusto.windows.net",
+    "service-principal-application-client-id": "ClientId",
+    "service-principal-application-key": "Key",
+    "service-principal-authority-id": "AutorityId",
+    "adx-database-name": "ADX_DB",
+    "azure-cache-host": "<host>.redis.cache.windows.net",
+    "azure-cache-key": "RedisKey",
+    "mapping-app-host": "https://i4c-model-mapping-sap.cfapps.eu20.hana.ondemand.com",
+    "client-id": "TenantId",
+    "client-secret": "TenantPassword",
+    "token-endpoint": "https://<tenant-subdomain>.authentication.eu20.hana.ondemand.com",
+    "sap-iot-tenant": "TenantId",
+    "lookup-app-host": "https://i4c-model-configuration-sap.cfapps.eu20.hana.ondemand.com",
+    "processed-timeseries-in-connection-string": "Endpoint=sb://<EndpointHost>/;SharedAccessKeyName=<SharedAccessKeyName>;SharedAccessKey=<SharedAccessKey>;EntityPath=<EntityPath>",
+    "AzureFunctionsJobHost__logging__logLevel__Function.AvroParser": "Information",
+    "AzureFunctionsJobHost__logging__logLevel__Function.Ingestion": "Information",
+    "sap-iot-required-api-scopes": "iotas!t940.am.map.r,iotas!t940.am.cnfg.r"
+  }
+}

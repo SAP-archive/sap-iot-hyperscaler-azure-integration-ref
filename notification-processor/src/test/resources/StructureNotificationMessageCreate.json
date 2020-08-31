@@ -1,0 +1,18 @@
+{
+  "operation": "POST",
+  "timestamp": 1589218488579,
+  "type": "com.sap.iot.i4c.Structure",
+  "changeEntity": "%s",
+  "tenant": "fd7d1261-3e73-4652-b8b1-245da32ecc53",
+  "changeList": [{
+    "type": "com.sap.iot.i4c.StructureProperty",
+    "entity": "Bearing_Temperature_M110",
+    "operation": "ADD",
+    "additionalEntityData": [{
+      "name": "dataType",
+      "value": "Numeric"
+    }]
+  }],
+  "version": "0",
+  "entityDataList": []
+}

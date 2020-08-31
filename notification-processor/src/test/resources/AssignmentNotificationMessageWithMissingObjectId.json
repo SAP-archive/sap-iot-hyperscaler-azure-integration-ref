@@ -1,0 +1,24 @@
+{
+  "operation": "POST",
+  "timestamp": 1592582486206,
+  "type": "com.sap.iot.i4c.Assignment",
+  "changeEntity": "bdabe161-cdf7-429e-a9f9-db0cb9c67012",
+  "tenant": "fd7d1261-3e73-4652-b8b1-245da32ecc53",
+  "changeList": [
+    {
+      "type": "com.sap.iot.i4c.Sensor",
+      "entity": "384109E0F2534A6A382J110/MT_J110",
+      "operation": "ADD",
+      "descriptions": [
+
+      ],
+      "additionalEntityData": []
+    }
+  ],
+  "entityDataList": [
+    {
+      "name": "MappingId",
+      "value": "46da85fa-c19d-4c38-8bb6-f0b6f8c76bbe"
+    }
+  ]
+}

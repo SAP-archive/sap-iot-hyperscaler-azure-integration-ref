@@ -1,0 +1,55 @@
+{
+  "specversion": "1.0",
+  "type": "com.sap.iot.abstraction.device.management.create.v1",
+  "id": "1b8a80e9-7903-4c63-83c3-2ca4545a965a",
+  "time": "2020-06-05T17:31:00Z",
+  "comSapIoTAbstractionExtension": {
+    "transactionId": "a1b3032f-cb1b-4539-8b4b-bd87664af99a",
+    "sequenceNumber": "0"
+  },
+  "datacontenttype": "application/json",
+  "data": {
+    "deviceId": "d1",
+    "sensors": [
+      {
+        "sensorId": "s1",
+        "operation": "ADD",
+        "capabilities": [
+          {
+            "operation": "ADD",
+            "capabilityId": "c1"
+          },
+          {
+            "operation": "ADD",
+            "capabilityId": "c2"
+          }
+        ]
+      }
+    ],
+    "capabilities": [
+      {
+        "capabilityId": "c1",
+        "operation": "ADD",
+        "properties": [
+          {
+            "name": "p1",
+            "type": "Numeric",
+            "operation": "ADD"
+          }
+        ]
+      },
+      {
+        "capabilityId": "c2",
+        "operation": "ADD",
+        "properties": [
+          {
+            "name": "p2",
+            "type": "Numeric",
+            "length": "10,2",
+            "operation": "ADD"
+          }
+        ]
+      }
+    ]
+  }
+}
