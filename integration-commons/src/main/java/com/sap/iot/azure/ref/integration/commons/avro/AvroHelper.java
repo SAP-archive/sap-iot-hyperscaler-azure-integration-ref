@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -65,9 +66,10 @@ public class AvroHelper {
     public static byte[] serializeJsonToAvro(ProcessedMessage processedMessage, String schemaStr) throws AvroIngestionException {
         DatumWriter<GenericRecord> writer;
         DataFileWriter<GenericRecord> fileWriter = null;
+        Schema schema = null;
 
         try {
-            Schema schema = new Schema.Parser().parse(schemaStr);
+            schema = new Schema.Parser().parse(schemaStr);
             writer = gd.createDatumWriter(schema);
 
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -79,9 +81,8 @@ public class AvroHelper {
 
             return byteArrayOutputStream.toByteArray();
         } catch (IOException | RuntimeException e) {
-            throw new AvroIngestionException("Error in serializing processed message (json) to Avro", e,
-                    IdentifierUtil.getIdentifier(CommonConstants.SOURCE_ID_PROPERTY_KEY, processedMessage.getSourceId(),
-                            CommonConstants.STRUCTURE_ID_PROPERTY_KEY, processedMessage.getStructureId()));
+            ObjectNode exceptionId = getExceptionIdentifier(Collections.singletonList(processedMessage), schema);
+            throw new AvroIngestionException("Error in serializing processed message (json) to Avro", e, exceptionId);
         } finally {
             IOUtils.closeQuietly(fileWriter);
         }
@@ -100,12 +101,13 @@ public class AvroHelper {
 
         List<byte[]> avroMessages = new LinkedList<>();
         DataFileWriter<GenericRecord> fileWriter = null;
+        Schema schema = null;
         DatumWriter<GenericRecord> datumWriter;
 
         try {
 
             // setup the file writer for the first batch of avro message
-            Schema schema = new Schema.Parser().parse(schemaStr);
+            schema = new Schema.Parser().parse(schemaStr);
             datumWriter = gd.createDatumWriter(schema);
 
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -159,13 +161,7 @@ public class AvroHelper {
 
             return avroMessages;
         } catch (IOException | RuntimeException e) {
-
-            ObjectNode exceptionId = IdentifierUtil.empty();
-            if (processedMessages.size() > 0) {
-                exceptionId = IdentifierUtil.getIdentifier(CommonConstants.SOURCE_ID_PROPERTY_KEY, processedMessages.get(0).getSourceId(),
-                        CommonConstants.STRUCTURE_ID_PROPERTY_KEY, processedMessages.get(0).getStructureId());
-            }
-
+            ObjectNode exceptionId = getExceptionIdentifier(processedMessages, schema);
             throw new AvroIngestionException("Error in serializing processed message (json) to Avro", e, exceptionId);
         } finally {
             IOUtils.closeQuietly(fileWriter);
@@ -175,10 +171,10 @@ public class AvroHelper {
     private static GenericRecord getGenericRecord(ProcessedMessage processedMessage, Schema schema) throws AvroRuntimeException {
 
         GenericRecord datum = new GenericData.Record(schema);
-        datum.put(AvroConstants.AVRO_DATUM_KEY_MESSAGE_ID, "" + processedMessage.getSourceId() + "/" + processedMessage.getStructureId() + "/" + new Date().getTime());
+        datum.put(AvroConstants.AVRO_DATUM_KEY_MESSAGE_ID,
+                processedMessage.getSourceId() + "/" + schema.getProp(AvroConstants.AVRO_DATUM_KEY_STRUCTURE_ID) + "/" + new Date().getTime());
         datum.put(AvroConstants.AVRO_DATUM_KEY_IDENTIFIER, processedMessage.getSourceId());
-        datum.put(AvroConstants.AVRO_DATUM_KEY_STRUCTURE_ID, processedMessage.getStructureId());
-        datum.put(AvroConstants.AVRO_DATUM_KEY_TENANT, processedMessage.getTenantId());
+
         Schema measuresSchema = datum.getSchema().getField(AvroConstants.AVRO_DATUM_KEY_MEASUREMENTS).schema().getElementType();
         Schema tagSchema = datum.getSchema().getField(AvroConstants.AVRO_DATUM_KEY_TAGS).schema().getElementType();
 
@@ -382,5 +378,17 @@ public class AvroHelper {
             default:
                 throw new AvroIngestionException(String.format("Unsupported Datatype: %s.", type), IdentifierUtil.empty());
         }
+    }
+
+    private static ObjectNode getExceptionIdentifier(List<ProcessedMessage> processedMessages, Schema schema) {
+        ObjectNode exceptionId = IdentifierUtil.empty();
+        if (processedMessages.size() > 0) {
+            exceptionId = IdentifierUtil.getIdentifier(CommonConstants.SOURCE_ID_PROPERTY_KEY, processedMessages.get(0).getSourceId());
+        }
+
+        if (schema != null) {
+            exceptionId.put(CommonConstants.STRUCTURE_ID_PROPERTY_KEY, StringUtils.stripToEmpty(schema.getProp(STRUCTURE_ID_PROPERTY_KEY)));
+        }
+        return exceptionId;
     }
 }

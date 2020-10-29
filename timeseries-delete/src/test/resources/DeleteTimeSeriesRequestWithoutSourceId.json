@@ -1,0 +1,17 @@
+{
+  "specversion": "1.0",
+  "type": "com.sap.iot.abstraction.timeseries.request.v1",
+  "source": "sap-iot-abstraction",
+  "id": "%s",
+  "time": "2020-01-01T00:00:00.000Z",
+  "comSapIoTAbstractionExtension": {
+    "correlationId": "dcd1f2b8-d9c1-11ea-87d0-0242ac130003"
+  },
+  "datacontenttype": "application/json",
+  "data": {
+    "structureId": "%s",
+    "ingestionTimestamp": "%s",
+    "fromTimestamp": "%s",
+    "toTimestamp": "%s"
+  }
+}

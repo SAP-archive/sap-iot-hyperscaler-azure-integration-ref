@@ -12,7 +12,7 @@ import com.sap.iot.azure.ref.ingestion.device.mapping.IoTSPayloadMapper;
 import com.sap.iot.azure.ref.ingestion.model.device.mapping.DeviceMessage;
 import com.sap.iot.azure.ref.ingestion.model.timeseries.raw.DeviceMeasure;
 import com.sap.iot.azure.ref.ingestion.output.ADXEventHubProcessor;
-import com.sap.iot.azure.ref.ingestion.output.ProcessedTimeseriesEventHubProcessor;
+import com.sap.iot.azure.ref.ingestion.output.ProcessedTimeSeriesEventHubProcessor;
 import com.sap.iot.azure.ref.ingestion.processing.DeviceToProcessedMessageProcessor;
 import com.sap.iot.azure.ref.ingestion.util.Constants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
@@ -36,7 +36,7 @@ import static com.sap.iot.azure.ref.integration.commons.constants.CommonConstant
 @SuppressWarnings("unused") //AZ Function
 public class MappingFunction {
 
-    private final ProcessedTimeseriesEventHubProcessor processedTimeseriesEventHubProcessor;
+    private final ProcessedTimeSeriesEventHubProcessor processedTimeSeriesEventHubProcessor;
     private final ADXEventHubProcessor adxEventHubProcessor;
     private final DeviceToProcessedMessageProcessor deviceToProcessedMessageProcessor;
     private final Long start = System.currentTimeMillis();
@@ -53,20 +53,20 @@ public class MappingFunction {
 
     public MappingFunction() {
         this(
-                new ProcessedTimeseriesEventHubProcessor(),
+                new ProcessedTimeSeriesEventHubProcessor(),
                 new ADXEventHubProcessor(),
                 new DeviceToProcessedMessageProcessor()
         );
     }
 
-    MappingFunction(ProcessedTimeseriesEventHubProcessor processedTimeseriesEventHubProcessor, ADXEventHubProcessor adxEventHubProcessor,
+    MappingFunction(ProcessedTimeSeriesEventHubProcessor processedTimeSeriesEventHubProcessor, ADXEventHubProcessor adxEventHubProcessor,
                     DeviceToProcessedMessageProcessor deviceToProcessedMessageProcessor) {
 
         if (newInstance.compareAndSet(true, false)) {
             MetricsClient.trackPerfMetric(MetricsClient.getMetricName("NewInstance"), 1);
         }
 
-        this.processedTimeseriesEventHubProcessor = processedTimeseriesEventHubProcessor;
+        this.processedTimeSeriesEventHubProcessor = processedTimeSeriesEventHubProcessor;
         this.adxEventHubProcessor = adxEventHubProcessor;
         this.deviceToProcessedMessageProcessor = deviceToProcessedMessageProcessor;
 
@@ -80,7 +80,7 @@ public class MappingFunction {
      * The supported payload format is {@link Constants#TRANSFORM_TYPE_IOTS}.
      * The message payloads are brought into a common format using the {@link DevicePayloadMapper}, augmented with mapping information using the
      * {@link DeviceToProcessedMessageProcessor} and sent to the downstream Event Hubs using the {@link ADXEventHubProcessor} and the
-     * {@link ProcessedTimeseriesEventHubProcessor}.
+     * {@link ProcessedTimeSeriesEventHubProcessor}.
      * @param messages, incoming device payloads
      * @param systemProperties, system properties including message header information, such as the IoT Hub device ID
      * @param context, invocation context of the current Azure Function invocation
@@ -144,12 +144,12 @@ public class MappingFunction {
                     .map(deviceToProcessedMessageProcessor).filter(Objects::nonNull)
                     .forEach(messageGroup -> {
                         /*
-                         processed timeseries event hub processor converts the message to avro format, and send to Eventhub asynchronously
+                         processed time series event hub processor converts the message to avro format, and send to Eventhub asynchronously
                          if conversion to avro fails, then a null value is returned instead of future corresponding to EventHub send Async
                          if null is returned, the data sent is not complying to SAP-defined AVRO schema, and the message will not be sent for ADX persistence
                          */
 
-                        CompletableFuture<Void> avroConversionAndEventHubSendFuture = processedTimeseriesEventHubProcessor.apply(messageGroup);
+                        CompletableFuture<Void> avroConversionAndEventHubSendFuture = processedTimeSeriesEventHubProcessor.apply(messageGroup);
 
                         // assumes to be completed, and is only triggered after successful avro conversion
                         CompletableFuture<Void> adxEventHubSendFuture = CompletableFuture.completedFuture(null);

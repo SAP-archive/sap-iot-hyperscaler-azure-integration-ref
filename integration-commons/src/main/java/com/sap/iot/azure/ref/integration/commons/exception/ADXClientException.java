@@ -6,6 +6,10 @@ import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeExcept
 
 public class ADXClientException extends IoTRuntimeException {
 
+    public ADXClientException(String message, JsonNode identifier, boolean isTransient) {
+        super(message, CommonErrorType.ADX_ERROR, InvocationContext.getContext().getInvocationId(), identifier, isTransient);
+    }
+
     public ADXClientException(String message, Throwable cause, JsonNode identifier, boolean isTransient) {
         super(message, cause, CommonErrorType.ADX_ERROR, InvocationContext.getContext().getInvocationId(), identifier, isTransient);
     }

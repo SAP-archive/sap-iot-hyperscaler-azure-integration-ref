@@ -5,9 +5,11 @@ import com.microsoft.azure.kusto.data.Results;
 import com.microsoft.azure.kusto.data.exceptions.DataClientException;
 import com.microsoft.azure.kusto.data.exceptions.DataServiceException;
 import com.sap.iot.azure.ref.integration.commons.avro.TestAVROSchemaConstants;
+import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;
 import com.sap.iot.azure.ref.integration.commons.exception.ADXClientException;
 import com.sap.iot.azure.ref.integration.commons.exception.AvroIngestionException;
+import com.sap.iot.azure.ref.integration.commons.model.timeseries.delete.DeleteInfo;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -21,8 +23,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
@@ -52,7 +57,7 @@ public class ADXTableManagerTest {
             "_time:" +
             " datetime, decimalMeasure: decimal, booleanMeasure: bool, intMeasure: int, longMeasure: long, floatMeasure: real, tag1: string, tag2: string, tag3: string, tag4: string)", TABLE_NAME);
     private final String SIMPLE_MAPPING_CREATION_QUERY = String.format(".create-or-alter table %s ingestion json mapping '%s' '[{\"path\":\"$.sourceId\"," +
-            "\"column\":\"sourceId\"},{\"path\":\"$.x-opt-enqueued-time\",\"column\":\"_enqueued_time\"},{\"path\":\"false\",\"column\":\"_isDeleted\"}]'",
+                    "\"column\":\"sourceId\"},{\"path\":\"$.x-opt-enqueued-time\",\"column\":\"_enqueued_time\"},{\"path\":\"false\",\"column\":\"_isDeleted\"}]'",
             TABLE_NAME, TABLE_NAME);
     private final String COMPLEX_MAPPING_CREATION_QUERY = String.format(".create-or-alter table %s ingestion json mapping '%s' '[{\"path\":\"$.sourceId\"," +
             "\"column\":\"sourceId\"},{\"path\":\"$.x-opt-enqueued-time\",\"column\":\"_enqueued_time\"},{\"path\":\"false\",\"column\":\"_isDeleted\"},{\"path\":\"$._time\",\"column\":\"_time\"},{\"path\":\"$.measurements.decimalMeasure\",\"column\":\"decimalMeasure\"},{\"path\":\"$.measurements.booleanMeasure\",\"column\":\"booleanMeasure\"},{\"path\":\"$.measurements.intMeasure\",\"column\":\"intMeasure\"},{\"path\":\"$.measurements.longMeasure\",\"column\":\"longMeasure\"},{\"path\":\"$.measurements.floatMeasure\",\"column\":\"floatMeasure\"},{\"path\":\"$.measurements.tag1\",\"column\":\"tag1\"},{\"path\":\"$.measurements.tag2\",\"column\":\"tag2\"},{\"path\":\"$.measurements.tag3\",\"column\":\"tag3\"},{\"path\":\"$.measurements.tag4\",\"column\":\"tag4\"}]'", TABLE_NAME, TABLE_NAME);
@@ -232,9 +237,19 @@ public class ADXTableManagerTest {
 
     @Test
     public void testDropColumn() throws DataClientException, DataServiceException {
-        adxTableManager.dropColumn(STRUCTURE_ID, COLUMNN_NAME);
+        adxTableManager.dropColumn(STRUCTURE_ID, COLUMNN_NAME, getSimpleSampleSchema());
 
         verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(DROP_COLUMN_QUERY));
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(SIMPLE_MAPPING_CREATION_QUERY));
+    }
+
+    @Test
+    public void testDropColumnException() throws DataClientException, DataServiceException {
+        doThrow(DataClientException.class).when(kustoClient).execute(eq(DB_NAME), eq(SIMPLE_MAPPING_CREATION_QUERY));
+
+        //Exceptions when creating adx resources are wrapped as IngestionRuntimeException
+        expectedException.expect(ADXClientException.class);
+        adxTableManager.dropColumn(STRUCTURE_ID, COLUMNN_NAME, getSimpleSampleSchema());
     }
 
     @Test
@@ -262,9 +277,19 @@ public class ADXTableManagerTest {
     @Test
     public void testRenameColumn() throws DataClientException, DataServiceException {
         doReturn(MOCK_MILLIS).when(clock).millis();
-        adxTableManager.softDeleteColumn(STRUCTURE_ID, COLUMNN_NAME);
+        adxTableManager.softDeleteColumn(STRUCTURE_ID, COLUMNN_NAME, getSimpleSampleSchema());
 
         verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(RENAME_COLUMN_QUERY));
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(SIMPLE_MAPPING_CREATION_QUERY));
+    }
+
+    @Test
+    public void testRenameColumnException() throws DataClientException, DataServiceException {
+        doThrow(DataClientException.class).when(kustoClient).execute(eq(DB_NAME), eq(SIMPLE_MAPPING_CREATION_QUERY));
+
+        //Exceptions when creating adx resources are wrapped as IngestionRuntimeException
+        expectedException.expect(ADXClientException.class);
+        adxTableManager.softDeleteColumn(STRUCTURE_ID, COLUMNN_NAME, getSimpleSampleSchema());
     }
 
     @Test
@@ -273,6 +298,119 @@ public class ADXTableManagerTest {
         adxTableManager.softDeleteTable(STRUCTURE_ID);
 
         verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(RENAME_TABLE_QUERY));
+    }
+
+    @Test
+    public void testDeleteTimeSeries() throws DataClientException, DataServiceException {
+        String sourceId = "sourceId";
+        String otherSourceId = "sourceId2";
+        String fromTimestamp = "2020-01-01T00:00:00Z";
+        String toTimestamp = "2020-01-02T00:00:00Z";
+        String ingestionTimestamp = "2020-01-03T00:00:00Z";
+        String deleteTimeSeriesQueryWithoutSourceId = String.format(".set-or-append async %s <| %s | where (_time >= datetime(\"%s\") and _time " +
+                        "<= datetime(\"%s\")) and _enqueued_time < datetime(\"%s\") | where _isDeleted != true | extend " +
+                        "_enqueued_time = now(), _isDeleted = true", TABLE_NAME,
+                TABLE_NAME, fromTimestamp, toTimestamp, ingestionTimestamp);
+        String deleteTimeSeriesQueryInclusive = String.format(".set-or-append async %s <| %s | where (_time >= datetime(\"%s\") and _time " +
+                        "<= datetime(\"%s\")) and sourceId in (\"%s\") and _enqueued_time < datetime(\"%s\") | where _isDeleted != true | extend " +
+                        "_enqueued_time = now(), _isDeleted = true", TABLE_NAME,
+                TABLE_NAME, fromTimestamp, toTimestamp, sourceId, ingestionTimestamp);
+        String deleteTimeSeriesQueryMultipleSourceIds = String.format(".set-or-append async %s <| %s | where (_time >= datetime(\"%s\") and _time " +
+                        "<= datetime(\"%s\")) and sourceId in (\"%s\", \"%s\") and _enqueued_time < datetime(\"%s\") | where _isDeleted != true | extend " +
+                        "_enqueued_time = now(), _isDeleted = true", TABLE_NAME,
+                TABLE_NAME, fromTimestamp, toTimestamp, sourceId, otherSourceId, ingestionTimestamp);
+
+        String deleteTimeSeriesQueryNonInclusive = String.format(".set-or-append async %s <| %s | where (_time > datetime(\"%s\") and _time " +
+                        "< datetime(\"%s\")) and sourceId in (\"%s\") and _enqueued_time < datetime(\"%s\") | where _isDeleted != true | extend " +
+                        "_enqueued_time = now(), _isDeleted = true", TABLE_NAME,
+                TABLE_NAME, fromTimestamp, toTimestamp, sourceId, ingestionTimestamp);
+        DeleteInfo request = DeleteInfo.builder()
+                .structureId(STRUCTURE_ID)
+                .fromTimestamp(fromTimestamp)
+                .toTimestamp(toTimestamp)
+                .ingestionTimestamp(ingestionTimestamp)
+                .fromTimestampInclusive(true)
+                .toTimestampInclusive(true)
+                .build();
+
+        //mock results
+        doReturn(getSampleResults(true)).when(kustoClient).execute(eq(DB_NAME), anyString());
+
+        //no source ID test
+        adxTableManager.deleteTimeSeries(request);
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(deleteTimeSeriesQueryWithoutSourceId));
+
+        //multiple source IDs
+        request.setSourceIds(Arrays.asList(sourceId, otherSourceId));
+        adxTableManager.deleteTimeSeries(request);
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(deleteTimeSeriesQueryMultipleSourceIds));
+
+        //inclusive test
+        request.setSourceIds(Collections.singletonList(sourceId));
+        adxTableManager.deleteTimeSeries(request);
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(deleteTimeSeriesQueryInclusive));
+
+        request.setFromTimestampInclusive(false);
+        request.setToTimestampInclusive(false);
+        adxTableManager.deleteTimeSeries(request);
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(deleteTimeSeriesQueryNonInclusive));
+    }
+
+    @Test
+    public void testDeleteTimeSeriesNoOperationIdReturned() throws DataClientException, DataServiceException {
+        String sourceId = "sourceId";
+        String fromTimestamp = "2020-01-01T00:00:00Z";
+        String toTimestamp = "2020-01-02T00:00:00Z";
+        String ingestionTimestamp = "2020-01-03T00:00:00Z";
+        DeleteInfo request = DeleteInfo.builder()
+                .structureId(STRUCTURE_ID)
+                .fromTimestamp(fromTimestamp)
+                .toTimestamp(toTimestamp)
+                .ingestionTimestamp(ingestionTimestamp)
+                .fromTimestampInclusive(true)
+                .toTimestampInclusive(true)
+                .build();
+
+        //mock empty results
+        doReturn(getSampleResults(false)).when(kustoClient).execute(eq(DB_NAME), anyString());
+
+        //ADX client exception should be thrown
+        expectedException.expect(ADXClientException.class);
+        adxTableManager.deleteTimeSeries(request);
+    }
+
+    @Test
+    public void testGetDeleteOperationStatus() throws DataClientException, DataServiceException {
+        String operationId = "operationId";
+        String statusQuery = String.format(".show operations %s", operationId);
+
+        doReturn(getSampleResultForOperationCheck(true, "Completed")).when(kustoClient).execute(anyString());
+        DeleteOperationStatus status = adxTableManager.getDeleteOperationStatus(operationId, STRUCTURE_ID);
+
+        verify(kustoClient, times(1)).execute(eq(statusQuery));
+        assertEquals(DeleteOperationStatus.ofType("Completed"), status);
+    }
+
+    @Test
+    public void testEmptyOperationStatus() throws DataClientException, DataServiceException {
+        String operationId = "operationId";
+
+        doReturn(getSampleResultForOperationCheck(false, "Completed")).when(kustoClient).execute(anyString());
+        //ADX client exception should be thrown
+        expectedException.expect(ADXClientException.class);
+        expectedException.expectMessage("Delete time series query did not return an operation status");
+        adxTableManager.getDeleteOperationStatus(operationId, STRUCTURE_ID);
+    }
+
+    @Test
+    public void testOperationStatusException() throws DataClientException, DataServiceException {
+        String operationId = "operationId";
+
+        doThrow(DataClientException.class).when(kustoClient).execute(anyString());
+        //ADX client exception should be thrown
+        expectedException.expect(ADXClientException.class);
+        expectedException.expectMessage("Exception in accessing ADX artifacts");
+        adxTableManager.getDeleteOperationStatus(operationId, STRUCTURE_ID);
     }
 
     private void verifyExistenceCheck() throws DataClientException, DataServiceException {
@@ -295,15 +433,29 @@ public class ADXTableManagerTest {
     }
 
     private Results getSampleResults(boolean filled) {
-        Results results = mock(Results.class);
-        List<String> innerValues = new ArrayList<>();
-        List<List<String>> values = new ArrayList<>();
+        ArrayList<String> innerValues = new ArrayList<>();
+        ArrayList<ArrayList<String>> values = new ArrayList<>();
+        Results results = new Results(null, null, values, null);
 
         innerValues.add("TEST");
         if (filled) {
             values.add(innerValues);
         }
-        doReturn(values).when(results).getValues();
+
+        return results;
+    }
+
+    private Results getSampleResultForOperationCheck(boolean filled, String state) {
+        ArrayList<ArrayList<String>> values = new ArrayList<>();
+        ArrayList<String> innerValues = new ArrayList<>();
+        HashMap<String, Integer> columnNameToIndex = new HashMap<>();
+        Results results = new Results(columnNameToIndex, null, values, null);
+
+        columnNameToIndex.put("State", 0);
+        innerValues.add(state);
+        if (filled) {
+            values.add(innerValues);
+        }
 
         return results;
     }

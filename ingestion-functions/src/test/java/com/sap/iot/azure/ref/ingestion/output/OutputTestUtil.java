@@ -15,8 +15,8 @@ public class OutputTestUtil {
     static final String STRUCTURE_ID = "testStructureId";
     static final String TENANT_ID = "testTenant";
     static final long TIMESTAMP = 1585774916094L;
-    static final String MOCK_PROPERTY_KEY = "samplePropKey";
-    static final String MOCK_PROPERTY_VAL = "samplePropValue";
+    static final String SAMPLE_PROPERTY_KEY = "samplePropKey";
+    static final String SAMPLE_PROPERTY_VAL = "samplePropValue";
     static final String SAMPLE_TAG_KEY = "sampleTagKey";
     static final String SAMPLE_TAG_VAL = "sampleTagVal";
     static final String AVRO_SCHEMA_MEASUREMENTS_FIELD_NAME = "measurements";
@@ -25,19 +25,17 @@ public class OutputTestUtil {
 
         ProcessedMessage processedMessage = ProcessedMessage.builder()
                 .sourceId(SOURCE_ID)
-                .structureId(STRUCTURE_ID)
-                .tenantId(TENANT_ID)
                 .measures(Collections.singletonList(createMeasure()))
                 .tags(createTags())
                 .build();
 
-        return new ProcessedMessageContainer(TestAVROSchemaConstants.SIMPLE_AVRO_SCHEMA, Collections.singletonList(processedMessage));
+        return new ProcessedMessageContainer(TestAVROSchemaConstants.SIMPLE_AVRO_SCHEMA, STRUCTURE_ID, Collections.singletonList(processedMessage));
     }
 
     static Map<String, Object> createMeasure() {
         Map<String, Object> measure = new HashMap<>();
         measure.put(CommonConstants.TIMESTAMP_PROPERTY_KEY, TIMESTAMP);
-        measure.put(MOCK_PROPERTY_KEY, MOCK_PROPERTY_VAL);
+        measure.put(SAMPLE_PROPERTY_KEY, SAMPLE_PROPERTY_VAL);
 
         return measure;
     }

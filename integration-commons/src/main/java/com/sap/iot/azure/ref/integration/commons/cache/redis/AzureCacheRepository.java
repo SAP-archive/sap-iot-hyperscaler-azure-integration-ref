@@ -46,7 +46,9 @@ public class AzureCacheRepository implements CacheRepository {
      */
     @Override
     public <T> Optional<T> get(byte[] key, Class<T> clazz) throws IoTRuntimeException {
-        try (Jedis jedis = jedisPool.getResource()) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
             Optional<T> value = Optional.empty();
             byte[] cacheEntry = jedis.get(key);
 
@@ -63,6 +65,10 @@ public class AzureCacheRepository implements CacheRepository {
         } catch (JedisException e) {
             throw IoTRuntimeException.wrapTransient(IdentifierUtil.getIdentifier(CommonConstants.CACHE_KEY, getKeyAsString(key)),
                     CommonErrorType.CACHE_ACCESS_ERROR, "Error in reading redis", e);
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
         }
     }
 
@@ -77,7 +83,9 @@ public class AzureCacheRepository implements CacheRepository {
      */
     @Override
     public <T> void set(byte[] key, T t, Class<T> clazz) throws IoTRuntimeException {
-        try (Jedis jedis = jedisPool.getResource()) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
             jedis.set(key, objectMapper.writeValueAsString(t).getBytes(StandardCharsets.UTF_8));
 
         } catch (JsonProcessingException e) {
@@ -85,6 +93,10 @@ public class AzureCacheRepository implements CacheRepository {
         } catch (JedisException e) {
             throw IoTRuntimeException.wrapTransient(IdentifierUtil.getIdentifier(CommonConstants.CACHE_KEY, getKeyAsString(key)),
                     CommonErrorType.CACHE_ACCESS_ERROR, "Error in setting cache entry", e);
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
         }
     }
 
@@ -96,11 +108,17 @@ public class AzureCacheRepository implements CacheRepository {
      */
     @Override
     public void delete(byte[] key) throws IoTRuntimeException {
-        try (Jedis jedis = jedisPool.getResource()) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
             jedis.del(key);
         } catch (JedisException e) {
             throw IoTRuntimeException.wrapTransient(IdentifierUtil.getIdentifier(CommonConstants.CACHE_KEY, getKeyAsString(key)),
                     CommonErrorType.CACHE_ACCESS_ERROR, "Error in deleting cache entry", e);
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
         }
     }
 
@@ -112,7 +130,9 @@ public class AzureCacheRepository implements CacheRepository {
      */
     @Override
     public List<String> scanCacheKey(String partialKey) {
-        try (Jedis jedis = jedisPool.getResource()) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
             List<String> keys = new ArrayList<>();
             String cursor = CacheConstants.SCAN_CURSOR;
             ScanParams sp = new ScanParams();
@@ -127,6 +147,10 @@ public class AzureCacheRepository implements CacheRepository {
                 cursor = ret.getCursor();
             } while (!cursor.equals(CacheConstants.SCAN_CURSOR));
             return keys;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
         }
     }
 

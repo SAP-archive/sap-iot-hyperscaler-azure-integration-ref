@@ -301,12 +301,12 @@ The column names and types are generated with the information provided of the AV
 ### Event Hubs Sinks
 
 Once the measures were successfully augmented with the SAP IoT mapping information, the measures are sent to the following two downstream Event Hubs.
-1. Processed Timeseries Out
-2. ADX Timeseries
+1. Processed Time Series Out
+2. ADX Time Series
 
-Measures will be written in AVRO format to the **Processed Timeseries Out** Event Hub.
+Measures will be written in AVRO format to the **Processed Time Series Out** Event Hub.
 
-Measures are written to the ADX Timeseries Event Hub in JSON format. The Azure reference implementation configures this Event Hub as ingestion source for
+Measures are written to the ADX Time Series Event Hub in JSON format. The Azure reference implementation configures this Event Hub as ingestion source for
  ADX.
 
 ## Support for device formats

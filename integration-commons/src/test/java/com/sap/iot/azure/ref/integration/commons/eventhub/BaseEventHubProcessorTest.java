@@ -6,6 +6,7 @@ import com.microsoft.azure.eventhubs.EventDataBatch;
 import com.microsoft.azure.eventhubs.EventHubClient;
 import com.microsoft.azure.eventhubs.EventHubException;
 import com.microsoft.azure.eventhubs.PayloadSizeExceededException;
+import com.sap.iot.azure.ref.integration.commons.avro.TestAVROSchemaConstants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;
 import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
 import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessageContainer;
@@ -21,6 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -52,7 +54,7 @@ public class BaseEventHubProcessorTest {
     public void testSend() throws ExecutionException, InterruptedException {
         EventHubProcessorImpl eventHubProcessor = new EventHubProcessorImpl(eventHubClient, 1, 100);
         //Test implementation will return a list of EventData
-        eventHubProcessor.process(new ProcessedMessageContainer(new ArrayList<>()), "").get();
+        eventHubProcessor.process(new ProcessedMessageContainer(TestAVROSchemaConstants.SAMPLE_AVRO_SCHEMA, "schema", Collections.emptyList()), "").get();
 
         //Since EventData is present, send should be invoked
         verify(eventHubClient, times(1)).send(any(EventDataBatch.class));
@@ -62,7 +64,7 @@ public class BaseEventHubProcessorTest {
     public void testEmptyList() throws ExecutionException, InterruptedException {
         EventHubProcessorImpl eventHubProcessor = new EventHubProcessorImpl(eventHubClient, 0, 0);
         //Test implementation will return an empty list of EventData
-        eventHubProcessor.process(new ProcessedMessageContainer(new ArrayList<>()), "").get();
+        eventHubProcessor.process(new ProcessedMessageContainer(TestAVROSchemaConstants.SAMPLE_AVRO_SCHEMA, "schema", Collections.emptyList()), "").get();
 
         //Since no EventData is present, send should not be invoked
         verify(eventHubClient, times(0)).send(any(EventDataBatch.class));

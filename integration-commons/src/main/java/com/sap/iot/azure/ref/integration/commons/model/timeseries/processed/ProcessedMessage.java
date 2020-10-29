@@ -17,13 +17,6 @@ public class ProcessedMessage {
 
 	@NonNull
 	private String sourceId;
-	
-	@NonNull
-	private String structureId;
-
-	private String tenantId;
-	
 	private List<Map<String, Object>> measures;
-
 	private Map<String, String> tags;
 }

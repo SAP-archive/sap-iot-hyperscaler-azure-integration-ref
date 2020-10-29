@@ -12,10 +12,14 @@ import java.util.Map;
 
 public class TestUtil {
 
-    public static List<byte[]> avroMessage() {
-        ProcessedMessage sampleMessage = getSampleMessage();
-        byte[] data = AvroHelper.serializeJsonToAvro(sampleMessage, AVRO_SCHEMA);
-        return Collections.singletonList(data);
+    public static List<byte[]> avroMessage(int numOfMessages) {
+        List<byte[]> avroMsgs = new ArrayList<>();
+        for (int i = 0; i < numOfMessages; i++) {
+            ProcessedMessage sampleMessage = getSampleMessage();
+            avroMsgs.add(AvroHelper.serializeJsonToAvro(sampleMessage, AVRO_SCHEMA));
+        }
+
+        return avroMsgs;
     }
 
     public static byte[] avroMessageByte(){
@@ -47,8 +51,6 @@ public class TestUtil {
 
         return ProcessedMessage.builder()
                 .sourceId("S1")
-                .structureId("IG1")
-                .tenantId("tenantId")
                 .tags(tags)
                 .measures(measuresList)
                 .build();
@@ -81,21 +83,23 @@ public class TestUtil {
 
         return ProcessedMessage.builder()
                 .sourceId("S1")
-                .structureId("IG1")
-                .tenantId("tenantId")
                 .tags(tags)
                 .measures(measuresList)
                 .build();
     }
 
     public static List<ProcessedMessage> getProcessedMessageList() {
-        ProcessedMessage pm = getSampleMessage();
-        return Collections.singletonList(pm);
+        List<ProcessedMessage> processedMessages = new ArrayList<>();
+        processedMessages.add(getSampleMessage());
+        return processedMessages;
     }
 
     public static final String AVRO_SCHEMA = "{\n" +
             "  \"type\": \"record\",\n" +
             "  \"name\": \"IG1\",\n" +
+            "  \"gdprDataCategory\": \"\",\n" +
+            "  \"structureId\": \"IG1\",\n" +
+            "  \"tenant\": \"tenant-guid-1\",\n" +
             "  \"fields\": [\n" +
             "    {\n" +
             "      \"name\": \"messageId\",\n" +
@@ -103,14 +107,6 @@ public class TestUtil {
             "    },\n" +
             "    {\n" +
             "      \"name\": \"identifier\",\n" +
-            "      \"type\": \"string\"\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"structureId\",\n" +
-            "      \"type\": \"string\"\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"name\": \"tenant\",\n" +
             "      \"type\": \"string\"\n" +
             "    },\n" +
             "    {\n" +
@@ -203,8 +199,6 @@ public class TestUtil {
     public static final String GENERIC_JSON = "{\n" +
             "  \"messageId\": \"S1/IG1/1587023647403\",\n" +
             "  \"identifier\": \"S1\",\n" +
-            "  \"structureId\": \"IG1\",\n" +
-            "  \"tenant\": \"tenantId\",\n" +
             "  \"tags\": [\n" +
             "    {\n" +
             "      \"modelId\": \"m1\",\n" +
@@ -226,8 +220,6 @@ public class TestUtil {
     public static final String GENERIC_JSON_WITH_MULTIPLE_TAGS = "{\n" +
             "  \"messageId\": \"S1/IG1/1587023647403\",\n" +
             "  \"identifier\": \"S1\",\n" +
-            "  \"structureId\": \"IG1\",\n" +
-            "  \"tenant\": \"tenantId\",\n" +
             "  \"tags\": [\n" +
             "    {\n" +
             "      \"modelId\": \"m1\",\n" +
@@ -255,8 +247,6 @@ public class TestUtil {
     public static final String GENERIC_JSON_WITH_NULL_TAGS = "{\n" +
             "  \"messageId\": \"S1/IG1/1587023647403\",\n" +
             "  \"identifier\": \"S1\",\n" +
-            "  \"structureId\": \"IG1\",\n" +
-            "  \"tenant\": \"tenantId\",\n" +
             "  \"tags\": null,\n" +
             "  \"measurements\": [\n" +
             "    {\n" +

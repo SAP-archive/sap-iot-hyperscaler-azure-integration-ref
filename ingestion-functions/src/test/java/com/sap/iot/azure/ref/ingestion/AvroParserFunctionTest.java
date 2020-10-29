@@ -6,6 +6,7 @@ import com.sap.iot.azure.ref.ingestion.output.ADXEventHubProcessor;
 import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessage;
 import com.sap.iot.azure.ref.ingestion.service.AvroMessageService;
 import com.sap.iot.azure.ref.ingestion.service.TestUtil;
+import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessageContainer;
 import com.sap.iot.azure.ref.integration.commons.retry.RetryTaskExecutor;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil.createPartitionContext;
@@ -37,16 +39,17 @@ public class AvroParserFunctionTest {
 
     @Before
     public void prepare() {
-        ImmutableMap<String, List<ProcessedMessage>> processedMessageMap = ImmutableMap.of("S1", TestUtil.getProcessedMessageList());
-        doReturn(processedMessageMap).when( avroMessageService ).createProcessedMessage(Mockito.any(), Mockito.any());
-        avroParserFunction = new AvroParserFunction( avroMessageService, adxEventHubProcessor, retryTaskExecutor );
+        Map<String, ProcessedMessageContainer> processedMessageMap = ImmutableMap.of("S1", new ProcessedMessageContainer("IG1",
+                TestUtil.getProcessedMessageList()));
+        doReturn(processedMessageMap).when(avroMessageService).createProcessedMessage(Mockito.any(), Mockito.any());
+        avroParserFunction = new AvroParserFunction(avroMessageService, adxEventHubProcessor, retryTaskExecutor);
         InvocationContextTestUtil.initInvocationContext();
     }
 
     @Test
     public void testRun() {
         doReturn(CompletableFuture.completedFuture(null)).when(adxEventHubProcessor).apply(any());
-        avroParserFunction.run(TestUtil.avroMessage(), createSystemPropertiesMap(),
+        avroParserFunction.run(TestUtil.avroMessage(1), createSystemPropertiesMap(),
                 createPartitionContext(), InvocationContextTestUtil.getMockContext());
         verify(avroMessageService, times(1)).createProcessedMessage(any(), any());
         verify(adxEventHubProcessor, times(1)).apply(any());

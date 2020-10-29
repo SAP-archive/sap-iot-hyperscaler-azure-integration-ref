@@ -40,7 +40,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProcessedTimeseriesEventHubProcessorTest {
+public class ProcessedTimeSeriesEventHubProcessorTest {
     private static final String CONNECTION_STRING = "testConnStr";
 
     @Mock
@@ -53,11 +53,11 @@ public class ProcessedTimeseriesEventHubProcessorTest {
     public static final EnvironmentVariables environmentVariables = new EnvironmentVariables()
             .set(Constants.PROCESSED_TIMESERIES_CONNECTION_STRING_PROP, CONNECTION_STRING);
 
-    private ProcessedTimeseriesEventHubProcessor processedTimeseriesEventHubProcessor;
+    private ProcessedTimeSeriesEventHubProcessor processedTimeSeriesEventHubProcessor;
 
     @Before
     public void setup() throws EventHubException {
-        processedTimeseriesEventHubProcessor = new ProcessedTimeseriesEventHubProcessor(CompletableFuture.completedFuture(ehclientMock));
+        processedTimeSeriesEventHubProcessor = new ProcessedTimeSeriesEventHubProcessor(CompletableFuture.completedFuture(ehclientMock));
 
         when(ehclientMock.createBatch(any(BatchOptions.class))).thenReturn(new BaseEventHubProcessorTest.SimpleEventBatch());
         when(ehclientMock.send(any(EventDataBatch.class))).thenReturn(CompletableFutures.voidCompletedFuture());
@@ -71,13 +71,13 @@ public class ProcessedTimeseriesEventHubProcessorTest {
     @Test
     public void testProcess() throws Exception {
         //If I call process with a list of processed messages, they should be converted and sent as event data.
-        processedTimeseriesEventHubProcessor.apply(Maps.immutableEntry("sourceId", OutputTestUtil.createProcessedMessages()));
+        processedTimeSeriesEventHubProcessor.apply(Maps.immutableEntry("sourceId", OutputTestUtil.createProcessedMessages()));
 
         verify(ehclientMock, times(1)).send(eventDataCaptor.capture());
         JsonNode processedMessage = decode(((BaseEventHubProcessorTest.SimpleEventBatch) eventDataCaptor.getValue()).getBytes(0));
         assertEquals(OutputTestUtil.SOURCE_ID, processedMessage.get(AvroConstants.AVRO_DATUM_KEY_IDENTIFIER).textValue());
-        assertEquals(OutputTestUtil.STRUCTURE_ID, processedMessage.get(AvroConstants.AVRO_DATUM_KEY_STRUCTURE_ID).textValue());
-        assertEquals(OutputTestUtil.TENANT_ID, processedMessage.get(AvroConstants.AVRO_DATUM_KEY_TENANT).textValue());
+        assertEquals(OutputTestUtil.SAMPLE_TAG_VAL, processedMessage.get(AvroConstants.AVRO_DATUM_KEY_TAGS).get(0).get(OutputTestUtil.SAMPLE_TAG_KEY).asText());
+        assertEquals(OutputTestUtil.SAMPLE_PROPERTY_VAL, processedMessage.get(AvroConstants.AVRO_DATUM_KEY_MEASUREMENTS).get(0).get(OutputTestUtil.SAMPLE_PROPERTY_KEY).asText());
     }
 
     private JsonNode decode ( byte[] avro ) throws Exception {

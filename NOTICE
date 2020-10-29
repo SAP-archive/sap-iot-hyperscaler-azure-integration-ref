@@ -110,11 +110,6 @@ Licensor: The Project Lombok Authors
 Website: http://github.com/rzwitserloot/lombok/
 License: MIT License
 
-Component: org.junit.jupiter 5.4.2
-Licensor: junit.org
-Website: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/
-License: Eclipse Public License 1.0
-
 Component: mockito-core 2.25.1
 Licensor: Mockito contributors
 Website: https://github.com/mockito/mockito

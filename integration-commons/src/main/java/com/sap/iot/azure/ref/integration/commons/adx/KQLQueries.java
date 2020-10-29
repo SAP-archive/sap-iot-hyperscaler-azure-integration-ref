@@ -3,6 +3,7 @@ package com.sap.iot.azure.ref.integration.commons.adx;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
+import com.sap.iot.azure.ref.integration.commons.model.timeseries.delete.DeleteInfo;
 import com.sap.iot.azure.ref.integration.commons.util.EnvUtils;
 
 import java.time.Clock;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 class KQLQueries {
     static final String TABLE_EXISTS_QUERY = ".show table %s details";
@@ -28,6 +30,17 @@ class KQLQueries {
     private static final String COLUMN_DATA_EXISTS_QUERY = "%s | project %s | where isnotempty(%s) | take 1";
     private static final String RENAME_TABLE_QUERY = ".rename table %s to %s";
     private static final String RENAME_COLUMN_QUERY = ".rename column %s . %s to %s";
+    private static final String SOURCE_ID_FILTER_PLACEHOLDER = "{SOURCE_ID_FILTER}";
+    private static final String FROM_INCLUSIVE_PLACEHOLDER = "{FROM_INCLUSIVE}";
+    private static final String TO_INCLUSIVE_PLACEHOLDER = "{TO_INCLUSIVE}";
+    private static final String SOURCE_ID_FILTER_CLAUSE = "and sourceId in (%s) ";
+    private static final String DELETE_TIMESERIES_QUERY = ".set-or-append async %s <| %s " +
+            "| where (_time >" + FROM_INCLUSIVE_PLACEHOLDER + " datetime(\"%s\") " +
+            "and _time <" + TO_INCLUSIVE_PLACEHOLDER + " datetime(\"%s\")) " +
+            SOURCE_ID_FILTER_PLACEHOLDER +
+            "and _enqueued_time < datetime(\"%s\") " +
+            "| where _isDeleted != true " +
+            "| extend _enqueued_time = now(), _isDeleted = true";
     private static final String KEY_VALUE_PLACEHOLDER = "%s: %s";
     private static final String MAPPING_COLUMN_KEY = "column";
     private static final String MAPPING_PATH_KEY = "path";
@@ -44,6 +57,9 @@ class KQLQueries {
     private static final String MAX_NUMBER_OF_ITEMS = EnvUtils.getEnv(MAX_NUMBER_OF_ITEMS_PROP, DEFAULT_MAX_NUMBER_OF_ITEMS);
     private static final String MAX_RAW_DATA_SIZE = EnvUtils.getEnv(MAX_RAW_DATA_SIZE_PROP, DEFAULT_MAX_RAW_DATA_SIZE);
     public static final String SOFT_DELETE_SUFFIX = "_D_%s";
+    private static final String DELETE_OPERATION_STATUS = ".show operations %s";
+    public static final String INCLUSIVE_OPERATOR = "=";
+    public static final String IN_CONDITION_SPLITTER = ", ";
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -105,6 +121,17 @@ class KQLQueries {
         return String.format(COLUMN_DATA_EXISTS_QUERY, getTableName(structureId), columnName, columnName);
     }
 
+    static String getDeleteTimeSeriesQuery(DeleteInfo request) {
+        String tableName = getTableName(request.getStructureId());
+        String query = DELETE_TIMESERIES_QUERY;
+        query = addInclusiveInfo(query, request.getFromTimestampInclusive(), request.getToTimestampInclusive());
+        query = addSourceIdFilter(query, request.getSourceIds());
+
+        query = String.format(query, tableName, tableName, request.getFromTimestamp(), request.getToTimestamp(), request.getIngestionTimestamp());
+
+        return query;
+    }
+
     private static String getTableName(String structureId) {
         return ADXConstants.TABLE_PREFIX + structureId;
     }
@@ -149,7 +176,7 @@ class KQLQueries {
         if (path.equals(CommonConstants.DELETED_PROPERTY_KEY)) {
             //Since isDeleted is a constant value, we do not add the path root
             return CommonConstants.DELETED_PROPERTY_VALUE;
-        }else if (path.equals(CommonConstants.ENQUEUED_TIME_PROPERTY_KEY)) {
+        } else if (path.equals(CommonConstants.ENQUEUED_TIME_PROPERTY_KEY)) {
             //The path of the enqueued time is different from the column name
             path = CommonConstants.ENQUEUED_TIME_PROPERTY_VALUE;
         }
@@ -164,5 +191,34 @@ class KQLQueries {
     private static String getSoftDeleteSuffix(Clock clock) {
         //We add a timestamp to the suffix to avoid name collisions with future changes
         return String.format(SOFT_DELETE_SUFFIX, clock.millis());
+    }
+
+    static String getDeleteOperationStatus(String operationId) {
+        return String.format(DELETE_OPERATION_STATUS, operationId);
+    }
+
+    private static String addInclusiveInfo(String input, boolean fromTimestampInclusive, boolean toTimestampInclusive) {
+        String fromInclusive = fromTimestampInclusive ? INCLUSIVE_OPERATOR : "";
+        String toInclusive = toTimestampInclusive ? INCLUSIVE_OPERATOR : "";
+
+        input = input.replace(FROM_INCLUSIVE_PLACEHOLDER, fromInclusive);
+        input = input.replace(TO_INCLUSIVE_PLACEHOLDER, toInclusive);
+
+        return input;
+    }
+
+    private static String addSourceIdFilter(String input, List<String> sourceIds) {
+        boolean sourceIdFilterExists = sourceIds != null && sourceIds.size() > 0;
+        String sourceIdFilter = sourceIdFilterExists ? getSourceIdFilterString(sourceIds) : "";
+
+        input = input.replace(SOURCE_ID_FILTER_PLACEHOLDER, sourceIdFilter);
+
+        return input;
+    }
+
+    private static String getSourceIdFilterString(List<String> sourceIds) {
+        return String.format(SOURCE_ID_FILTER_CLAUSE, sourceIds.stream()
+                .map((sourceId) -> {return "\"" + sourceId + "\"";})
+                .collect(Collectors.joining(IN_CONDITION_SPLITTER)));
     }
 }

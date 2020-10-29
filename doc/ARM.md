@@ -30,6 +30,7 @@ Follow these steps to create and upload the zip file:
   2. notification-processor.zip
   3. device-management-functions.zip
 4. [Generate SAS token url as template input parameter](https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview)
+    > Note: The expiry of the SAS token will lead to inactivity of the function. You should therefore ensure to pick an appropriate expiration date.
 
 ## Parameters
 * **Subscription**
@@ -94,15 +95,19 @@ Follow these steps to create and upload the zip file:
 
 * **Mapping Function Zip URI**
 
-  * The SAS(Shared access signatures) Url that points to the zipped mapping function zip uploaded to the Azure Storage Account Blob Service Container.
+  * The SAS (Shared access signatures) Url that points to the zipped mapping function app uploaded to the Azure Storage Account Blob Service Container.
 
 * **Notification Function Zip URI**
 
-  * The SAS(Shared access signatures) Url that points to the zipped notification function zip uploaded to the Azure Storage Account Blob Service Container.
+  * The SAS(Shared access signatures) Url that points to the zipped notification function app uploaded to the Azure Storage Account Blob Service Container.
 
 * **Device Management Function Zip URI**
 
-  * The SAS(Shared access signatures) Url that points to the zipped device management function zip uploaded tothe Azure Storage Account Blob Service Container.
+  * The SAS (Shared access signatures) Url that points to the zipped device management function app uploaded to the Azure Storage Account Blob Service Container.
+
+* **Delete Time Series Function Zip URI**
+
+  * The SAS (Shared access signatures) Url that points to the zipped times series function app uploaded to the Azure Storage Account Blob Service Container.  
 
 * **Enable Diagnostics Settings for Services**
 
@@ -110,7 +115,7 @@ Follow these steps to create and upload the zip file:
 
 * **Diagnostics Logs Retention in Days**
 
-  * Number of days that the logs are retained. Set vaule to 0 to retain data forever.
+  * Number of days that the logs are retained. Set value to 0 to retain data forever.
 
 * **IoT Hub SKU Name**
 
@@ -152,15 +157,15 @@ Follow these steps to create and upload the zip file:
 
   * Event hubs throughput units.
 
-* **Event Hub Partitions for ADX Timeseries**
+* **Event Hub Partitions for ADX Time Series**
 
-  * Number of partitions for Event Hub with logical type "ADXTimeseries".
+  * Number of partitions for Event Hub with logical type "ADXTimeSeries".
 
-* **Event Hub Partitions for Processed Timeseries In**
+* **Event Hub Partitions for Processed Time Series In**
 
   * Number of partitions for Event Hub with logical type "ProcessedTimeSeriesIn".
 
-* **Event Hub Partitions for Processed Timeseries Out**
+* **Event Hub Partitions for Processed Time Series Out**
 
   * Number of partitions for Event Hub with logical type "ProcessedTimeSeriesOut".
 
@@ -176,6 +181,14 @@ Follow these steps to create and upload the zip file:
 
   * Number of partitions for Device Management Status Event Hub.
 
+* **Event Hub Partitions for Delete Time Series Request**
+
+  * Number of partitions for Delete Time Series Request Event Hub.
+
+* **Event Hub Partitions for Delete Time Series Status**
+
+  * Number of partitions for Delete Time Series Status Event Hub.  
+
 * **Key Vault SKU Name**
 
   * Used to store credentials. Customers can pick either Standard or Premium.
@@ -189,7 +202,62 @@ Follow these steps to create and upload the zip file:
   * For faster access and no need to call APIs every time. Family C: 0, 1, 2, 3, 4, 5, 6 / Family P: 1, 2, 3, 4.  
 
 
-![ARM parameters](img/armParameters_v5.png)
+### Parameters Grouped By Resource
+  
+Resource                         | Parameters                                           |
+| ------------------------------ | ---------------------------------------------------- | 
+| Basic                          | {Subscription}                                       | 
+|                                | {Resource Group}                                     |
+|                                | {Location}                                           |
+|                                | {Name}                                               |
+|                                |                                                      | 
+| Azure Functions                | {AAD Application Client ID for Azure Function}       | 
+|                                | {AAD Application Client ID for SAP IoT Abstraction}  | 
+|                                | {AAD Client Secret}                                  | 
+|                                | {AAD Tenant ID}                                      | 
+|                                | {SAP IoT Tenant Authentication Token Endpoint}       | 
+|                                | {SAP IoT Tenant ID}                                  | 
+|                                | {SAP IoT Tenant Client ID}                           | 
+|                                | {SAP IoT Tenant Client Secret}                       | 
+|                                | {Scopes to Access SAP IoT APIs}                      | 
+|                                | {Model Configuration App Host}                       | 
+|                                | {Model Mapping App Host}                             | 
+|                                | {Enable Diagnostics Settings for Services}           | 
+|                                |                                                      |
+| IoT Hub                        | {SKU Name}                                           | 
+|                                | {SKU Capacity}                                       |
+|                                | {Partition Count}                                    |
+|                                | {Logs Retention}                                     |
+|                                |                                                      |
+| ADX Clusters                   | {SKU Name}                                           | 
+|                                | {SKU Tier}                                           |
+|                                | {SKU Capacity}                                       |
+|                                | {Logs Retention}                                     |
+|                                |                                                      |
+| ADX Database                   | {Hot Cache Period}                                   | 
+|                                |                                                      |
+| Event Hub                      | {SKU Name}                                           | 
+|                                | {SKU Tier}                                           |
+|                                | {SKU Capacity}                                       |
+|                                | {Event Hub Partitions for ADX Timeseries}            |
+|                                | {Event Hub Partitions for Processed Timeseries In}   | 
+|                                | {Event Hub Partitions for Processed Timeseries Out}  | 
+|                                | {Event Hub Partitions for Model Change Notification} | 
+|                                | {Event Hub Partitions for Device Management Request} | 
+|                                | {Event Hub Partitions for Device Management Status}  | 
+|                                | {Event Hub Partitions for Delete Timeseries Request} | 
+|                                | {Event Hub Partitions for Delete Timeseries Status}  |
+|                                | {Logs Retention}                                    |
+|                                |                                                      |
+| Key Vault                      | {SKU Name}                                           | 
+|                                | {Logs Retention}                                     |
+|                                |                                                      |
+| Redis Cache                    | {SKU Name}                                           | 
+|                                | {SKU Capacity}                                       |
+|                                | {Logs Retention}                                     |
+|                                |                                                      |
+
+
 ## Deployment
 
 * Open Create Resource in Azure Resource Manager and choose Template Deployment.
@@ -214,3 +282,45 @@ The limits/quotas of various services are available at [Azure subscription and s
 * Redis Cache:
   - [How to Scale Azure Cache for Redis Documentation](https://docs.microsoft.com/en-us/azure/azure-cache-for-redis/cache-how-to-scale)
   - [How to configure Redis clustering for a Premium Azure Cache for Redis](https://docs.microsoft.com/en-us/azure/azure-cache-for-redis/cache-how-to-premium-clustering)
+
+## Updating Resource Group
+SAP IoT reference template shall be enhanced with new resources to support features and API changes introduced to integrate to SAP IoT with Customer-managed Azure Ingestion & Persistence. Updating of resource group shall be required in following scenarios
+
+* to update the resource group with new resources added in ARM template in master.
+> Note: You can refer to the ARM template from previous releases in this repository tags marked with respective release name (e.g., 2008a)
+
+* Updating resource configuration (e.g., updating the client id & secret for connecting to SAP IoT Mapping APIs).
+> Note: Such updates to specific Azure function can also be done directly on the resource itself, but it is recommended to use the redeploy template for updating to ensure that required changes are propagated to all impacted resources.
+
+To update a resource group, navigate to the latest deployment<br/>
+* Resource Group > Deployments > Redeploy > Edit Template and load a new version of the template.<br/>
+
+You can update the properties of existing resources to fit your budget by adjusting parameter values such as SKU Name, SKU Capacity, and SKU Tier. 
+However, you should keep parameter Name same as before since all existing resource creation are populated by this name. <br/>
+
+![ARM template deployment](img/armParameters_Name.png)
+
+
+After the (re)deployment completes, the new or modified resources in the ARM templates will be added to the resource group.
+
+
+For more details on updating resource group, you can refer to Microsoft Azure Documentation [Update a resource in an Azure Resource Manager template](https://docs.microsoft.com/en-us/azure/architecture/building-blocks/extending-templates/update-resource)
+
+
+### Updating Resource Group for 2011a Release
+
+As part of the new updates in 2010b release, the following resources will be added after the template deployment
+
+#### Delete Time Series
+  - Delete Time Series Function App
+  - New Event Hub sap.iot.abstraction.timeseries.delete.request added to the existing Event Hub Namespace with consumer group sap-iot-timeseries-delete-request-cg and required access policies
+  - New Event Hub sap.iot.abstraction.timeseries.delete.status added to the existing Event Hub Namespace with consumer group sap-iot-timeseries-delete-status-cg and required access policies.
+  - Storage Account
+  - Diagnostic Settings for Function App
+  
+#### Azure Data Export Large Volume Export
+  - Storage Account
+  - Storage Account Blob Container cold-store-export
+  - Storage Account Lifecycle Management > Rules
+    - adxExportStagingExpirationRule: files in cold-store-export/export path will be deleted after 7 days from the time of creation
+    - adxExportVerifyPermissionsTempFileExpirationRule: cold-store-export/adx-export-verify.txt will be deleted after 1 day from the time of creation

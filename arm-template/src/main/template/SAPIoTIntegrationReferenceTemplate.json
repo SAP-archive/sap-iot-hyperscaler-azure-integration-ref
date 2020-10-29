@@ -91,6 +91,12 @@
 				"description": "Defines a value for device management function Zip URI."
 			}
 		},
+		"deleteTimeSeriesFunctionZipURI": {
+			"type": "string",
+			"metadata": {
+				"description": "Defines a value for delete time series function Zip URI."
+			}
+		},
 		"enableDiagnosticsSettingsForServices": {
 			"type": "string",
 			"defaultValue": "Yes",
@@ -249,7 +255,7 @@
 				"description": "Defines event hubs throughput units."
 			}
 		},
-		"eventHubPartitionsForADXTimeseries": {
+		"eventHubPartitionsForADXTimeSeries": {
 			"type": "int",
 			"defaultValue": 5,
 			"allowedValues": [
@@ -287,10 +293,10 @@
 				32
 			],
 			"metadata": {
-				"description": "Defines number of event hub partitions for ADX Timeseries."
+				"description": "Defines number of event hub partitions for ADX Time Series."
 			}
 		},
-		"eventHubPartitionsForProcessedTimeseriesIn": {
+		"eventHubPartitionsForProcessedTimeSeriesInbound": {
 			"type": "int",
 			"defaultValue": 5,
 			"allowedValues": [
@@ -328,10 +334,10 @@
 				32
 			],
 			"metadata": {
-				"description": "Defines number of event hub partitions for Processed Timeseries In."
+				"description": "Defines number of event hub partitions for Processed Time Series Inbound for time series records ingested from SAP IoT Time Series APIs."
 			}
 		},
-		"eventHubPartitionsForProcessedTimeseriesOut": {
+		"eventHubPartitionsForProcessedTimeSeriesOutbound": {
 			"type": "int",
 			"defaultValue": 5,
 			"allowedValues": [
@@ -369,7 +375,7 @@
 				32
 			],
 			"metadata": {
-				"description": "Defines number of event hub partitions for Processed Timeseries Out."
+				"description": "Defines number of event hub partitions for Processed Time Series Out."
 			}
 		},
 		"eventHubPartitionsForModelChangeNotification": {
@@ -495,6 +501,88 @@
 				"description": "Defines number of event hub partitions for Device Management Status."
 			}
 		},
+		"eventHubPartitionsForDeleteTimeSeriesRequest": {
+			"type": "int",
+			"defaultValue": 1,
+			"allowedValues": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32
+			],
+			"metadata": {
+				"description": "Defines number of event hub partitions for Delete Timeseries."
+			}
+		},
+		"eventHubPartitionsForDeleteTimeSeriesStatus": {
+			"type": "int",
+			"defaultValue": 1,
+			"allowedValues": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32
+			],
+			"metadata": {
+				"description": "Defines number of event hub partitions for Delete Timeseries Status."
+			}
+		},
 		"keyVaultSKUName": {
 			"type": "string",
 			"defaultValue": "Standard",
@@ -542,6 +630,12 @@
 		"notificationStorageName": "[toLower(substring(concat('stnotification', uniqueString(variables('uniqueAppName'))), 0, 24))]",
 		"deviceStorageName": "[toLower(substring(concat('stdevicemanagement', uniqueString(variables('uniqueAppName'))), 0, 24))]",
 		"diagnosticStorageName": "[toLower(substring(concat('stdiagnostic', uniqueString(variables('uniqueAppName'))), 0, 24))]",
+		"deleteTimeseriesStorageName": "[toLower(substring(concat('stdeletetimeseries', uniqueString(variables('uniqueAppName'))), 0, 24))]",
+		"coldStoreExportStorageName": "[toLower(substring(concat('stcoldexport', uniqueString(variables('uniqueAppName'))), 0, 24))]",
+		"coldStoreExportContainerName": "cold-store-export",
+		"coldStoreExportFilesRetentionInDays": 7,
+		"coldStoreADXExportTempVerifyPermissionFileRetentionInDays": "1",
+		"appInsightsName": "[toLower(concat('appi-', uniqueString(variables('uniqueAppName'))))]",
 		"iotHubName": "[substring(concat('iot-', uniqueString(resourceGroup().id), '-', parameters('name')), 0, 16)]",
 		"iotHubAccountId": "[concat(resourceGroup().id,'/providers/Microsoft.Devices/IotHubs/', variables('iotHubName'))]",
 		"ADXClustersName": "[substring(concat('kusto', uniqueString(variables('uniqueAppName'))), 0, 10)]",
@@ -559,12 +653,12 @@
 		"eventHubModelChangeNotificationPolicyListen": "model-change-notification-policy-listen",
 		"eventHubModelChangeNotificationPolicySend": "model-change-notification-policy-send",
 		"eventHubModelChangeNotificationConsumerGroup": "sap-iot-notification-handler-cg",
-		"eventHubProcessedTimeseriesOut": "sap.iot.abstract.processed_timeseries_out.v1",
-		"eventHubProcessedTimeseriesOutPolicyListen": "processed-timeseries-out-policy-listen",
-		"eventHubProcessedTimeseriesOutPolicySend": "processed-timeseries-out-policy-send",
-		"eventHubProcessedTimeseriesIn": "sap.iot.abstract.processed_timeseries_in.v1",
-		"eventHubProcessedTimeseriesInPolicyListen": "processed-timeseries-in-policy-listen",
-		"eventHubProcessedTimeseriesInPolicySend": "processed-timeseries-in-policy-send",
+		"eventHubProcessedTimeSeriesOut": "sap.iot.abstract.processed_timeseries_out.v1",
+		"eventHubProcessedTimeSeriesOutPolicyListen": "processed-timeseries-out-policy-listen",
+		"eventHubProcessedTimeSeriesOutPolicySend": "processed-timeseries-out-policy-send",
+		"eventHubProcessedTimeSeriesIn": "sap.iot.abstract.processed_timeseries_in.v1",
+		"eventHubProcessedTimeSeriesInPolicyListen": "processed-timeseries-in-policy-listen",
+		"eventHubProcessedTimeSeriesInPolicySend": "processed-timeseries-in-policy-send",
 		"eventHubDeviceManagementRequest": "sap.iot.abstraction.device.management.request",
 		"eventHubDeviceManagementRequestPolicyListen": "device-management-request-policy-listen",
 		"eventHubDeviceManagementRequestPolicySend": "device-management-request-policy-send",
@@ -573,6 +667,14 @@
 		"eventHubDeviceManagementStatusPolicyListen": "device-management-status-policy-listen",
 		"eventHubDeviceManagementStatusPolicySend": "device-management-status-policy-send",
 		"eventHubDeviceManagementStatusConsumerGroup": "sap-iot-device-management-status-cg",
+		"eventHubDeleteTimeseriesRequest": "sap.iot.abstraction.timeseries.delete.request",
+		"eventHubDeleteTimeseriesRequestPolicyListen": "delete-timeseries-request-policy-listen",
+		"eventHubDeleteTimeseriesRequestPolicySend": "delete-timeseries-request-policy-send",
+		"eventHubDeleteTimeseriesRequestConsumerGroup": "sap-iot-timeseries-delete-request-cg",
+		"eventHubDeleteTimeseriesStatus": "sap.iot.abstraction.timeseries.delete.status",
+		"eventHubDeleteTimeseriesStatusPolicyListen": "delete-timeseries-status-policy-listen",
+		"eventHubDeleteTimeseriesStatusPolicySend": "delete-timeseries-status-policy-send",
+		"eventHubDeleteTimeseriesStatusConsumerGroup": "sap-iot-timeseries-delete-status-cg",
 		"vaultName": "[substring(concat('kv-', uniqueString(variables('uniqueAppName'))), 0, 10)]",
 		"SPAclientId": "service-principal-application-client-id",
 		"SPAKey": "service-principal-application-key",
@@ -580,15 +682,18 @@
 		"clientId": "client-id",
 		"clientSecret": "client-secret",
 		"ADXSourceConnectionString": "adx-source-connection-string",
-		"processedTimeseriesConnectionString": "processed-timeseries-connection-string",
-		"processedTimeseriesIn": "processed-timeseries-in-connection-string",
+		"processedTimeSeriesConnectionString": "processed-timeseries-connection-string",
+		"processedTimeSeriesIn": "processed-timeseries-in-connection-string",
 		"eventProcessHubConnectionString": "event-process-hub-connection-string",
 		"deviceManagementRequestConnectionString": "device-management-request-connection-string",
 		"deviceManagementStatusConnectionString": "device-management-status-connection-string",
+		"deleteTimeseriesConnectionString": "delete-timeseries-connection-string",
+		"deleteStatusConnectionString": "delete-status-connection-string",
 		"azureCacheKey": "azure-cache-key",
 		"functionAppIngestionDiagnosticName": "[substring(concat('ingest-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
 		"functionAppNotificationDiagnosticName": "[substring(concat('notify-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
 		"functionAppDeviceManagementDiagnosticName": "[substring(concat('device-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
+		"functionAppDeleteTimeseriesDiagnosticName": "[substring(concat('delete-ts-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
 		"iotHubDiagnosticName": "[substring(concat('iot-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
 		"ADXDiagnosticName": "[substring(concat('adx-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
 		"eventHubDiagnosticName": "[substring(concat('evh-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
@@ -648,7 +753,7 @@
 						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2019-04-01').keys[0].value)]",
 						"WEBSITE_CONTENTSHARE": "[concat(toLower(variables('uniqueAppName')))]",
 						"WEBSITE_RUN_FROM_ZIP": "[parameters('mappingFunctionZipURI')]",
-						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('uniqueAppName')), '2018-05-01-preview').InstrumentationKey]",
+						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey]",
 						"WEBSITE_RUN_FROM_PACKAGE": "1",
 						"service-principal-application-client-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAclientId'))).secretUriWithVersion, ')')]",
 						"service-principal-application-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAKey'))).secretUriWithVersion, ')')]",
@@ -658,10 +763,10 @@
 						"azure-cache-host": "[concat(variables('redisCacheName'), '.redis.cache.windows.net')]",
 						"adx-resource-uri": "[concat('https://', variables('ADXClustersName'), '.', variables('ADXResourceLocation'), '.kusto.windows.net')]",
 						"adx-source-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('ADXSourceConnectionString'))).secretUriWithVersion, ')')]",
-						"processed-timeseries-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('processedTimeseriesConnectionString'))).secretUriWithVersion, ')')]",
-						"processed-timeseries-in-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('processedTimeseriesIn'))).secretUriWithVersion, ')')]",
+						"processed-timeseries-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('processedTimeSeriesConnectionString'))).secretUriWithVersion, ')')]",
+						"processed-timeseries-in-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('processedTimeSeriesIn'))).secretUriWithVersion, ')')]",
 						"iothub-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('eventProcessHubConnectionString'))).secretUriWithVersion, ')')]",
-						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', variables('uniqueAppName')), '2018-05-01-preview').InstrumentationKey)]",
+						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey)]",
 						"azure-cache-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('azureCacheKey'))).secretUriWithVersion, ')')]",
 						"transform-default-message-type": "IOTS",
 						"sap-iot-tenant": "[parameters('SAPIotTenantID')]",
@@ -750,7 +855,7 @@
 						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('notificationStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('notificationStorageName')), '2019-04-01').keys[0].value)]",
 						"WEBSITE_CONTENTSHARE": "[concat(toLower(concat(variables('uniqueAppName'), '-notify')))]",
 						"WEBSITE_RUN_FROM_ZIP": "[parameters('notificationFunctionZipURI')]",
-						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', concat(variables('uniqueAppName'))), '2018-05-01-preview').InstrumentationKey]",
+						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey]",
 						"WEBSITE_RUN_FROM_PACKAGE": "1",
 						"service-principal-application-client-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAclientId'))).secretUriWithVersion, ')')]",
 						"service-principal-application-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAKey'))).secretUriWithVersion, ')')]",
@@ -759,7 +864,7 @@
 						"client-secret": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('clientSecret'))).secretUriWithVersion, ')')]",
 						"azure-cache-host": "[concat(variables('redisCacheName'), '.redis.cache.windows.net')]",
 						"adx-resource-uri": "[concat('https://', variables('ADXClustersName'), '.', variables('ADXResourceLocation'), '.kusto.windows.net')]",
-						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', concat(variables('uniqueAppName'))), '2018-05-01-preview').InstrumentationKey)]",
+						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey)]",
 						"azure-cache-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('azureCacheKey'))).secretUriWithVersion, ')')]",
 						"adx-database-name": "[variables('ADXClustersDatabaseName')]",
 						"eventhub-sku-tier": "[parameters('eventHubSKUTier')]",
@@ -843,9 +948,9 @@
 						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deviceStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deviceStorageName')), '2019-04-01').keys[0].value)]",
 						"WEBSITE_CONTENTSHARE": "[concat(toLower(concat(variables('uniqueAppName'), '-device')))]",
 						"WEBSITE_RUN_FROM_ZIP": "[parameters('deviceManagementFunctionZipURI')]",
-						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', concat(variables('uniqueAppName'))), '2018-05-01-preview').InstrumentationKey]",
+						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey]",
 						"WEBSITE_RUN_FROM_PACKAGE": "1",
-						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', concat(variables('uniqueAppName'))), '2018-05-01-preview').InstrumentationKey)]",
+						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey)]",
 						"device-management-request-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deviceManagementRequestConnectionString'))).secretUriWithVersion, ')')]",
 						"device-management-status-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deviceManagementStatusConnectionString'))).secretUriWithVersion, ')')]",
 						"iothub-registry-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('iothubRegistryConnectionString'))).secretUriWithVersion, ')')]"
@@ -863,6 +968,104 @@
 					],
 					"properties": {
 						"storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('diagnosticStorageName'))]",
+						"logs": [
+							{
+								"category": "FunctionAppLogs",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						],
+						"metrics": [
+							{
+								"category": "AllMetrics",
+								"enabled": true,
+								"retentionPolicy": {
+									"enabled": true,
+									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
+								}
+							}
+						]
+					}
+				}
+			],
+			"location": "[resourceGroup().location]",
+			"identity": {
+				"type": "SystemAssigned"
+			},
+			"kind": "functionapp"
+		},
+		{
+			"apiVersion": "2016-03-01",
+			"name": "[concat(variables('uniqueAppName'), '-delete-ts')]",
+			"type": "Microsoft.Web/sites",
+			"properties": {
+				"name": "[concat(variables('uniqueAppName'), '-delete-ts')]",
+				"httpsOnly": true
+			},
+			"tags": {
+				"SAPIoTAzureRefTemplateVersion": "[variables('SAPIoTAzureRefTemplateVersion')]"
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Storage/storageAccounts', variables('deleteTimeseriesStorageName'))]",
+				"[resourceId('Microsoft.Web/serverfarms', variables('uniqueAppName'))]"
+			],
+			"resources": [
+				{
+					"apiVersion": "2018-02-01",
+					"name": "appsettings",
+					"type": "config",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/sites/', concat(variables('uniqueAppName'), '-delete-ts'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('deleteTimeseriesConnectionString'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('deleteStatusConnectionString'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('SPAclientId'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('SPAKey'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('SPAuthoriyId'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('clientId'))]",
+						"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('vaultName'), variables('clientSecret'))]"
+					],
+					"properties": {
+						"FUNCTIONS_WORKER_RUNTIME": "java",
+						"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deleteTimeseriesStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deleteTimeseriesStorageName')), '2019-04-01').keys[0].value)]",
+						"delete-timeseries-eventhub-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deleteTimeseriesConnectionString'))).secretUriWithVersion, ')')]",
+						"delete-status-eventhub-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deleteStatusConnectionString'))).secretUriWithVersion, ')')]",
+						"service-principal-application-client-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAclientId'))).secretUriWithVersion, ')')]",
+						"service-principal-application-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAKey'))).secretUriWithVersion, ')')]",
+						"service-principal-authority-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAuthoriyId'))).secretUriWithVersion, ')')]",
+						"client-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('clientId'))).secretUriWithVersion, ')')]",
+						"client-secret": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('clientSecret'))).secretUriWithVersion, ')')]",
+						"azure-cache-host": "[concat(variables('redisCacheName'), '.redis.cache.windows.net')]",
+						"adx-resource-uri": "[concat('https://', variables('ADXClustersName'), '.', variables('ADXResourceLocation'), '.kusto.windows.net')]",
+						"azure-cache-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('azureCacheKey'))).secretUriWithVersion, ')')]",
+						"adx-database-name": "[variables('ADXClustersDatabaseName')]",
+						"lookup-app-host": "[parameters('modelConfigurationAppHost')]",
+						"mapping-app-host": "[parameters('modelMappingAppHost')]",
+						"token-endpoint": "[parameters('SAPIotTenantAuthenticationTokenEndpoint')]",
+						"operation-storage-connection-string": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deleteTimeseriesStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deleteTimeseriesStorageName')), '2019-04-01').keys[0].value)]",
+						"FUNCTIONS_EXTENSION_VERSION": "~2",
+						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deleteTimeseriesStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deleteTimeseriesStorageName')), '2019-04-01').keys[0].value)]",
+						"WEBSITE_CONTENTSHARE": "[concat(toLower(concat(variables('uniqueAppName'), '-delete-ts')))]",
+						"WEBSITE_RUN_FROM_ZIP": "[parameters('deleteTimeSeriesFunctionZipURI')]",
+						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey]",
+						"WEBSITE_RUN_FROM_PACKAGE": "1",
+						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey)]"
+					}
+				},
+				{
+					"condition": "[equals(parameters('enableDiagnosticsSettingsForServices'), variables('enabledSettings'))]",
+					"type": "Microsoft.Web/sites/providers/diagnosticsettings",
+					"name": "[concat(variables('uniqueAppName'), '-delete-ts','/microsoft.insights/', variables('functionAppDeleteTimeSeriesDiagnosticName'))]",
+					"apiVersion": "2017-05-01-preview",
+					"location": "[resourceGroup().location]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/sites/', concat(variables('uniqueAppName'), '-delete-ts'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deleteTimeseriesStorageName'))]"
+					],
+					"properties": {
+						"storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('deleteTimeSeriesStorageName'))]",
 						"logs": [
 							{
 								"category": "FunctionAppLogs",
@@ -952,6 +1155,49 @@
 		{
 			"apiVersion": "2019-04-01",
 			"type": "Microsoft.Storage/storageAccounts",
+			"name": "[variables('deleteTimeseriesStorageName')]",
+			"location": "[resourceGroup().location]",
+			"kind": "StorageV2",
+			"sku": {
+				"name": "Standard_RAGRS"
+			},
+			"properties": {
+				"networkAcls": {
+					"bypass": "AzureServices",
+					"virtualNetworkRules": [],
+					"ipRules": [],
+					"defaultAction": "Allow"
+				},
+				"supportsHttpsTrafficOnly": true
+			},
+			"resources": [
+				{
+					"name": "[concat('default/', 'delete-operation-monitoring-queue')]",
+					"type": "queueServices/queues",
+					"apiVersion": "2019-06-01",
+					"dependsOn": [
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deleteTimeseriesStorageName'))]"
+					],
+					"properties": {
+						"metadata": {}
+					}
+				},
+				{
+					"name": "[concat('default/', 'delete-operation-monitoring-queue-poison')]",
+					"type": "queueServices/queues",
+					"apiVersion": "2019-06-01",
+					"dependsOn": [
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deleteTimeseriesStorageName'))]"
+					],
+					"properties": {
+						"metadata": {}
+					}
+				}
+			]
+		},
+		{
+			"apiVersion": "2019-04-01",
+			"type": "Microsoft.Storage/storageAccounts",
 			"name": "[variables('diagnosticStorageName')]",
 			"location": "[resourceGroup().location]",
 			"kind": "StorageV2",
@@ -970,8 +1216,86 @@
 			}
 		},
 		{
+			"type": "Microsoft.Storage/storageAccounts",
+			"apiVersion": "2019-04-01",
+			"name": "[variables('coldStoreExportStorageName')]",
+			"location": "[resourceGroup().location]",
+			"sku": {
+				"name": "Standard_RAGRS"
+			},
+			"kind": "StorageV2",
+			"properties": {
+				"networkAcls": {
+					"bypass": "AzureServices",
+					"virtualNetworkRules": [],
+					"ipRules": [],
+					"defaultAction": "Allow"
+				},
+				"supportsHttpsTrafficOnly": true
+			},
+			"resources": [
+				{
+					"type": "blobServices/containers",
+					"apiVersion": "2019-06-01",
+					"name": "[concat('default/', variables('coldStoreExportContainerName'))]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Storage/storageAccounts', variables('coldStoreExportStorageName'))]"
+					],
+					"properties": {
+						"publicAccess": "None"
+					}
+				},
+				{
+					"name": "[concat(variables('coldStoreExportStorageName'), '/default')]",
+					"type": "Microsoft.Storage/storageAccounts/managementPolicies",
+					"apiVersion": "2019-04-01",
+					"dependsOn": [
+						"[variables('coldStoreExportStorageName')]"
+					],
+					"properties": {
+						"policy": {
+							"rules": [
+								{
+									"name": "adxExportStagingExpirationRule",
+									"enabled": true,
+									"type": "Lifecycle",
+									"definition": {
+										"filters": {
+											"blobTypes": [ "blockBlob" ],
+											"prefixMatch": [ "cold-store-export/export" ]
+										},
+										"actions": {
+											"baseBlob": {
+												"delete": { "daysAfterModificationGreaterThan": "[variables('coldStoreExportFilesRetentionInDays')]" }
+											}
+										}
+									}
+								},
+								{
+									"name": "adxExportVerifyPermissionsTempFileExpirationRule",
+									"enabled": true,
+									"type": "Lifecycle",
+									"definition": {
+										"filters": {
+											"blobTypes": [ "blockBlob" ],
+											"prefixMatch": [ "cold-store-export/adx-export-verify.txt" ]
+										},
+										"actions": {
+											"baseBlob": {
+												"delete": { "daysAfterModificationGreaterThan": "[variables('coldStoreADXExportTempVerifyPermissionFileRetentionInDays')]" }
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
 			"apiVersion": "2018-05-01-preview",
-			"name": "[variables('uniqueAppName')]",
+			"name": "[variables('appInsightsName')]",
 			"type": "Microsoft.Insights/components",
 			"location": "[resourceGroup().location]",
 			"kind": "web",
@@ -1262,7 +1586,7 @@
 					],
 					"properties": {
 						"messageRetentionInDays": 3,
-						"partitionCount": "[parameters('eventHubPartitionsForADXTimeseries')]"
+						"partitionCount": "[parameters('eventHubPartitionsForADXTimeSeries')]"
 					},
 					"resources": [
 						{
@@ -1270,17 +1594,16 @@
 							"name": "[variables('eventHubADXIngestionConsumerGroup')]",
 							"type": "consumergroups",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubADXIngestion'))]"
-							],
-							"properties": {
-								"userMetadata": "User Metadata"
-							}
+							]
 						},
 						{
 							"apiVersion": "2017-04-01",
 							"name": "[variables('eventHubADXIngestionPolicyListen')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubADXIngestion'))]"
 							],
 							"properties": {
@@ -1294,6 +1617,7 @@
 							"name": "[variables('eventHubADXIngestionPolicySend')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubADXIngestion'))]"
 							],
 							"properties": {
@@ -1321,17 +1645,16 @@
 							"name": "[variables('eventHubModelChangeNotificationConsumerGroup')]",
 							"type": "consumergroups",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubModelChangeNotification'))]"
-							],
-							"properties": {
-								"userMetadata": "User Metadata"
-							}
+							]
 						},
 						{
 							"apiVersion": "2017-04-01",
 							"name": "[variables('eventHubModelChangeNotificationPolicyListen')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubModelChangeNotification'))]"
 							],
 							"properties": {
@@ -1345,6 +1668,7 @@
 							"name": "[variables('eventHubModelChangeNotificationPolicySend')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubModelChangeNotification'))]"
 							],
 							"properties": {
@@ -1358,14 +1682,14 @@
 				},
 				{
 					"apiVersion": "2017-04-01",
-					"name": "[variables('eventHubProcessedTimeseriesOut')]",
+					"name": "[variables('eventHubProcessedTimeSeriesOut')]",
 					"type": "eventhubs",
 					"dependsOn": [
 						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]"
 					],
 					"properties": {
 						"messageRetentionInDays": 3,
-						"partitionCount": "[parameters('eventHubPartitionsForProcessedTimeseriesOut')]"
+						"partitionCount": "[parameters('eventHubPartitionsForProcessedTimeSeriesOutbound')]"
 					},
 					"resources": [
 						{
@@ -1373,18 +1697,17 @@
 							"name": "sap-iot-processed-ts-cg",
 							"type": "consumergroups",
 							"dependsOn": [
-								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesOut'))]"
-							],
-							"properties": {
-								"userMetadata": "User Metadata"
-							}
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeSeriesOut'))]"
+							]
 						},
 						{
 							"apiVersion": "2017-04-01",
-							"name": "[variables('eventHubProcessedTimeseriesOutPolicyListen')]",
+							"name": "[variables('eventHubProcessedTimeSeriesOutPolicyListen')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
-								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesOut'))]"
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeSeriesOut'))]"
 							],
 							"properties": {
 								"rights": [
@@ -1394,10 +1717,11 @@
 						},
 						{
 							"apiVersion": "2017-04-01",
-							"name": "[variables('eventHubProcessedTimeseriesOutPolicySend')]",
+							"name": "[variables('eventHubProcessedTimeSeriesOutPolicySend')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
-								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesOut'))]"
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeSeriesOut'))]"
 							],
 							"properties": {
 								"rights": [
@@ -1409,14 +1733,14 @@
 				},
 				{
 					"apiVersion": "2017-04-01",
-					"name": "[variables('eventHubProcessedTimeseriesIn')]",
+					"name": "[variables('eventHubProcessedTimeSeriesIn')]",
 					"type": "eventhubs",
 					"dependsOn": [
 						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]"
 					],
 					"properties": {
 						"messageRetentionInDays": 3,
-						"partitionCount": "[parameters('eventHubPartitionsForProcessedTimeseriesIn')]"
+						"partitionCount": "[parameters('eventHubPartitionsForProcessedTimeSeriesInbound')]"
 					},
 					"resources": [
 						{
@@ -1424,18 +1748,17 @@
 							"name": "sap-iot-ingestion-avro-parser-cg",
 							"type": "consumergroups",
 							"dependsOn": [
-								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesIn'))]"
-							],
-							"properties": {
-								"userMetadata": "User Metadata"
-							}
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeSeriesIn'))]"
+							]
 						},
 						{
 							"apiVersion": "2017-04-01",
-							"name": "[variables('eventHubProcessedTimeseriesInPolicyListen')]",
+							"name": "[variables('eventHubProcessedTimeSeriesInPolicyListen')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
-								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesIn'))]"
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeSeriesIn'))]"
 							],
 							"properties": {
 								"rights": [
@@ -1445,10 +1768,11 @@
 						},
 						{
 							"apiVersion": "2017-04-01",
-							"name": "[variables('eventHubProcessedTimeseriesInPolicySend')]",
+							"name": "[variables('eventHubProcessedTimeSeriesInPolicySend')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
-								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeseriesIn'))]"
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubProcessedTimeSeriesIn'))]"
 							],
 							"properties": {
 								"rights": [
@@ -1475,17 +1799,16 @@
 							"name": "[variables('eventHubDeviceManagementRequestConsumerGroup')]",
 							"type": "consumergroups",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementRequest'))]"
-							],
-							"properties": {
-								"userMetadata": "User Metadata"
-							}
+							]
 						},
 						{
 							"apiVersion": "2017-04-01",
 							"name": "[variables('eventHubDeviceManagementRequestPolicyListen')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementRequest'))]"
 							],
 							"properties": {
@@ -1499,6 +1822,7 @@
 							"name": "[variables('eventHubDeviceManagementRequestPolicySend')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementRequest'))]"
 							],
 							"properties": {
@@ -1527,17 +1851,16 @@
 							"name": "[variables('eventHubDeviceManagementStatusConsumerGroup')]",
 							"type": "consumergroups",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementStatus'))]"
-							],
-							"properties": {
-								"userMetadata": "User Metadata"
-							}
+							]
 						},
 						{
 							"apiVersion": "2017-04-01",
 							"name": "[variables('eventHubDeviceManagementStatusPolicyListen')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementStatus'))]"
 							],
 							"properties": {
@@ -1551,6 +1874,7 @@
 							"name": "[variables('eventHubDeviceManagementStatusPolicySend')]",
 							"type": "AuthorizationRules",
 							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
 								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeviceManagementStatus'))]"
 							],
 							"properties": {
@@ -1560,6 +1884,108 @@
 							}
 						}
 
+					]
+				},
+				{
+					"apiVersion": "2017-04-01",
+					"name": "[variables('eventHubDeleteTimeseriesRequest')]",
+					"type": "eventhubs",
+					"dependsOn": [
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]"
+					],
+					"properties": {
+						"messageRetentionInDays": 3,
+						"partitionCount": "[parameters('eventHubPartitionsForDeleteTimeSeriesRequest')]"
+					},
+					"resources": [
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeleteTimeseriesRequestConsumerGroup')]",
+							"type": "consumergroups",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeleteTimeseriesRequest'))]"
+							]
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeleteTimeseriesRequestPolicyListen')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeleteTimeseriesRequest'))]"
+							],
+							"properties": {
+								"rights": [
+									"Listen"
+								]
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeleteTimeseriesRequestPolicySend')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeleteTimeseriesRequest'))]"
+							],
+							"properties": {
+								"rights": [
+									"Send"
+								]
+							}
+						}
+					]
+				},
+				{
+					"apiVersion": "2017-04-01",
+					"name": "[variables('eventHubDeleteTimeseriesStatus')]",
+					"type": "eventhubs",
+					"dependsOn": [
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]"
+					],
+					"properties": {
+						"messageRetentionInDays": 3,
+						"partitionCount": "[parameters('eventHubPartitionsForDeleteTimeSeriesStatus')]"
+					},
+					"resources": [
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeleteTimeseriesStatusConsumerGroup')]",
+							"type": "consumergroups",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeleteTimeseriesStatus'))]"
+							]
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeleteTimeseriesStatusPolicyListen')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeleteTimeseriesStatus'))]"
+							],
+							"properties": {
+								"rights": [
+									"Listen"
+								]
+							}
+						},
+						{
+							"apiVersion": "2017-04-01",
+							"name": "[variables('eventHubDeleteTimeseriesStatusPolicySend')]",
+							"type": "AuthorizationRules",
+							"dependsOn": [
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'))]",
+								"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/', variables('eventHubDeleteTimeseriesStatus'))]"
+							],
+							"properties": {
+								"rights": [
+									"Send"
+								]
+							}
+						}
 					]
 				},
 				{
@@ -1625,7 +2051,8 @@
 			"dependsOn": [
 				"[resourceId('Microsoft.Web/Sites', variables('uniqueAppName'))]",
 				"[resourceId('Microsoft.Web/Sites', concat(variables('uniqueAppName'), '-notify'))]",
-				"[resourceId('Microsoft.Web/Sites', concat(variables('uniqueAppName'), '-device'))]"
+				"[resourceId('Microsoft.Web/Sites', concat(variables('uniqueAppName'), '-device'))]",
+				"[resourceId('Microsoft.Web/Sites', concat(variables('uniqueAppName'), '-delete-ts'))]"
 			],
 			"apiVersion": "2018-02-14",
 			"location": "[resourceGroup().location]",
@@ -1660,6 +2087,17 @@
 					{
 						"objectId": "[reference(resourceId('Microsoft.Web/sites', concat(variables('uniqueAppName'), '-device')), '2018-02-01', 'Full').identity.principalId]",
 						"tenantId": "[reference(resourceId('Microsoft.Web/sites', concat(variables('uniqueAppName'), '-device')), '2018-02-01', 'Full').identity.tenantId]",
+						"permissions": {
+							"secrets": [
+								"get",
+								"list",
+								"set"
+							]
+						}
+					},
+					{
+						"objectId": "[reference(resourceId('Microsoft.Web/sites', concat(variables('uniqueAppName'), '-delete-ts')), '2018-02-01', 'Full').identity.principalId]",
+						"tenantId": "[reference(resourceId('Microsoft.Web/sites', concat(variables('uniqueAppName'), '-delete-ts')), '2018-02-01', 'Full').identity.tenantId]",
 						"permissions": {
 							"secrets": [
 								"get",
@@ -1757,33 +2195,36 @@
 					"dependsOn": [
 						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
 						"[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+						"[resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'),variables('eventHubADXIngestion'), variables('eventHubADXIngestionPolicySend'))]",
 						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubADXIngestion'))]"
 					]
 				},
 				{
 					"type": "secrets",
-					"name": "[variables('processedTimeseriesConnectionString')]",
+					"name": "[variables('processedTimeSeriesConnectionString')]",
 					"apiVersion": "2018-02-14",
 					"properties": {
-						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubProcessedTimeseriesOut'), variables('eventHubProcessedTimeseriesOutPolicySend')), '2017-04-01').primaryConnectionString]"
+						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubProcessedTimeSeriesOut'), variables('eventHubProcessedTimeSeriesOutPolicySend')), '2017-04-01').primaryConnectionString]"
 					},
 					"dependsOn": [
 						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
 						"[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
-						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubProcessedTimeseriesOut'))]"
+						"[resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'),variables('eventHubProcessedTimeseriesOut'), variables('eventHubProcessedTimeseriesOutPolicySend'))]",
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubProcessedTimeSeriesOut'))]"
 					]
 				},
 				{
 					"type": "secrets",
-					"name": "[variables('processedTimeseriesIn')]",
+					"name": "[variables('processedTimeSeriesIn')]",
 					"apiVersion": "2018-02-14",
 					"properties": {
-						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubProcessedTimeseriesIn'), variables('eventHubProcessedTimeseriesInPolicyListen')), '2017-04-01').primaryConnectionString]"
+						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubProcessedTimeSeriesIn'), variables('eventHubProcessedTimeSeriesInPolicyListen')), '2017-04-01').primaryConnectionString]"
 					},
 					"dependsOn": [
 						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
 						"[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
-						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubProcessedTimeseriesIn'))]"
+						"[resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'),variables('eventHubProcessedTimeseriesIn'), variables('eventHubProcessedTimeseriesInPolicyListen'))]",
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubProcessedTimeSeriesIn'))]"
 					]
 				},
 				{
@@ -1809,6 +2250,7 @@
 					"dependsOn": [
 						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
 						"[resourceId('Microsoft.Storage/storageAccounts/', variables('notificationStorageName'))]",
+						"[resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'),variables('eventHubModelChangeNotification'), variables('eventHubModelChangeNotificationPolicyListen'))]",
 						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubModelChangeNotification'))]"
 					]
 				},
@@ -1822,6 +2264,7 @@
 					"dependsOn": [
 						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
 						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deviceStorageName'))]",
+						"[resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'),variables('eventHubDeviceManagementRequest'), variables('eventHubDeviceManagementRequestPolicyListen'))]",
 						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubDeviceManagementRequest'))]"
 					]
 				},
@@ -1835,7 +2278,36 @@
 					"dependsOn": [
 						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
 						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deviceStorageName'))]",
+						"[resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'),variables('eventHubDeviceManagementStatus'), variables('eventHubDeviceManagementStatusPolicySend'))]",
 						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubDeviceManagementStatus'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('deleteTimeseriesConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubDeleteTimeseriesRequest'), variables('eventHubDeleteTimeseriesRequestPolicyListen')), '2017-04-01').primaryConnectionString]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deleteTimeseriesStorageName'))]",
+						"[resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'),variables('eventHubDeleteTimeseriesRequest'), variables('eventHubDeleteTimeseriesRequestPolicyListen'))]",
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubDeleteTimeseriesRequest'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('deleteStatusConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'), variables('eventHubDeleteTimeseriesStatus'), variables('eventHubDeleteTimeseriesStatusPolicySend')), '2017-04-01').primaryConnectionString]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deleteTimeseriesStorageName'))]",
+						"[resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', variables('eventHubNamespaces'),variables('eventHubDeleteTimeseriesStatus'), variables('eventHubDeleteTimeseriesStatusPolicySend'))]",
+						"[concat('Microsoft.EventHub/namespaces/', variables('eventHubNamespaces'),'/eventhubs/',variables('eventHubDeleteTimeseriesStatus'))]"
 					]
 				},
 				{

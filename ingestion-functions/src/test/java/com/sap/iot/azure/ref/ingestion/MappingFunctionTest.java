@@ -5,7 +5,7 @@ import com.sap.iot.azure.ref.ingestion.device.mapping.DevicePayloadMapper;
 import com.sap.iot.azure.ref.ingestion.model.device.mapping.DeviceMessage;
 import com.sap.iot.azure.ref.ingestion.model.timeseries.raw.DeviceMeasure;
 import com.sap.iot.azure.ref.ingestion.output.ADXEventHubProcessor;
-import com.sap.iot.azure.ref.ingestion.output.ProcessedTimeseriesEventHubProcessor;
+import com.sap.iot.azure.ref.ingestion.output.ProcessedTimeSeriesEventHubProcessor;
 import com.sap.iot.azure.ref.ingestion.processing.DeviceToProcessedMessageProcessor;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;
 import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessage;
@@ -29,7 +29,7 @@ public class MappingFunctionTest {
 
 
     @Mock
-    private ProcessedTimeseriesEventHubProcessor processedTimeseriesEventHubProcessor;
+    private ProcessedTimeSeriesEventHubProcessor processedTimeSeriesEventHubProcessor;
     @Mock
     private ADXEventHubProcessor adxEventHubProcessor;
     @Mock
@@ -43,11 +43,11 @@ public class MappingFunctionTest {
     public void prepare() {
         doReturn(Collections.singletonList(new DeviceMeasure())).when(devicePayloadMapper).apply(any(DeviceMessage.class));
         doReturn(getSampleProcessedMessages()).when(deviceToProcessedMessageProcessor).apply(any());
-        doReturn(CompletableFuture.completedFuture(null)).when(processedTimeseriesEventHubProcessor).apply(any());
+        doReturn(CompletableFuture.completedFuture(null)).when(processedTimeSeriesEventHubProcessor).apply(any());
         doReturn(CompletableFuture.completedFuture(null)).when(adxEventHubProcessor).apply(any());
 
         mappingFunction = Mockito.spy(new MappingFunction(
-                processedTimeseriesEventHubProcessor,
+                processedTimeSeriesEventHubProcessor,
                 adxEventHubProcessor,
                 deviceToProcessedMessageProcessor
         ));
@@ -62,7 +62,7 @@ public class MappingFunctionTest {
         mappingFunction.run(getSampleMessages(), InvocationContextTestUtil.createSystemPropertiesMap(), InvocationContextTestUtil.createPartitionContext(),
                 InvocationContextTestUtil.getMockContext());
 
-        verify(processedTimeseriesEventHubProcessor, times(1)).apply(any());
+        verify(processedTimeSeriesEventHubProcessor, times(1)).apply(any());
         verify(adxEventHubProcessor, times(1)).apply(any());
     }
 

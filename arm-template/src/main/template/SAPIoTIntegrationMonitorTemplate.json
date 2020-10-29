@@ -50,12 +50,14 @@
         "resourceGroupName": "[resourceGroup().name]",
         "dashboardName": "SAP IoT - Azure Integration Dashboard",
         "markdownMetadataType": "Extension/HubsExtension/PartType/MarkdownPart",
-        "markdownMetadataContent": "<div style=\"width:100%;border-bottom:1px solid #808080;font-size:24px;padding:8px 0px 2px 20px;font-weight:regular;background:#e4e4e4;color:#000;height:54px\">content</div>",
+        "markdownMetadataContent": "<div style=\"width:100%;border-bottom:1px solid #808080;font-size:24px;padding:8px 0px 2px 20px;font-weight:regular;background:#e4e4e4;color:#000;height:52px\">content</div>",
         "contentIot": "[replace(variables('markdownMetadataContent'),'content', 'IoT Hub')]",
         "contentIngestionFunction": "[replace(variables('markdownMetadataContent'),'content', 'Ingestion Function')]",
         "contentAvroParserFunction": "[replace(variables('markdownMetadataContent'),'content', 'Avro Parser Function')]",
         "contentNotificationProcessorFunction": "[replace(variables('markdownMetadataContent'),'content', 'Notification Processor Function')]",
         "contentDeviceManagementFunction": "[replace(variables('markdownMetadataContent'),'content', 'Device Management Function')]",
+        "contentTimeseriesDeleteFunction": "[replace(variables('markdownMetadataContent'),'content', 'Time Series Delete Function')]",
+        "contentTimeseriesDeleteMonitoringFunction": "[replace(variables('markdownMetadataContent'),'content', 'Time Series Delete Monitoring Function')]",
         "contentEventHubs": "[replace(variables('markdownMetadataContent'),'content', 'Event Hubs')]",
         "contentAzureDataExplorer": "[replace(variables('markdownMetadataContent'),'content', 'Azure Data Explorer')]",
         "contentRedisCache": "[replace(variables('markdownMetadataContent'),'content', 'Redis Cache')]",
@@ -84,6 +86,8 @@
         "avroParserFunctionFailuresAlertsName": "Avro Parser Function Failures",
         "ingestionFunctionFailuresAlertsName": "Ingestion Function Failures",
         "notificationProcessorFunctionFailuresAlertsName": "Notification Processor Function Failures",
+        "deleteTimeSeriesFunctionFailuresAlertsName": "Time Series Delete Function Failures",
+        "deleteTimeSeriesMonitoringFunctionFailuresAlertsName": "Time Series Delete Monitoring Function Failures",
         "metricAlertsLocation": "global"
     },
     "resources": [
@@ -601,6 +605,74 @@
                 },
                 "autoMitigate": true,
                 "targetResourceType": "Microsoft.Insights/components",
+                "actions": []
+            }
+        },
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "[variables('deleteTimeSeriesFunctionFailuresAlertsName')]",
+            "location": "global",
+            "properties": {
+                "description": "Error in deleting time series data",
+                "severity": 1,
+                "enabled": true,
+                "scopes": [
+                    "[variables('appInsightsResourceId')]"
+                ],
+                "evaluationFrequency": "PT15M",
+                "windowSize": "PT15M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "threshold": 1,
+                            "name": "deleteTimeSeriesFunctionFailureCriteria",
+                            "metricNamespace": "Azure.ApplicationInsights",
+                            "metricName": "DeleteTimeseries Failures",
+                            "dimensions": [],
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Total",
+                            "criterionType": "StaticThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "microsoft.insights/components",
+                "actions": []
+            }
+        },
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "[variables('deleteTimeSeriesMonitoringFunctionFailuresAlertsName')]",
+            "location": "global",
+            "properties": {
+                "description": "Error in monitoring asynchronous delete time series operation",
+                "severity": 1,
+                "enabled": true,
+                "scopes": [
+                    "[variables('appInsightsResourceId')]"
+                ],
+                "evaluationFrequency": "PT1H",
+                "windowSize": "PT1H",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "threshold": 0,
+                            "name": "deleteTimeSeriesMonitoringFunctionFailureCriteria",
+                            "metricNamespace": "Azure.ApplicationInsights",
+                            "metricName": "DeleteMonitoringFunction C_PoisonQueueAlert",
+                            "dimensions": [],
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Total",
+                            "criterionType": "StaticThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "microsoft.insights/components",
                 "actions": []
             }
         },
@@ -1859,7 +1931,7 @@
                                     "settings": {
                                         "content": {
                                             "settings": {
-                                                "content": "[variables('contentEventHubs')]",
+                                                "content": "[variables('contentTimeseriesDeleteFunction')]",
                                                 "title": "",
                                                 "subtitle": "",
                                                 "markdownSource": 1
@@ -1872,6 +1944,334 @@
                                 "position": {
                                     "x": 0,
                                     "y": 26,
+                                    "colSpan": 5,
+                                    "rowSpan": 3
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "[variables('metadataChartType')]",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "DeleteTimeseries AvgDurationMs",
+                                                            "aggregationType": 4,
+                                                            "namespace": "azure.applicationinsights",
+                                                            "metricVisualization": {
+                                                                "displayName": "DeleteTimeseries AvgDurationMs",
+                                                                "resourceDisplayName": "[parameters('appInsightsName')]"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Time Series Delete Performance",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        },
+                                                        "disablePinning": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "22": {
+                                "position": {
+                                    "x": 5,
+                                    "y": 26,
+                                    "colSpan": 10,
+                                    "rowSpan": 3
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "[variables('metadataChartType')]",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "DeleteTimeseries Failures",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
+                                                            "metricVisualization": {
+                                                                "displayName": "DeleteTimeseries Failures",
+                                                                "color": "#f76300",
+                                                                "resourceDisplayName": "[parameters('appInsightsName')]"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "DeleteTimeseries SuccessRate",
+                                                            "aggregationType": 4,
+                                                            "namespace": "azure.applicationinsights",
+                                                            "metricVisualization": {
+                                                                "displayName": "DeleteTimeseries SuccessRate",
+                                                                "color": "#02a14c",
+                                                                "resourceDisplayName": "[parameters('appInsightsName')]"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Time Series Delete Health",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        },
+                                                        "disablePinning": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "23": {
+                                "position": {
+                                    "x": 0,
+                                    "y": 29,
+                                    "colSpan": 15,
+                                    "rowSpan": 1
+                                },
+                                "metadata": {
+                                    "inputs": [],
+                                    "type": "[variables('markdownMetadataType')]",
+                                    "settings": {
+                                        "content": {
+                                            "settings": {
+                                                "content": "[variables('contentTimeseriesDeleteMonitoringFunction')]",
+                                                "title": "",
+                                                "subtitle": "",
+                                                "markdownSource": 1
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "24": {
+                                "position": {
+                                    "x": 0,
+                                    "y": 30,
+                                    "colSpan": 5,
+                                    "rowSpan": 3
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "[variables('metadataChartType')]",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "DeleteMonitoringFunction AvgDurationMs",
+                                                            "aggregationType": 4,
+                                                            "namespace": "azure.applicationinsights",
+                                                            "metricVisualization": {
+                                                                "displayName": "DeleteMonitoringFunction AvgDurationMs",
+                                                                "resourceDisplayName": "[parameters('appInsightsName')]"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Time Series Delete Monitoring Performance",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        },
+                                                        "disablePinning": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "25": {
+                                "position": {
+                                    "x": 5,
+                                    "y": 30,
+                                    "colSpan": 10,
+                                    "rowSpan": 3
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "[variables('metadataChartType')]",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "DeleteMonitoringFunction Failures",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
+                                                            "metricVisualization": {
+                                                                "displayName": "DeleteMonitoringFunction Failures",
+                                                                "color": "#f76300",
+                                                                "resourceDisplayName": "[parameters('appInsightsName')]"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "DeleteMonitoringFunction SuccessRate",
+                                                            "aggregationType": 4,
+                                                            "namespace": "azure.applicationinsights",
+                                                            "metricVisualization": {
+                                                                "displayName": "DeleteMonitoringFunction SuccessRate",
+                                                                "color": "#02a14c",
+                                                                "resourceDisplayName": "[parameters('appInsightsName')]"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Time Series Delete Monitoring Health",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        },
+                                                        "disablePinning": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "26": {
+                                "position": {
+                                    "x": 0,
+                                    "y": 33,
+                                    "colSpan": 15,
+                                    "rowSpan": 1
+                                },
+                                "metadata": {
+                                    "inputs": [],
+                                    "type": "[variables('markdownMetadataType')]",
+                                    "settings": {
+                                        "content": {
+                                            "settings": {
+                                                "content": "[variables('contentEventHubs')]",
+                                                "title": "",
+                                                "subtitle": "",
+                                                "markdownSource": 1
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "27": {
+                                "position": {
+                                    "x": 0,
+                                    "y": 34,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -1945,10 +2345,10 @@
                                     }
                                 }
                             },
-                            "22": {
+                            "28": {
                                 "position": {
                                     "x": 5,
-                                    "y": 26,
+                                    "y": 34,
                                     "colSpan": 10,
                                     "rowSpan": 3
                                 },
@@ -2021,10 +2421,10 @@
                                     }
                                 }
                             },
-                            "23": {
+                            "29": {
                                 "position": {
                                     "x": 0,
-                                    "y": 29,
+                                    "y": 37,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -2137,10 +2537,10 @@
                                     }
                                 }
                             },
-                            "24": {
+                            "30": {
                                 "position": {
                                     "x": 5,
-                                    "y": 29,
+                                    "y": 37,
                                     "colSpan": 10,
                                     "rowSpan": 3
                                 },
@@ -2213,10 +2613,10 @@
                                     }
                                 }
                             },
-                            "25": {
+                            "31": {
                                 "position": {
                                     "x": 0,
-                                    "y": 32,
+                                    "y": 40,
                                     "colSpan": 15,
                                     "rowSpan": 1
                                 },
@@ -2235,10 +2635,10 @@
                                     }
                                 }
                             },
-                            "26": {
+                            "32": {
                                 "position": {
                                     "x": 0,
-                                    "y": 33,
+                                    "y": 41,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -2311,10 +2711,10 @@
                                     }
                                 }
                             },
-                            "27": {
+                            "33": {
                                 "position": {
                                     "x": 5,
-                                    "y": 33,
+                                    "y": 41,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -2384,10 +2784,10 @@
                                     }
                                 }
                             },
-                            "28": {
+                            "34": {
                                 "position": {
                                     "x": 10,
-                                    "y": 33,
+                                    "y": 41,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -2448,10 +2848,10 @@
                                     }
                                 }
                             },
-                            "29": {
+                            "35": {
                                 "position": {
                                     "x": 0,
-                                    "y": 36,
+                                    "y": 44,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -2512,10 +2912,10 @@
                                     }
                                 }
                             },
-                            "30": {
+                            "36": {
                                 "position": {
                                     "x": 5,
-                                    "y": 36,
+                                    "y": 44,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -2576,10 +2976,10 @@
                                     }
                                 }
                             },
-                            "31": {
+                            "37": {
                                 "position": {
                                     "x": 10,
-                                    "y": 36,
+                                    "y": 44,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -2640,10 +3040,10 @@
                                     }
                                 }
                             },
-                            "32": {
+                            "38": {
                                 "position": {
                                     "x": 0,
-                                    "y": 39,
+                                    "y": 47,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -2704,10 +3104,10 @@
                                     }
                                 }
                             },
-                            "33": {
+                            "39": {
                                 "position": {
                                     "x": 5,
-                                    "y": 39,
+                                    "y": 47,
                                     "colSpan": 10,
                                     "rowSpan": 3
                                 },
@@ -2806,10 +3206,10 @@
                                     }
                                 }
                             },
-                            "34": {
+                            "40": {
                                 "position": {
                                     "x": 0,
-                                    "y": 42,
+                                    "y": 50,
                                     "colSpan": 15,
                                     "rowSpan": 1
                                 },
@@ -2828,10 +3228,10 @@
                                     }
                                 }
                             },
-                            "35": {
+                            "41": {
                                 "position": {
                                     "x": 0,
-                                    "y": 43,
+                                    "y": 51,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -2892,10 +3292,10 @@
                                     }
                                 }
                             },
-                            "36": {
+                            "42": {
                                 "position": {
                                     "x": 5,
-                                    "y": 43,
+                                    "y": 51,
                                     "colSpan": 10,
                                     "rowSpan": 3
                                 },
@@ -2970,10 +3370,10 @@
                                     }
                                 }
                             },
-                            "37": {
+                            "43": {
                                 "position": {
                                     "x": 0,
-                                    "y": 46,
+                                    "y": 54,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -3034,10 +3434,10 @@
                                     }
                                 }
                             },
-                            "38": {
+                            "44": {
                                 "position": {
                                     "x": 5,
-                                    "y": 46,
+                                    "y": 54,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -3099,10 +3499,10 @@
                                     }
                                 }
                             },
-                            "39": {
+                            "45": {
                                 "position": {
                                     "x": 10,
-                                    "y": 46,
+                                    "y": 54,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -3163,10 +3563,10 @@
                                     }
                                 }
                             },
-                            "40": {
+                            "46": {
                                 "position": {
                                     "x": 0,
-                                    "y": 49,
+                                    "y": 57,
                                     "colSpan": 15,
                                     "rowSpan": 1
                                 },
@@ -3185,10 +3585,10 @@
                                     }
                                 }
                             },
-                            "41": {
+                            "47": {
                                 "position": {
                                     "x": 0,
-                                    "y": 50,
+                                    "y": 58,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -3249,10 +3649,10 @@
                                     }
                                 }
                             },
-                            "42": {
+                            "48": {
                                 "position": {
                                     "x": 5,
-                                    "y": 50,
+                                    "y": 58,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },
@@ -3313,10 +3713,10 @@
                                     }
                                 }
                             },
-                            "43": {
+                            "49": {
                                 "position": {
                                     "x": 10,
-                                    "y": 50,
+                                    "y": 58,
                                     "colSpan": 5,
                                     "rowSpan": 3
                                 },

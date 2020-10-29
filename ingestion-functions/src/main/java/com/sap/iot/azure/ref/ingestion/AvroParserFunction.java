@@ -1,7 +1,7 @@
 package com.sap.iot.azure.ref.ingestion;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Maps;
+
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.Cardinality;
@@ -13,7 +13,6 @@ import com.sap.iot.azure.ref.ingestion.util.Constants;
 import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.metrics.MetricsClient;
-import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessageContainer;
 import com.sap.iot.azure.ref.integration.commons.retry.RetryTaskExecutor;
 
 import java.util.List;
@@ -50,9 +49,9 @@ public class AvroParserFunction {
 
     /**
      * Azure function which invoked by an EventHub trigger.
-     * The Trigger is connected to the built in ProcessedTimeseriesIN EventHub Endpoint.
+     * The Trigger is connected to the built in ProcessedTimeSeriesIN EventHub Endpoint.
      * The supported payload is AVRO in {@link CommonConstants#TRIGGER_EVENT_HUB_DATA_TYPE_BINARY} format.
-     * The message payloads are brought in to an AVRO format following SAP-defined Processed-Timeseries AVRO Schema,
+     * The message payloads are brought in to an AVRO format following SAP-defined Processed-Time-Series AVRO Schema,
      * and deserialized into a map of sourceId & list of processedMessages and sent to the downstream ADXEventHub using the {@link ADXEventHubProcessor}.
      *
      * @param avroMessages, incoming message payload in AVRO binary format
@@ -104,9 +103,8 @@ public class AvroParserFunction {
                         .peek(entry -> {
                             // metric to capture the number of measurements processed - each batch "messages" can have multiple Avro messages and each Avro
                             // message can have multiple measurements
-                            MetricsClient.trackMetric(MetricsClient.getMetricName("MessagesProcessed"), entry.getValue().size());
+                            MetricsClient.trackMetric(MetricsClient.getMetricName("MessagesProcessed"), entry.getValue().getProcessedMessages().size());
                         })
-                        .map(entry -> Maps.immutableEntry(entry.getKey(), new ProcessedMessageContainer(entry.getValue())))
                         .map(messageGroup -> CompletableFuture.allOf(adxEventHubProcessor.apply(messageGroup))).toArray(CompletableFuture[]::new))
                 .join()
         ));

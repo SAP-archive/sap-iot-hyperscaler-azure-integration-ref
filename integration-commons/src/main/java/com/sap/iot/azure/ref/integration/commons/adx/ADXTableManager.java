@@ -14,6 +14,7 @@ import com.sap.iot.azure.ref.integration.commons.exception.AvroIngestionExceptio
 import com.sap.iot.azure.ref.integration.commons.exception.CommonErrorType;
 import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
 import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
+import com.sap.iot.azure.ref.integration.commons.model.timeseries.delete.DeleteInfo;
 import org.apache.avro.SchemaParseException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -134,11 +135,22 @@ public class ADXTableManager {
      *
      * @param structureId, Structure ID. Used for forming the query.
      * @param columnName,  Column which should be dropped
+     * @param schemaString, AVRO schema. Used for constructing the column information.
      * @throws ADXClientException exception in adx interaction
      */
-    public void dropColumn(String structureId, String columnName) throws ADXClientException {
-        executeQueryForStructureId(KQLQueries.getDropColumnQuery(structureId, columnName), structureId);
-        InvocationContext.getLogger().log(Level.INFO, String.format("Dropped column '%s' for structure ID '%s'", columnName, structureId));
+    public void dropColumn(String structureId, String columnName, String schemaString) throws ADXClientException {
+        //fetch columns
+        Map<String, String> columnInfo = AvroHelper.getColumnInfo(structureId, schemaString);
+        try {
+            executeQueryForStructureId(KQLQueries.getDropColumnQuery(structureId, columnName), structureId);
+            InvocationContext.getLogger().log(Level.INFO, String.format("Dropped column '%s' for structure ID '%s'", columnName, structureId));
+            createMapping(structureId, columnInfo);
+        } catch (JsonProcessingException e) {
+            throw IoTRuntimeException.wrapNonTransient(IdentifierUtil.getIdentifier(CommonConstants.STRUCTURE_ID_PROPERTY_KEY, structureId),
+                    CommonErrorType.JSON_PROCESSING_ERROR, "Error in preparing json mapping for Table Update", e);
+        } catch (DataServiceException | DataClientException e) {
+            throw getADXExceptionWithStructureId(e, structureId);
+        }
     }
 
     /**
@@ -163,7 +175,7 @@ public class ADXTableManager {
      * Check if data exists for a given Structure ID and column.
      *
      * @param structureId, Structure ID. Used for forming the data exists query.
-     * @param columnName, Column Name. Used for forming the data exists query.
+     * @param columnName,  Column Name. Used for forming the data exists query.
      * @throws ADXClientException exception in adx interaction
      */
     public boolean dataExistsForColumn(String structureId, String columnName) throws ADXClientException {
@@ -181,22 +193,55 @@ public class ADXTableManager {
     /**
      * Execute soft delete request for a given structure ID and column name.
      *
-     * @param structureId   used for generating the table name
+     * @param structureId used for generating the table name
      * @param columnName  name of the column
+     * @param schemaString, AVRO schema. Used for constructing the column information.
      * @throws ADXClientException exception in adx interaction
      */
-    public void softDeleteColumn(String structureId, String columnName) throws ADXClientException {
-        executeQueryForStructureId(KQLQueries.getColumnSoftDeleteQuery(structureId, columnName, clock), structureId);
+    public void softDeleteColumn(String structureId, String columnName, String schemaString) throws ADXClientException {
+        //fetch columns
+        Map<String, String> columnInfo = AvroHelper.getColumnInfo(structureId, schemaString);
+        try {
+            executeQueryForStructureId(KQLQueries.getColumnSoftDeleteQuery(structureId, columnName, clock), structureId);
+            InvocationContext.getLogger().log(Level.INFO, String.format("Dropped column '%s' for structure ID '%s'", columnName, structureId));
+            createMapping(structureId, columnInfo);
+        } catch (JsonProcessingException e) {
+            throw IoTRuntimeException.wrapNonTransient(IdentifierUtil.getIdentifier(CommonConstants.STRUCTURE_ID_PROPERTY_KEY, structureId),
+                    CommonErrorType.JSON_PROCESSING_ERROR, "Error in preparing json mapping for Table Update", e);
+        } catch (DataServiceException | DataClientException e) {
+            throw getADXExceptionWithStructureId(e, structureId);
+        }
     }
 
     /**
      * Execute soft delete request for a given structure ID.
      *
-     * @param structureId   used for generating the table name
+     * @param structureId used for generating the table name
      * @throws ADXClientException exception in adx interaction
      */
     public void softDeleteTable(String structureId) throws ADXClientException {
         executeQueryForStructureId(KQLQueries.getTableSoftDeleteQuery(structureId, clock), structureId);
+    }
+
+    /**
+     * Execute soft delete time series request.
+     * Returns the operation ID of the delete query.
+     *
+     * @param request used for generating time series deletion query
+     * @return Operation ID of delete query
+     * @throws ADXClientException exception in adx interaction
+     */
+    public String deleteTimeSeries(DeleteInfo request) throws ADXClientException {
+        String structureId = request.getStructureId();
+        Results results = executeQueryForStructureId(KQLQueries.getDeleteTimeSeriesQuery(request),
+                structureId);
+
+        if (results.getValues().isEmpty() || results.getValues().get(0).isEmpty()) {
+            throw new ADXClientException("Delete TimeSeries Query did not return an operation ID",
+                    IdentifierUtil.getIdentifier(CommonConstants.STRUCTURE_ID_PROPERTY_KEY, structureId), false);
+        } else {
+            return results.getValues().get(0).get(0);
+        }
     }
 
     private void createTable(String structureId, Map<String, String> columnInfo) throws DataClientException, DataServiceException {
@@ -254,5 +299,21 @@ public class ADXTableManager {
 
         return new ADXClientException("Exception in accessing ADX artifacts", e, IdentifierUtil.getIdentifier(CommonConstants.STRUCTURE_ID_PROPERTY_KEY,
                 structureId), isTransient);
+    }
+
+    public DeleteOperationStatus getDeleteOperationStatus(String operationId, String structureId) throws ADXClientException {
+        try {
+            DeleteOperationStatus status;
+            Results results = kustoClient.execute(KQLQueries.getDeleteOperationStatus(operationId));
+            if (results.getValues() != null && !results.getValues().isEmpty()) {
+                status = DeleteOperationStatus.ofType(results.getValues().get(0).get(results.getColumnNameToIndex().get("State")));
+            } else {
+                throw new ADXClientException("Delete time series query did not return an operation status",
+                        IdentifierUtil.getIdentifier(CommonConstants.OPERATION_ID, operationId), false);
+            }
+            return status;
+        } catch (DataServiceException | DataClientException ex) {
+            throw getADXExceptionWithStructureId(ex, structureId);
+        }
     }
 }

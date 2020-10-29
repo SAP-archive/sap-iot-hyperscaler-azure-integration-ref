@@ -27,6 +27,7 @@
 		<module>integration-commons</module>
 		<module>notification-processor</module>
 		<module>device-management-functions</module>
+		<module>timeseries-delete</module>
 	</modules>
 
 	<dependencies>
@@ -34,6 +35,12 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>2.25.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -53,6 +60,13 @@
 				<version>${project.version}</version>
 				<type>test-jar</type>
 				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.sap.iot.azure.ref</groupId>
+				<artifactId>integration-commons</artifactId>
+				<version>${project.version}</version>
+				<scope>compile</scope>
 			</dependency>
 
 			<!-- External -->
@@ -89,7 +103,7 @@
 			<dependency>
 				<groupId>org.apache.avro</groupId>
 				<artifactId>avro</artifactId>
-				<version>1.9.1</version>
+				<version>1.10.0</version>
 				<exclusions>
 					<exclusion>
 						<artifactId>commons-compress</artifactId>
@@ -115,6 +129,12 @@
 				<groupId>com.microsoft.azure</groupId>
 				<artifactId>azure-eventhubs</artifactId>
 				<version>3.2.0</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-codec</groupId>
+						<artifactId>commons-codec</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.microsoft.azure.functions</groupId>
@@ -126,6 +146,21 @@
 				<groupId>com.microsoft.azure.kusto</groupId>
 				<artifactId>kusto-ingest</artifactId>
 				<version>1.4.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.codehaus.jackson</groupId>
+						<artifactId>jackson-mapper-asl</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.httpcomponents</groupId>
+						<artifactId>httpclient</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.5.13</version>
 			</dependency>
 			<dependency>
 				<groupId>redis.clients</groupId>
@@ -136,7 +171,7 @@
 			<dependency>
 				<groupId>org.asynchttpclient</groupId>
 				<artifactId>async-http-client</artifactId>
-				<version>2.0.39</version>
+				<version>2.12.1</version>
 				<exclusions>
 					<exclusion>
 						<artifactId>netty-codec</artifactId>
@@ -183,6 +218,12 @@
 				<groupId>com.microsoft.azure.sdk.iot</groupId>
 				<artifactId>iot-service-client</artifactId>
 				<version>1.18.0</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.bouncycastle</groupId>
+						<artifactId>bcprov-jdk15on</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<!-- Test -->
@@ -190,12 +231,6 @@
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter</artifactId>
 				<version>5.4.2</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-core</artifactId>
-				<version>2.25.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -278,6 +313,8 @@
 						<!-- Justification: POJOs -->
 						<exclude>com/sap/iot/azure/ref/ingestion-functions/model/*.class</exclude>
 						<exclude>com/sap/iot/azure/ref/device-management-functions/model/*.class</exclude>
+						<exclude>com/sap/iot/azure/ref/integration/commons/model/*.class</exclude>
+						<exclude>com/sap/iot/azure/ref/delete/model/*.class</exclude>
 					</excludes>
 					<destFile>${sonar.jacoco.reportPath}</destFile>
 					<append>true</append>

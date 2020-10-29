@@ -54,25 +54,13 @@
 
         <!-- Test -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.sap.iot.azure.ref</groupId>
             <artifactId>integration-commons</artifactId>
-            <version>1.0.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.sap.iot.azure.ref</groupId>
             <artifactId>integration-commons</artifactId>
-            <version>1.0.0</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
