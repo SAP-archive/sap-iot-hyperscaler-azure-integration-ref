@@ -22,10 +22,12 @@ public class HttpResponseUtil {
         int statusCode = response.getStatusCode();
 
         if (statusCode >= 500) { // 5xx series
-            throw new MappingLookupException(String.format("API call for %s failed due to a server error with response: %s", serviceName, response.getResponseBody()),
+            throw new MappingLookupException(String.format("API call for %s failed due to a server error with status code %d and response: %s", serviceName,
+                    response.getStatusCode(), response.getResponseBody()),
                     IdentifierUtil.getIdentifier(MappingServiceConstants.SERVICE_NAME_KEY, serviceName), true);
         } else if (statusCode != HttpStatus.SC_OK) {
-            throw new MappingLookupException(String.format("API call for %s failed with response: %s", serviceName, response.getResponseBody()),
+            throw new MappingLookupException(String.format("API call for %s failed with status code %d and response: %s", serviceName,
+                    response.getStatusCode(), response.getResponseBody()),
                     IdentifierUtil.getIdentifier(MappingServiceConstants.SERVICE_NAME_KEY, serviceName), false);
         } else if (response.getResponseBody().isEmpty()) {
             throw new MappingLookupException(String.format("API call for %s returned with empty response body", serviceName),

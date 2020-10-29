@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.iot.azure.ref.ingestion.util.AvroMessageConverter;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;
 import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
-import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessage;
+import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessageContainer;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,20 +47,20 @@ public class ProcessMessageServiceTest {
     @Test
     public void createProcessedMessage() throws IOException {
         JsonNode genericMessageJSON = mapper.readTree(TestUtil.GENERIC_JSON);
-        List<JsonNode> listMessages = new LinkedList<JsonNode>();
+        List<JsonNode> listMessages = new LinkedList<>();
         listMessages.add(genericMessageJSON);
         Mockito.doReturn(listMessages).when(avroMessageConverter).deserializeAvroMessage(any(), any());
         Pair<byte[], Map<String, Object>> pair = Pair.of(TestUtil.avroMessageByte(), InvocationContextTestUtil.createSystemPropertiesMap("S1/IG1")[0]);
-        Pair<String, List<ProcessedMessage>> processedMessagesPair = processMessageService.process(pair);
+        Pair<String, ProcessedMessageContainer> processedMessagesPair = processMessageService.process(pair);
         Assert.assertEquals("S1", processedMessagesPair.getKey());
-        Assert.assertEquals("S1", processedMessagesPair.getValue().get(0).getSourceId());
-        Assert.assertEquals("IG1", processedMessagesPair.getValue().get(0).getStructureId());
+        Assert.assertEquals("S1", processedMessagesPair.getValue().getProcessedMessages().get(0).getSourceId());
+        Assert.assertEquals("IG1", processedMessagesPair.getValue().getStructureId());
     }
 
     @Test
     public void createProcessedMessageWithMultipleTags() throws IOException {
         JsonNode genericMessageJSON = mapper.readTree(TestUtil.GENERIC_JSON_WITH_MULTIPLE_TAGS);
-        List<JsonNode> listMessages = new LinkedList<JsonNode>();
+        List<JsonNode> listMessages = new LinkedList<>();
         listMessages.add(genericMessageJSON);
         Mockito.doReturn(listMessages).when(avroMessageConverter).deserializeAvroMessage(any(), any());
         expectedException.expect(IoTRuntimeException.class);
@@ -72,20 +72,20 @@ public class ProcessMessageServiceTest {
     @Test
     public void createProcessedMessageWithNullTags() throws IOException {
         JsonNode genericMessageJSON = mapper.readTree(TestUtil.GENERIC_JSON_WITH_NULL_TAGS);
-        List<JsonNode> listMessages = new LinkedList<JsonNode>();
+        List<JsonNode> listMessages = new LinkedList<>();
         listMessages.add(genericMessageJSON);
         Mockito.doReturn(listMessages).when(avroMessageConverter).deserializeAvroMessage(any(), any());
         Pair<byte[], Map<String, Object>> pair = Pair.of(TestUtil.avroMessageByte(), InvocationContextTestUtil.createSystemPropertiesMap("S1/IG1")[0]);
-        Pair<String, List<ProcessedMessage>> processedMessagesPair = processMessageService.process(pair);
-        Assert.assertEquals(null, processedMessagesPair.getValue().get(0).getTags());
-        Assert.assertEquals("S1", processedMessagesPair.getValue().get(0).getSourceId());
-        Assert.assertEquals("IG1", processedMessagesPair.getValue().get(0).getStructureId());
+        Pair<String, ProcessedMessageContainer> processedMessagesPair = processMessageService.process(pair);
+        Assert.assertEquals(null, processedMessagesPair.getValue().getProcessedMessages().get(0).getTags());
+        Assert.assertEquals("S1", processedMessagesPair.getValue().getProcessedMessages().get(0).getSourceId());
+        Assert.assertEquals("IG1", processedMessagesPair.getValue().getStructureId());
     }
 
     @Test
     public void createProcessedMessageWithIncorrectPartitionKey() throws IOException {
         JsonNode genericMessageJSON = mapper.readTree(TestUtil.GENERIC_JSON);
-        List<JsonNode> listMessages = new LinkedList<JsonNode>();
+        List<JsonNode> listMessages = new LinkedList<>();
         listMessages.add(genericMessageJSON);
         expectedException.expect(IoTRuntimeException.class);
         expectedException.expectMessage("sourceId and structureId cannot be identified from Partition Key");

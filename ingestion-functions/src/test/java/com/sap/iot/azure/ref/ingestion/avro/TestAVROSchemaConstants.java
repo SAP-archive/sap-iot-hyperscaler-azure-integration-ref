@@ -4,6 +4,9 @@ public class TestAVROSchemaConstants {
     public static final String SIMPLE_AVRO_SCHEMA = "{" +
             "  \"type\": \"record\"," +
             "  \"name\": \"schema\"," +
+            "  \"gdprDataCategory\": \"\",\n" +
+            "  \"structureId\": \"schema\",\n" +
+            "  \"tenant\": \"tenant-guid-1\",\n" +
             "  \"fields\": [" +
             "    {" +
             "      \"name\": \"messageId\"," +
@@ -11,14 +14,6 @@ public class TestAVROSchemaConstants {
             "    }," +
             "    {" +
             "      \"name\": \"identifier\"," +
-            "      \"type\": \"string\"" +
-            "    }," +
-            "    {" +
-            "      \"name\": \"structureId\"," +
-            "      \"type\": \"string\"" +
-            "    }," +
-            "    {" +
-            "      \"name\": \"tenant\"," +
             "      \"type\": \"string\"" +
             "    }," +
             "    {" +
@@ -72,17 +67,14 @@ public class TestAVROSchemaConstants {
     public static final String ALLTYPES_AVRO_SCHEMA = "{" +
             "    \"type\": \"record\"," +
             "    \"name\": \"structure\"," +
+            "    \"gdprDataCategory\": \"\",\n" +
+            "    \"structureId\": \"ALLTYPES_NF\",\n" +
+            "    \"tenant\": \"tenant-guid-1\",\n" +
             "    \"fields\": [{" +
             "        \"name\": \"messageId\"," +
             "        \"type\": \"string\"" +
             "    }, {" +
             "        \"name\": \"identifier\"," +
-            "        \"type\": \"string\"" +
-            "    }, {" +
-            "        \"name\": \"structureId\"," +
-            "        \"type\": \"string\"" +
-            "    }, {" +
-            "        \"name\": \"tenant\"," +
             "        \"type\": \"string\"" +
             "    }, {" +
             "        \"name\": \"tags\"," +
@@ -198,73 +190,4 @@ public class TestAVROSchemaConstants {
             "        }" +
             "    }]" +
             "}";
-
-    public static final String SAMPLE_AVRO_SCHEMA_INVALID_TYPE = "{" +
-            "  \"type\": \"record\"," +
-            "  \"name\": \"TEST_SCHEMA\"," +
-            "  \"fields\": [" +
-            "    {" +
-            "      \"name\": \"messageId\"," +
-            "      \"type\": \"string\"" +
-            "    }," +
-            "    {" +
-            "      \"name\": \"identifier\"," +
-            "      \"type\": \"string\"" +
-            "    }," +
-            "    {" +
-            "      \"name\": \"structureId\"," +
-            "      \"type\": \"string\"" +
-            "    }," +
-            "    {" +
-            "      \"name\": \"tenant\"," +
-            "      \"type\": \"string\"" +
-            "    }," +
-            "    {" +
-            "      \"name\": \"tags\"," +
-            "      \"type\": {" +
-            "        \"type\": \"array\"," +
-            "        \"items\": {" +
-            "          \"type\": \"record\"," +
-            "          \"name\": \"queryParams\"," +
-            "          \"fields\": [" +
-            "            {" +
-            "              \"name\": \"sampleTagKey\"," +
-            "              \"type\": \"string\"" +
-            "            }" +
-            "          ]" +
-            "        }" +
-            "      }" +
-            "    }," +
-            "    {" +
-            "      \"name\": \"measurements\"," +
-            "      \"type\": {" +
-            "        \"type\": \"array\"," +
-            "        \"items\": {" +
-            "          \"type\": \"record\"," +
-            "          \"name\": \"timeseriesRecord\"," +
-            "          \"fields\": [" +
-            "            {" +
-            "              \"name\": \"_time\"," +
-            "              \"type\": {" +
-            "                \"type\": \"long\"," +
-            "                \"logicalType\": \"timestamp-seconds\"" +
-            "              }" +
-            "            }," +
-            "            {" +
-            "              \"name\": \"mockKey\"," +
-            "              \"type\": {" +
-            "                \"type\": \"string\"" +
-            "              }" +
-            "            }" +
-            "          ]" +
-            "        }" +
-            "      }" +
-            "    }" +
-            "  ]" +
-            "}";
-
-    public static void main(String[] args) {
-
-        System.out.println(ALLTYPES_AVRO_SCHEMA);
-    }
 }

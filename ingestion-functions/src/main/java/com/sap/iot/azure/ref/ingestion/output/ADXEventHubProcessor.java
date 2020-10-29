@@ -57,7 +57,7 @@ public class ADXEventHubProcessor extends BaseEventHubProcessor<ProcessedMessage
 
         for (ProcessedMessage processedMessage : processedMessageContainer.getProcessedMessages()) {
             String sourceId = processedMessage.getSourceId();
-            String structureId = processedMessage.getStructureId();
+            String structureId = processedMessageContainer.getStructureId();
             Map<String, String> tags = processedMessage.getTags();
 
             // ProcessedMessage measures always has one measure

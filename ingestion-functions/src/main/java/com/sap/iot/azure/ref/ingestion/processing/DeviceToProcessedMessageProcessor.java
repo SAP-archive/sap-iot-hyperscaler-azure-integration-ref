@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.sap.iot.azure.ref.ingestion.exception.IngestionRuntimeException;
 import com.sap.iot.azure.ref.integration.commons.mapping.MappingHelper;
 import com.sap.iot.azure.ref.integration.commons.model.mapping.SensorMappingInfo;
-import com.sap.iot.azure.ref.integration.commons.mapping.MappingServiceConstants;
 import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.PropertyMapping;
 import com.sap.iot.azure.ref.ingestion.model.timeseries.raw.DeviceMeasure;
 import com.sap.iot.azure.ref.ingestion.model.timeseries.raw.DeviceMeasureKey;
@@ -16,7 +15,6 @@ import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.Tag;
 import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessage;
 import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessageContainer;
 
-import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -60,8 +58,6 @@ public class DeviceToProcessedMessageProcessor implements Processor<Map.Entry<De
         // form the common parts for all processed messages for this sourceId
         ProcessedMessage.ProcessedMessageBuilder processedMessageBuilder = ProcessedMessage.builder()
                 .sourceId(mapping.getSourceId())
-                .structureId(mapping.getStructureId())
-                .tenantId(MappingServiceConstants.TENANT)
                 .tags(mapping.getTags().stream().collect(Collectors.toMap(Tag::getTagSemantic, Tag::getTagValue)));
 
         // complete building processed message adding the measure with event timestamp
@@ -75,10 +71,11 @@ public class DeviceToProcessedMessageProcessor implements Processor<Map.Entry<De
         ProcessedMessageContainer processedMessageContainer = ProcessedMessageContainer.builder()
                 .avroSchema(mapping.getSchemaInfo())
                 .processedMessages(processedMessages)
+                .structureId(mapping.getStructureId())
                 .build();
 
-        InvocationContext.getLogger().log(Level.FINE, String.format("Successfully processed %s messages for Sensor ID: '%s' and Virtual Capability ID: '%s'."
-                , rawMessages.size(), deviceMeasureKey.getSensorId(), deviceMeasureKey.getVirtualCapabilityId()));
+        InvocationContext.getLogger().log(Level.FINE, String.format("Successfully processed %s messages for Sensor ID: '%s' and Virtual Capability ID: '%s'.",
+                rawMessages.size(), deviceMeasureKey.getSensorId(), deviceMeasureKey.getVirtualCapabilityId()));
         return Maps.immutableEntry(mapping.getSourceId() + Constants.SEPARATOR + mapping.getStructureId(), processedMessageContainer);
     }
 

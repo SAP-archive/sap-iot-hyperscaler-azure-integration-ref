@@ -27,10 +27,27 @@ public class AvroMessageConverterTest {
     private AvroMessageConverter avroMessageConverter;
 
     private static final ObjectMapper mapper = new ObjectMapper();
-    static final String STRUCTURE_ID = "IG1";
-    static final String GENERIC_JSON = "{\"messageId\":\"S1/IG1/1587023647403\",\"identifier\":\"S1\",\"structureId\":\"IG1\"," +
-            "\"tenant\":\"tenantId\",\"tags\":[{\"modelId\":\"m1\",\"equipmentId\":\"eq1\",\"indicatorGroupId\":\"ig1\",\"templateId\":\"tl1\"}]," +
-            "\"measurements\":[{\"_time\":1587023647403,\"ax\":10,\"ay\":20,\"az\":30}]}";
+    private String STRUCTURE_ID = "IG1";
+    private String GENERIC_JSON = "{\n" +
+            "  \"messageId\": \"S1/IG1/1587023647403\",\n" +
+            "  \"identifier\": \"S1\",\n" +
+            "  \"tags\": [\n" +
+            "    {\n" +
+            "      \"modelId\": \"m1\",\n" +
+            "      \"equipmentId\": \"eq1\",\n" +
+            "      \"indicatorGroupId\": \"ig1\",\n" +
+            "      \"templateId\": \"tl1\"\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"measurements\": [\n" +
+            "    {\n" +
+            "      \"_time\": 1587023647403,\n" +
+            "      \"ax\": 10,\n" +
+            "      \"ay\": 20,\n" +
+            "      \"az\": 30\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
 
     @Before
     public void setup() {
@@ -46,16 +63,13 @@ public class AvroMessageConverterTest {
         JsonNode genericMessageJSON = mapper.readTree(GENERIC_JSON);
         List<JsonNode> expectedMessages = new LinkedList<JsonNode>();
         expectedMessages.add(genericMessageJSON);
-        List<JsonNode> deserializedMultipleDataTypesAvroMessages = avroMessageConverter.deserializeAvroMessage(STRUCTURE_ID, TestUtil.avroMessageByteMultipleDataTypes());
 
         Assert.assertEquals(1, deserializedAvroMessages.size());
-        Assert.assertEquals(expectedMessages.get(0).get("structureId"), deserializedAvroMessages.get(0).get("structureId"));
         Assert.assertEquals(expectedMessages.get(0).get("identifier"), deserializedAvroMessages.get(0).get("identifier"));
-        Assert.assertEquals(expectedMessages.get(0).get("tenant"), deserializedAvroMessages.get(0).get("tenant"));
         Assert.assertEquals(expectedMessages.get(0).get("tags").get("equipmentId"), deserializedAvroMessages.get(0).get("tags").get("equipmentId")) ;
         Assert.assertEquals(expectedMessages.get(0).get("measurements").get("ax"), deserializedAvroMessages.get(0).get("measurements").get("ax")) ;
-        Assert.assertEquals("IG1", deserializedMultipleDataTypesAvroMessages.get(0).get("structureId").textValue());
-        Assert.assertEquals("S1", deserializedMultipleDataTypesAvroMessages.get(0).get("identifier").textValue());
 
+        List<JsonNode> deserializedMultipleDataTypesAvroMessages = avroMessageConverter.deserializeAvroMessage(STRUCTURE_ID, TestUtil.avroMessageByteMultipleDataTypes());
+        Assert.assertEquals("S1", deserializedMultipleDataTypesAvroMessages.get(0).get("identifier").textValue());
     }
 }

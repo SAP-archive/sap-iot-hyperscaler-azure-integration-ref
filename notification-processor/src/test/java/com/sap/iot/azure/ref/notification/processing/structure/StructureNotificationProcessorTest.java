@@ -143,7 +143,7 @@ public class StructureNotificationProcessorTest {
 
         assertSchemaUpdate(2);
         verify(adxTableManager, times(1)).dataExistsForColumn(SAMPLE_STRUCTURE_ID, SAMPLE_PROPERTY_NAME);
-        verify(adxTableManager, times(1)).dropColumn(SAMPLE_STRUCTURE_ID, SAMPLE_PROPERTY_NAME);
+        verify(adxTableManager, times(1)).dropColumn(SAMPLE_STRUCTURE_ID, SAMPLE_PROPERTY_NAME, SAMPLE_SCHEMA);
         verify(retryTaskExecutor, times(2)).executeWithRetry(any(), eq(Constants.MAX_RETRIES));
     }
 
@@ -157,7 +157,7 @@ public class StructureNotificationProcessorTest {
 
         assertSchemaUpdate(2);
         verify(adxTableManager, times(1)).dataExistsForColumn(SAMPLE_STRUCTURE_ID, SAMPLE_PROPERTY_NAME);
-        verify(adxTableManager, times(1)).softDeleteColumn(eq(SAMPLE_STRUCTURE_ID), eq(SAMPLE_PROPERTY_NAME));
+        verify(adxTableManager, times(1)).softDeleteColumn(eq(SAMPLE_STRUCTURE_ID), eq(SAMPLE_PROPERTY_NAME), eq(SAMPLE_SCHEMA));
     }
 
     @Test

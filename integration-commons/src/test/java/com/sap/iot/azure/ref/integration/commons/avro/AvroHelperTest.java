@@ -83,8 +83,6 @@ public class AvroHelperTest {
 
         ProcessedMessage pm = ProcessedMessage.builder()
                 .sourceId("SourceId")
-                .structureId("structureId")
-                .tenantId("tenantId")
                 .tags(tags)
                 .measures(measuresList)
                 .build();
@@ -105,8 +103,6 @@ public class AvroHelperTest {
 
         ProcessedMessage pm = ProcessedMessage.builder()
                 .sourceId("SourceId")
-                .structureId("structureId")
-                .tenantId("tenantId")
                 .tags(tags)
                 .measures(measuresList)
                 .build();
@@ -127,8 +123,6 @@ public class AvroHelperTest {
 
         ProcessedMessage pm = ProcessedMessage.builder()
                 .sourceId("SourceId")
-                .structureId("structureId")
-                .tenantId("tenantId")
                 .tags(tags)
                 .measures(measuresList)
                 .build();
@@ -207,8 +201,6 @@ public class AvroHelperTest {
 
             ProcessedMessage pm = ProcessedMessage.builder()
                     .sourceId("SourceId")
-                    .structureId("structureId")
-                    .tenantId("tenantId")
                     .tags(tags)
                     .measures(Collections.singletonList(measures))
                     .build();
@@ -269,8 +261,6 @@ public class AvroHelperTest {
 
                 pm = ProcessedMessage.builder()
                         .sourceId(String.valueOf(genericRecord.get("identifier")))
-                        .structureId(String.valueOf(genericRecord.get("structureId")))
-                        .tenantId(String.valueOf(genericRecord.get("tenant")))
                         .tags(tags)
                         .measures(measuresList)
                         .build();

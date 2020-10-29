@@ -17,6 +17,9 @@ The project structure showing all functions in the Azure IoT Integration Referen
     ├───integration-commons
     └───notification-processor
         └───NotificationProcessorFunction
+    ├───timeseries-delete
+        └───DeleteTimeSeriesFunction
+        └───DeleteTimeSeriesMonitor
 ```
 
 ## Data Ingestion Architecture 
@@ -39,11 +42,14 @@ The Data Ingestion architecture block diagram shows the key components in Azure 
 
 - **Mapping Function**: Azure function that does mapping from device payload to Application model
 
-- **Avro Parser Function**: Azure function that consumes the list of Processed Timeseries data messages in Avro format then Avro messages are deserialized to JSON format and then persisted into the respective ADX table provided
+- **Avro Parser Function**: Azure function that consumes the list of Processed Time Series data messages in Avro format then Avro messages are deserialized
+ to JSON format and then persisted into the respective ADX table provided
 
 - **Notification Processor Function**: Azure function that processes the model change notifications that are generated when any changes are made to the equipment model in SAP IoT Applications
 
 - **Device Management Function**: Azure function that allows managing of device in Azure IoT Hub
+
+- **Delete Time Series Functions**: Set of Azure Functions that handles the delete time series request from SAP IoT - execute and monitor the status of the asynchronous delete operations and send the status to SAP IoT.   
 
 - **Azure Cache for Redis**: Used for caching mapping, assignment, Avro schema, etc., (all cache types mentioned in section below) 
 
@@ -73,5 +79,7 @@ The documentation is structured as follows in GitHub:
 - Error Handling: This document describes the error handling in the functions present in the Azure IoT Integration Reference.
 
 - Notification Processor: This document describes the processing of the model change notifications that are generated when any changes are made to the equipment model in SAP IoT Applications.
+
+- Delete Time Series: This document describes the processing and the monitoring of the time series delete requests.
 
 - Security: This document provides an overview of security-relevant information that applies this reference template. 

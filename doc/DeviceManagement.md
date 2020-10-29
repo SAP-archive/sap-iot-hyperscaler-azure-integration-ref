@@ -99,16 +99,16 @@ As IoT Hub does not impose a model definition for the device telemetry, the SAP 
 - Sensor Alternate Id 
 - Capability Alternate Id
 
-IoT Abstraction maintains a mapping from the virtual entities since the sensor and capability IDs passed in the device telemetry does not tranlate to physical entities in Azure IoT Hub to the Abstract Model entities. When data is received from the IoT Hub device model, the virtual mapping is used to map the values with the abstract model entities. 
+IoT Abstraction maintains a mapping from the virtual entities since the sensor and capability IDs passed in the device telemetry does not translate to physical entities in Azure IoT Hub to the Abstract Model entities. When data is received from the IoT Hub device model, the virtual mapping is used to map the values with the abstract model entities. 
 
 Following table, taking example of Asset Central model defines the mapping between Asset Central artifacts and virtual identifiers passed in the payload 
 
-| Asset Central Entities | IoT Hub / Virutal Entities   | Mapping details                                              |
+| Asset Central Entities | IoT Hub / Virtual Entities   | Mapping details                                              |
 | ---------------------- | ---------------------------- | ------------------------------------------------------------ |
 | Equipment              | Device                       | Device Id = Equipment Id                                     |
-| Template               | [Virtual] Sensor             | Sensor Alternate Id = Template Name <br />Sensor Alternate Id is sent in the device telemetry<br /><br />Sensor Id =  {DeviceId} + / + {Sensor}<br />Sensor Id is used for lookup service is |
+| Template               | [Virtual] Sensor             | Sensor Alternate Id = Template Name <br />Sensor Alternate Id is sent in the device telemetry<br /><br />Sensor Id =  {DeviceId} + / + {Sensor} |
 | Indicator Group        | [Virtual] Capability         | Capability Alternate Id = Indicator Group Name<br />Capability Alternate Id is sent in the device telemetry<br /><br />CapabilityId = Indicator Group Id |
-| Indicator              | [Vritual] Cabaility Property | Property Name = Indicator Name                               |
+| Indicator              | [Virtual] Capability Property | Property Name = Indicator Name                               |
 
 ## Implementation Details
 

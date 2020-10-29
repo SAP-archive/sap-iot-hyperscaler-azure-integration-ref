@@ -1,0 +1,21 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "java",
+    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=<AccountName>;AccountKey=<AccountKey>;EndpointSuffix=core.windows.net",
+    "delete-timeseries-eventhub-connection-string": "Endpoint=sb://<EndpointHost>/;SharedAccessKeyName=<SharedAccessKeyName>;SharedAccessKey=<SharedAccessKey>;EntityPath=<EntityPath>",
+    "adx-resource-uri": "https://<host>.kusto.windows.net",
+    "service-principal-application-client-id": "ClientId",
+    "service-principal-application-key": "Key",
+    "service-principal-authority-id": "AutorityId",
+    "adx-database-name": "ADX_DB",
+    "azure-cache-host": "<host>.redis.cache.windows.net",
+    "azure-cache-key": "RedisKey",
+    "mapping-app-host": "https://i4c-model-mapping-sap.cfapps.eu20.hana.ondemand.com",
+    "client-id": "TenantId",
+    "client-secret": "TenantPassword",
+    "token-endpoint": "https://<tenant-subdomain>.authentication.eu20.hana.ondemand.com",
+    "lookup-app-host": "https://i4c-model-configuration-sap.cfapps.eu20.hana.ondemand.com",
+    "storage-connection-string": "DefaultEndpointsProtocol=https;AccountName=<AccountName>;AccountKey=<AccountKey>;EndpointSuffix=core.windows.net"
+  }
+}

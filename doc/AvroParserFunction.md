@@ -2,9 +2,12 @@
 
 In addition to data being ingested from device to IoT Hub, SAP IoT provides REST-based APIs to ingest time series data.
 
-With customer-managed ingestion and data persistance scenario in Azure, requests to write time series data APIs of SAP IoT is processed, and the time series data is sent to Azure Event Hub following SAP-defined Processed-Timeseries Avro Schema. These messages are ingested into the corresponding table in Azure Data Explorer (ADX).
+With customer-managed ingestion and data persistance scenario in Azure, requests to write time series data APIs of SAP IoT is processed, and the time series
+ data is sent to Azure Event Hub following SAP-defined Processed Time Series Avro Schema. These messages are ingested into the corresponding table in Azure
+  Data Explorer (ADX).
 
-Please refer to SAP documentation on Processed-Timeseries Avro Schema: [Streaming Data using Message Broker](https://help.sap.com/viewer/224d189da0314339a1dd99489de10e48/latest/en-US/6547d6f2a54c48f2a4d8469a9c523812.html) 
+Please refer to SAP documentation on Processed Time Series Avro Schema: [Streaming Data using Message Broker](https://help.sap.com/viewer
+/224d189da0314339a1dd99489de10e48/latest/en-US/6547d6f2a54c48f2a4d8469a9c523812.html) 
 
 Azure Data Explorer (ADX) supports the following ingestion methods:
 
@@ -26,7 +29,8 @@ SAP IoT Customer-managed Data Persistence and Streaming Abstraction forwards the
 
 ### Steps
 
-- AvroParser function consumes the list of Processed Timeseries data messages in Avro format as List<byte[]>, along with Event Hub's system-properties. System properties consists of offset-number, sequence-number, enqueued-time-utc, and partition-key.
+- AvroParser function consumes the list of Processed Time Series data messages in Avro format as List<byte[]>, along with Event Hub's system-properties
+. System properties consists of offset-number, sequence-number, enqueued-time-utc, and partition-key.
 - Each consumed Avro message contains both the Avro schema and the records in the message payload in bytes format. 
 - StructureId, extracted from partition-key is used to check the existence of ADX tables on Azure. The appropriate table is created, if it does not exist.
 - Avro messages are deserialized to JSON format, which then creates the Processed Message Map for sending the data to ADX Source Event Hub.
@@ -68,9 +72,10 @@ When write time series data API is invoked with request payload as shown below.
        ]
      }
 
-#### Sample Avro Message in Processed timeseries IN EventHub 
+#### Sample Avro Message in Processed Time Series IN EventHub 
 
-The processed timeseries topic of the IN eventhub is invoked and Avro message is serialized. AVRO message input is in byte[] format, as shown below in the sample.
+The processed time series topic of the IN eventhub is invoked and Avro message is serialized. AVRO message input is in byte[] format, as shown below in the
+ sample.
 
      [79, 98, 106, ..., 9, 97, -86, 13 ...]
      

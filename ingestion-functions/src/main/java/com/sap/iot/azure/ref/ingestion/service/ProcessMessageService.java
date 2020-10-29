@@ -12,13 +12,14 @@ import com.sap.iot.azure.ref.integration.commons.exception.CommonErrorType;
 import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
 import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
 import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessage;
+import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessageContainer;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class ProcessMessageService implements Processor<Pair<byte[], Map<String, Object>>, Pair<String, List<ProcessedMessage>>> {
+public class ProcessMessageService implements Processor<Pair<byte[], Map<String, Object>>, Pair<String, ProcessedMessageContainer>> {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final AvroMessageConverter avroMessageConverter;
@@ -43,12 +44,12 @@ public class ProcessMessageService implements Processor<Pair<byte[], Map<String,
      * @return pair {@link Pair<String, List>} containing sourceId and list of {@link ProcessedMessage ProcessedMessages}.
      */
     @Override
-    public Pair<String, List<ProcessedMessage>> process(Pair<byte[], Map<String, Object>> t) throws IngestionRuntimeException {
+    public Pair<String, ProcessedMessageContainer> process(Pair<byte[], Map<String, Object>> t) throws IngestionRuntimeException {
         return createProcessedMessage(t.getKey(), t.getValue());
     }
 
     @SuppressWarnings("unchecked")
-    private Pair<String, List<ProcessedMessage>> createProcessedMessage(byte[] message,
+    private Pair<String, ProcessedMessageContainer> createProcessedMessage(byte[] message,
                                                                         Map<String, Object> systemProperties) {
 
         String partitionKey;
@@ -72,8 +73,6 @@ public class ProcessMessageService implements Processor<Pair<byte[], Map<String,
         ProcessedMessage pm;
         for (JsonNode jsonMessage : genericJSONMessages) {
 
-            String tenant = jsonMessage.get(AvroConstants.AVRO_DATUM_KEY_TENANT).textValue();
-
             List<Map<String, Object>> measuresList = new LinkedList<>();
             for (JsonNode measures : jsonMessage.get(AvroConstants.AVRO_DATUM_KEY_MEASUREMENTS)) {
                 measuresList.add(objectMapper.convertValue(measures, Map.class));
@@ -95,8 +94,6 @@ public class ProcessMessageService implements Processor<Pair<byte[], Map<String,
 
             pm = ProcessedMessage.builder()
                     .sourceId(sourceId)
-                    .structureId(structureId)
-                    .tenantId(tenant)
                     .measures(measuresList)
                     .tags(tagMap)
                     .build();
@@ -105,7 +102,6 @@ public class ProcessMessageService implements Processor<Pair<byte[], Map<String,
 
         }
 
-        return Pair.of(sourceId, processedMessages);
+        return Pair.of(sourceId, new ProcessedMessageContainer(structureId, processedMessages));
     }
-
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,13 +19,20 @@ import java.util.Optional;
 @AllArgsConstructor
 public class ProcessedMessageContainer {
     private String avroSchema;
+    private String structureId;
     private List<ProcessedMessage> processedMessages;
-
-    public ProcessedMessageContainer(List<ProcessedMessage> processedMessages) {
-        this.processedMessages = processedMessages;
-    }
 
     public Optional<String> getAvroSchema() {
         return Optional.ofNullable(avroSchema);
+    }
+
+    public ProcessedMessageContainer(String structureId, List<ProcessedMessage> processedMessages) {
+        this.structureId = structureId;
+        this.processedMessages = processedMessages;
+    }
+
+    public ProcessedMessageContainer addAll(ProcessedMessageContainer other) {
+        processedMessages.addAll(other.getProcessedMessages());
+        return this;
     }
 }

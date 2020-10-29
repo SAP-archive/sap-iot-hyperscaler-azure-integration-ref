@@ -65,21 +65,21 @@ public class DeviceToProcessedMessageProcessorTest {
         getSampleMessages().entrySet()
                 .forEach(rawMessageGrouping -> {
                     initMappingHelperMock();
-                    Map.Entry<String, ProcessedMessageContainer> processedMessage = deviceToProcessedMessageProcessorSpy.process(rawMessageGrouping);
+                    Map.Entry<String, ProcessedMessageContainer> processedMessagesMap = deviceToProcessedMessageProcessorSpy.process(rawMessageGrouping);
 
                     // deviceMapping is fetched with sensorId and capabilityId
                     verify(mappingHelperMock, times(1)).getSensorMapping(contains(SAMPLE_SENSOR_ID), contains(SAMPLE_CAPABILITY_ID));
 
-                    List<ProcessedMessage> processedMeasures = processedMessage.getValue().getProcessedMessages();
+                    List<ProcessedMessage> processedMeasures = processedMessagesMap.getValue().getProcessedMessages();
                     String sourceId = SAMPLE_SOURCE_ID + index.get();
 
                     for (ProcessedMessage processedMessageEntry : processedMeasures) {
 
                         //output should include correct info
-                        Assert.assertEquals(processedMessage.getKey(),
-                                processedMessageEntry.getSourceId() + Constants.SEPARATOR + processedMessageEntry.getStructureId());
+                        Assert.assertEquals(processedMessagesMap.getKey(),
+                                processedMessageEntry.getSourceId() + Constants.SEPARATOR + processedMessagesMap.getValue().getStructureId());
                         assertEquals(sourceId, processedMessageEntry.getSourceId());
-                        assertEquals(SAMPLE_STRUCTURE_ID, processedMessageEntry.getStructureId());
+                        assertEquals(SAMPLE_STRUCTURE_ID, processedMessagesMap.getValue().getStructureId());
                         assertEquals(SAMPLE_TIMESTAMP.toEpochMilli(), processedMessageEntry.getMeasures().get(0).get(Constants.TIMESTAMP_PROPERTY_KEY));
                     }
 

@@ -33,6 +33,7 @@ public class CommonConstants {
     public static final String MAPPING_ID_PROPERTY_KEY = "mappingId";
     public static final String ASSIGNMENT_ID = "assignmentId";
     public static final String PARTITION_KEY = "partitionKey";
+    public static final String OPERATION_ID = "operationId";
 
     // common function trigger constants
     public static final String TRIGGER_SYSTEM_PROPERTIES_ARRAY_NAME = "SystemPropertiesArray";

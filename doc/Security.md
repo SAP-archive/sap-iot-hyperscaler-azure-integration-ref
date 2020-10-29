@@ -17,7 +17,7 @@ For more information about data protection and privacy, and access logging in Mi
 - [Data Protection and Privacy](http://help.sap.com/disclaimer?site=https://www.microsoft.com/en-us/TrustCenter/CloudServices/Azure/GDPR)
 - [Access Logging	](http://help.sap.com/disclaimer?site=https://docs.microsoft.com/en-us/azure/security/azure-log-audit)
 
-**Note –** The Timeseries Abstraction customer-managed solution is not designed to store or process personal and sensitive information. Therefore, it is the
+**Note –** The Time Series abstraction customer-managed solution is not designed to store or process personal and sensitive information. Therefore, it is the
  responsibility of the customer to ensure that such data is not ingested into or stored in the customer-managed data lake that is integrated with this solution.
 
-**Note –** The Timeseries Abstraction customer-managed solution does not support the deletion of telemtry data stored in the customer-managed data lake.
+**Note –** The Time Series abstraction customer-managed solution does not support the deletion of telemtry data stored in the customer-managed data lake.

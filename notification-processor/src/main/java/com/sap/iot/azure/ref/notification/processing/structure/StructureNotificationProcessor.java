@@ -174,7 +174,7 @@ public class StructureNotificationProcessor implements NotificationProcessor {
                         handlePropertyUpdate(changeEntity, structureId);
                         break;
                     case DELETE:
-                        handlePropertyDelete(changeEntity, structureId);
+                        handlePropertyDelete(changeEntity, structureId, schemaWithADXStatus.getAvroSchema());
                         break;
                     default:
                         //for adding or deleting properties, we alter the table with the latest AVRO schema
@@ -203,17 +203,17 @@ public class StructureNotificationProcessor implements NotificationProcessor {
         });
     }
 
-    private void handlePropertyDelete(ChangeEntity changeEntity, String structureId) {
+    private void handlePropertyDelete(ChangeEntity changeEntity, String structureId, String schema) {
         String columnName = changeEntity.getEntity();
 
         if (adxTableManager.dataExistsForColumn(structureId, columnName)) {
             InvocationContext.getContext().getLogger().log(Level.WARNING, String.format("Delete Request received for Column '%s'. Renaming Column to prevent " +
                     "data loss", columnName));
             //rename column
-            adxTableManager.softDeleteColumn(structureId, columnName);
+            adxTableManager.softDeleteColumn(structureId, columnName, schema);
         } else {
             // remove column
-            adxTableManager.dropColumn(structureId, columnName);
+            adxTableManager.dropColumn(structureId, columnName, schema);
         }
     }
 

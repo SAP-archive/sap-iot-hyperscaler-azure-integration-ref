@@ -26,22 +26,22 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil.getIdentifier;
 
-public class ProcessedTimeseriesEventHubProcessor extends BaseEventHubProcessor<ProcessedMessageContainer> implements Processor<Map.Entry<String, ProcessedMessageContainer>,
+public class ProcessedTimeSeriesEventHubProcessor extends BaseEventHubProcessor<ProcessedMessageContainer> implements Processor<Map.Entry<String, ProcessedMessageContainer>,
         CompletableFuture<Void>> {
 
     private static final String CONNECTION_STRING = System.getenv(Constants.PROCESSED_TIMESERIES_CONNECTION_STRING_PROP);
 
-    public ProcessedTimeseriesEventHubProcessor() {
+    public ProcessedTimeSeriesEventHubProcessor() {
         this(new EventHubClientFactory().getEhClient(CONNECTION_STRING));
     }
 
     @VisibleForTesting
-    ProcessedTimeseriesEventHubProcessor(CompletableFuture<EventHubClient> eventHubClient) {
+    ProcessedTimeSeriesEventHubProcessor(CompletableFuture<EventHubClient> eventHubClient) {
         super(eventHubClient);
     }
 
     /**
-     * Send a single group of processed messages to the Processed Timeseries Event Hub with the key as partition key.
+     * Send a single group of processed messages to the Processed Time Series Event Hub with the key as partition key.
      * The processed messages will be converted into an AVRO format, using the {@link AvroHelper} and an AVRO schema which is fetched from the
      * {@link MappingHelper}.
      *
@@ -70,7 +70,7 @@ public class ProcessedTimeseriesEventHubProcessor extends BaseEventHubProcessor<
             }
 
         } catch (AvroRuntimeException e) {
-            throw IoTRuntimeException.wrapNonTransient(getIdentifier(processedMessages.get(0).getSourceId(), processedMessages.get(0).getStructureId()),
+            throw IoTRuntimeException.wrapNonTransient(getIdentifier(processedMessages.get(0).getSourceId(), processedMessageContainer.getStructureId()),
                     CommonErrorType.AVRO_EXCEPTION, "Avro runtime exception while processing message", e);
         }
 

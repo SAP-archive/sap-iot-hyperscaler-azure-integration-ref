@@ -72,13 +72,13 @@ public class ADXEventHubProcessorTest {
 
         String sourceId = processedMessage.get(CommonConstants.SOURCE_ID_PROPERTY_KEY).textValue();
         String timestamp = processedMessage.get(CommonConstants.TIMESTAMP_PROPERTY_KEY).textValue();
-        String mockPropertyVal = processedMessage.get(OutputTestUtil.AVRO_SCHEMA_MEASUREMENTS_FIELD_NAME).get(OutputTestUtil.MOCK_PROPERTY_KEY).textValue();
+        String mockPropertyVal = processedMessage.get(OutputTestUtil.AVRO_SCHEMA_MEASUREMENTS_FIELD_NAME).get(OutputTestUtil.SAMPLE_PROPERTY_KEY).textValue();
         String sampleTagVal = processedMessage.get(OutputTestUtil.AVRO_SCHEMA_MEASUREMENTS_FIELD_NAME).get(OutputTestUtil.SAMPLE_TAG_KEY).textValue();
 
         // Check EventData Body
         assertEquals(OutputTestUtil.SOURCE_ID, sourceId);
         assertEquals(Instant.ofEpochMilli(OutputTestUtil.TIMESTAMP).toString(), timestamp);
-        assertEquals(OutputTestUtil.MOCK_PROPERTY_VAL, mockPropertyVal);
+        assertEquals(OutputTestUtil.SAMPLE_PROPERTY_VAL, mockPropertyVal);
         assertEquals(OutputTestUtil.SAMPLE_TAG_VAL, sampleTagVal);
 
         // Check EventData Properties
