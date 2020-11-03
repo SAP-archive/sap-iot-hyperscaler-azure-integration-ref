@@ -1,5 +1,3 @@
-Represented in PPMS as [AZURE-IOT-INTEGRATION-REF 1.0](https://i7p.wdf.sap.corp/ppmslight/#/details/cv/73554900100200012831/overview) SCV 
-
 # SAP IoT with Customer-managed Azure Ingestion and Persistence
 
 
