@@ -88,7 +88,9 @@ public class IoTSPayloadMapper implements DevicePayloadMapper {
 
     private List<IoTSMessage> convertPayloadToIoTSMessages(String payload) throws IOException {
         List<IoTSMessage> ioTSMessages = new ArrayList<>();
-        try(JsonParser parser = mapper.getFactory().createParser(payload)) {
+        JsonParser parser = null;
+        try {
+            parser = mapper.getFactory().createParser(payload);
             if (parser.nextToken() == JsonToken.START_ARRAY) {
                 ioTSMessages.addAll(mapper.readValue(parser, new TypeReference<List<IoTSMessage>>() {
                 }));
@@ -97,6 +99,10 @@ public class IoTSPayloadMapper implements DevicePayloadMapper {
             }
 
             return ioTSMessages;
+        }finally {
+            if (parser != null) {
+                parser.close();
+            }
         }
     }
 
