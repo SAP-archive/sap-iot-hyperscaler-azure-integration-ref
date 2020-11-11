@@ -24,7 +24,10 @@ The ARM template provided in this sample implementation sets up all the resource
 Follow these steps to create and upload the zip file:
 
 1. Clone this repository
-2. Run Maven build locally (mvn clean install) and get the zip file from azure-iot-integration-ref/azure-ref/target folder
+2. Run maven build (install) on this project and locate the zip files from the maven build output for the required modules:  
+    1. sap-iot-hyperscaler-azure-integration-ref/ingestion-functions/target folder will contain the ingestion-functions.zip file
+    2.  sap-iot-hyperscaler-azure-integration-ref/notification-processor/target folder will contain the notification-processor.zip file
+    3. sap-iot-hyperscaler-azure-integration-ref/device-management-functions/target folder will contain the device-management-functions.zip file.
 3. [Upload to the zip files to a blob storage container](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal)
   1. ingestion-functions.zip
   2. notification-processor.zip
