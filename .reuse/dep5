@@ -27,3 +27,101 @@ Disclaimer: The code in this project may include calls to APIs (“API Calls”)
 Files: *
 Copyright: 2019 SAP SE or an SAP affiliate company and sap-iot-hyperscaler-azure-integration-ref contributors
 License: Apache-2.0
+
+Third-Party Notices
+
+Azure IoT Integration Reference uses third-party software or other resources that may be distributed under
+licenses different than Azure IoT Integration Reference software. In the event that we overlooked to list
+required notice, please bring this to our attention by contacting us via this email: opensource@sap.com
+
+Components:
+
+Component: Apache Avro 1.9.1
+Licensor: Apache
+Website: https://github.com/apache/avro
+License: Apache License 2.0
+
+Component: Asynchronous Http Client async-http-client-project-2.0.39
+Licensor: Apache
+Website: http://github.com/AsyncHttpClient/async-http-client/
+License: Apache License 2.0
+
+Component: azure-iot-sdk-java 2019-09-30
+Licensor: Microsoft Corporation
+Website: http://github.com/Azure/azure-iot-sdk-java/
+License: MIT License
+
+Component: Azure/azure-sdk-for-java 3.2.0
+Licensor: Microsoft Corporation
+Website: https://github.com/Azure/azure-sdk-for-java
+License: MIT License
+
+Component: Commons IO 2.4
+Licensor: The Apache Software Foundation
+Website: http://jakarta.apache.org/commons/io/
+License: Apache License 2.0
+
+Component: Guava (Google Common Libraries) 27.1
+Licensor: Kevin Bourrillion from Google
+Website: https://github.com/google/guava
+License: Apache License 2.0
+
+Component: jackson-databind 2.10.4
+Licensor:  FasterXML, LLC
+Website: http://wiki.fasterxml.com/JacksonHome
+License: Apache License 2.0
+
+Component: Jedis 3.1.0
+Licensor:  Jonathan Leibiusky
+Website: http://repo.maven.apache.org/maven2/redis/clients/jedis/
+License: MIT License
+
+Component: json-smart-v1 2.3
+Licensor: The Apache Software Foundation
+Website: http://github.com/netplex/json-smart-v2/
+License: Apache License 2.0
+
+Component: logging-log4j2 2.13.2
+Licensor: The Apache Software Foundation
+Website: http://github.com/apache/logging-log4j2/
+License: Apache License 2.0
+
+Component: Netty Project 4.1.46.Final
+Licensor: The Netty Project
+Website: http://netty.io/
+License: Apache License 2.0
+
+Component: Nimbus LangTag 1.4.4
+Licensor: Connect2id Ltd.
+Website: http://repo.maven.apache.org/maven2/com/nimbusds/lang-tag/
+License: Apache License 2.0
+
+Component: NimbusDS JOSE JWT 8.8
+Licensor: Connect2id Ltd.
+Website: https://bitbucket.org/nimbusds/nimbus-jose-jwt
+License: Apache License 2.0
+
+Component: projectlombok 1.18.12
+Licensor: The Project Lombok Authors
+Website: http://github.com/rzwitserloot/lombok/
+License: MIT License
+
+Component: mockito-core 2.25.1
+Licensor: Mockito contributors
+Website: https://github.com/mockito/mockito
+License: MIT License
+
+Component: JUnit 4.12
+Licensor: junit.org
+Website: http://www.junit.org/
+License: Eclipse Public License 1.0
+
+Component: System Rules 1.16.1
+Licensor: Stefan Birkner
+Website: http://stefanbirkner.github.io/system-rules
+License: Common Public License 1.0
+
+Component: hamcrest-java-1.3
+Licensor: hamcrest.org
+Website: http://code.google.com/p/hamcrest
+License: New BSD License (BSD-3-Clause)
