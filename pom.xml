@@ -123,6 +123,8 @@
 				<artifactId>commons-io</artifactId>
 				<version>2.4</version>
 			</dependency>
+
+			<!-- eventhub related -->
 			<dependency>
 				<groupId>com.microsoft.azure</groupId>
 				<artifactId>azure-eventhubs</artifactId>
@@ -134,6 +136,12 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk15on</artifactId>
+				<version>1.64</version>
+			</dependency>
+
 			<dependency>
 				<groupId>com.microsoft.azure.functions</groupId>
 				<artifactId>azure-functions-java-library</artifactId>
