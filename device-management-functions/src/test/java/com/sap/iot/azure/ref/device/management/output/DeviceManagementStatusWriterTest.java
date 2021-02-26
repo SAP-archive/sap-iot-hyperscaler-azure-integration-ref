@@ -115,6 +115,7 @@ public class DeviceManagementStatusWriterTest {
     public DeviceManagementStatusInfo.DeviceManagementStatus deviceManagementStatus() {
         DeviceManagementStatusInfo.DeviceManagementStatus deviceManagementStatus = DeviceManagementStatusInfo.DeviceManagementStatus.builder()
                 .deviceId("d1")
+                .deviceAlternateId("d1")
                 .status("SUCCESS")
                 .error(error())
                 .build();

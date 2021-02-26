@@ -15,6 +15,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SensorEntity {
 	private String sensorId;
+	private String sensorAlternateId;
 	private String operation;
 	private List<CapabilityRef> capabilities;
 

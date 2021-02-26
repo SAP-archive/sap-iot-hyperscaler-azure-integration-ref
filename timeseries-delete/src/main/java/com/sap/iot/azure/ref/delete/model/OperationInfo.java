@@ -16,4 +16,5 @@ public class OperationInfo {
     private String eventId;
     private String structureId;
     private String correlationId;
+    private OperationType operationType;
 }

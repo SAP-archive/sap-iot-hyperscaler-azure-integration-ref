@@ -4,18 +4,21 @@
 
 	<groupId>com.sap.iot.azure.ref</groupId>
 	<artifactId>azure-iot-integration</artifactId>
-	<version>1.1.0</version>
+	<version>1.4.0</version>
 	<packaging>pom</packaging>
 
 	<properties>
 		<!-- Plug-in and related Versions -->
+		<whitesource-maven-plugin.version>18.6.2</whitesource-maven-plugin.version>
 		<maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
 		<maven-surefire-plugin.version>2.21.0</maven-surefire-plugin.version>
 		<jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
-		<jackson-databind.version>2.10.4</jackson-databind.version>
+		<jackson-databind.version>2.10.5.1</jackson-databind.version>
+		<sap.ldi.fortify.version>1.11.0</sap.ldi.fortify.version>
 		<java.version>1.8</java.version>
 		<azure.functions.maven.plugin.version>1.6.0</azure.functions.maven.plugin.version>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 	</properties>
 
@@ -32,7 +35,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -188,7 +191,7 @@
 			<dependency>
 				<artifactId>netty-codec</artifactId>
 				<groupId>io.netty</groupId>
-				<version>4.1.46.Final</version>
+				<version>4.1.59.Final</version>
 			</dependency>
 
 			<!-- application insights -->
@@ -198,18 +201,16 @@
 				<version>2.6.0</version>
 			</dependency>
 
-			<!-- vulas fixes -->
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
 				<version>${jackson-databind.version}</version>
 			</dependency>
 
-			<!-- vulas fixes -->
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>27.1-jre</version>
+				<version>30.1-jre</version>
 			</dependency>
 
 			<!-- cloud events -->
@@ -232,17 +233,18 @@
 				</exclusions>
 			</dependency>
 
+			<!-- Collection Utils -->
+			<dependency>
+				<groupId>commons-collections</groupId>
+				<artifactId>commons-collections</artifactId>
+				<version>3.2.2</version>
+			</dependency>
+
 			<!-- Test -->
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter</artifactId>
 				<version>5.4.2</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.12</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -265,6 +267,11 @@
 
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>org.sonarsource.scanner.maven</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>3.7.0.1746</version>
+				</plugin>
 				<plugin>
 					<groupId>com.microsoft.azure</groupId>
 					<artifactId>azure-functions-maven-plugin</artifactId>
@@ -322,12 +329,9 @@
 						<exclude>com/sap/iot/azure/ref/integration/commons/model/*.class</exclude>
 						<exclude>com/sap/iot/azure/ref/delete/model/*.class</exclude>
 					</excludes>
-					<destFile>${sonar.jacoco.reportPath}</destFile>
-					<append>true</append>
 				</configuration>
 				<executions>
 					<execution>
-						<id>agent</id>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
@@ -336,7 +340,7 @@
 						<id>report</id>
 						<phase>prepare-package</phase>
 						<goals>
-							<goal>report-aggregate</goal>
+							<goal>report</goal>
 						</goals>
 					</execution>
 				</executions>

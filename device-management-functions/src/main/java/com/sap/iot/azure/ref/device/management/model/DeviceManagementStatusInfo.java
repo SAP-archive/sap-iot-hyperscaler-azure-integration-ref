@@ -26,6 +26,7 @@ public class DeviceManagementStatusInfo {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class DeviceManagementStatus {
         private String deviceId;
+        private String deviceAlternateId;
         private String status;
         private Error error;
     }

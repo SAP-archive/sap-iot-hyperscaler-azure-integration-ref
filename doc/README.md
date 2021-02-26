@@ -20,6 +20,7 @@ The project structure showing all functions in the Azure IoT Integration Referen
     ├───timeseries-delete
         └───DeleteTimeSeriesFunction
         └───DeleteTimeSeriesMonitor
+        └───BatchPurgeTimeSeries
 ```
 
 ## Data Ingestion Architecture 

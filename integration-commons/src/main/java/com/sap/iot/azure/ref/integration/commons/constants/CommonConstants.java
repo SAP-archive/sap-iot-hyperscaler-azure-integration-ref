@@ -11,6 +11,7 @@ public class CommonConstants {
     public static final String CACHE_KEY = "cacheKey";
 
     // message properties
+    public static final String SYSTEM_PROPERTIES = "System Properties";
     public static final String PARTITION_ID = "PartitionId";
     public static final String BATCH_OFFSET_START = "OffsetStart";
     public static final String BATCH_OFFSET_END = "OffsetEnd";
@@ -18,6 +19,7 @@ public class CommonConstants {
     public static final String BATCH_ENQUEUED_TIME_END = "EnqueuedTimeEnd";
     public static final String OFFSET = "Offset";
     public static final String ENQUEUED_TIME_UTC = "EnqueuedTimeUtc";
+    public static final String SEQUENCE_NUMBER = "SequenceNumber";
 
     // Time Series Constants
     public static final String SOURCE_ID_PROPERTY_KEY = "sourceId";
@@ -32,8 +34,10 @@ public class CommonConstants {
     public static final String DELETED_PROPERTY_VALUE = "false";
     public static final String MAPPING_ID_PROPERTY_KEY = "mappingId";
     public static final String ASSIGNMENT_ID = "assignmentId";
-    public static final String PARTITION_KEY = "partitionKey";
+    public static final String PARTITION_KEY = "PartitionKey";
     public static final String OPERATION_ID = "operationId";
+    public static final String CORRELATION_ID = "correlationId";
+    public static final String MESSAGE_ID = "messageId";
 
     // common function trigger constants
     public static final String TRIGGER_SYSTEM_PROPERTIES_ARRAY_NAME = "SystemPropertiesArray";

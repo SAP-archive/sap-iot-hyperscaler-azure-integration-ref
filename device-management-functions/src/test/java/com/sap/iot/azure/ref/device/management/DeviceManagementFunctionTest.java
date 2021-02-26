@@ -49,6 +49,7 @@ public class DeviceManagementFunctionTest {
 
         DeviceManagementStatusInfo.DeviceManagementStatus testStatus = DeviceManagementStatusInfo.DeviceManagementStatus.builder()
                 .deviceId(testDeviceId)
+                .deviceAlternateId(testDeviceId)
                 .status("SUCCESS")
                 .build();
 

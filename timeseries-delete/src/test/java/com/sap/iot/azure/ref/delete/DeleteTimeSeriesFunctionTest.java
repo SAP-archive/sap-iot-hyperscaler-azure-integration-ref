@@ -1,23 +1,25 @@
 package com.sap.iot.azure.ref.delete;
 
+import com.microsoft.azure.eventhubs.EventDataBatch;
+import com.sap.iot.azure.ref.delete.logic.DeleteTimeSeriesHandler;
+import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;
-import com.sap.iot.azure.ref.integration.commons.retry.RetryTaskExecutor;
-import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Callable;
+import java.util.Map;
 
 import static com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil.createPartitionContext;
 import static com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil.createSystemPropertiesMap;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -26,27 +28,29 @@ public class DeleteTimeSeriesFunctionTest {
     @Mock
     private DeleteTimeSeriesHandler deleteHandler;
 
-    @Spy
-    private RetryTaskExecutor retryTaskExecutor;
-
     @InjectMocks
     DeleteTimeSeriesFunction deleteTimeSeriesFunction;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
+    @Captor
+    private ArgumentCaptor<Map> systemPropertiesCaptor;
+
     @Test
     public void testRun() throws IOException {
-        String deleteRequest = createNotificationMessage("/DeleteTimeSeriesRequest.json");
-        deleteTimeSeriesFunction.run(deleteRequest, createSystemPropertiesMap()[0], createPartitionContext(),
+        String deleteRequest = DeleteTimeSeriesTestUtil.createSimpleDeleteRequest("/DeleteTimeSeriesRequest.json");
+        Map<String, Object> test = createSystemPropertiesMap()[0];
+        deleteTimeSeriesFunction.run(deleteRequest, test, createPartitionContext(),
                 InvocationContextTestUtil.getMockContext());
-        verify(deleteHandler, times(1)).processMessage(deleteRequest);
+        verify(deleteHandler, times(1)).processMessage(eq(deleteRequest), systemPropertiesCaptor.capture());
+        assertEquals(test.get(CommonConstants.ENQUEUED_TIME_UTC), systemPropertiesCaptor.getValue().get(CommonConstants.ENQUEUED_TIME_UTC));
     }
 
     @Test
     public void testRunWithException() throws IOException {
-        String notificationMessage = createNotificationMessage("/DeleteTimeSeriesRequest.json");
-        doThrow(new RuntimeException("test error")).when(retryTaskExecutor).executeWithRetry(any(Callable.class), anyInt());
+        String notificationMessage = DeleteTimeSeriesTestUtil.createSimpleDeleteRequest("/DeleteTimeSeriesRequest.json");
+        doThrow(new RuntimeException("test error")).when(deleteHandler).processMessage(anyString(), anyMap());
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("test error");
@@ -54,7 +58,4 @@ public class DeleteTimeSeriesFunctionTest {
                 InvocationContextTestUtil.getMockContext());
     }
 
-    public String createNotificationMessage(String sampleMessage) throws IOException {
-        return IOUtils.toString(this.getClass().getResourceAsStream(sampleMessage), StandardCharsets.UTF_8);
-    }
 }

@@ -2,9 +2,11 @@ package com.sap.iot.azure.ref.integration.commons.context;
 
 import com.google.common.base.Predicates;
 import com.microsoft.azure.functions.ExecutionContext;
+import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.mockito.Mockito;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,7 +17,8 @@ import java.util.UUID;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.spy;
 
 public class InvocationContextTestUtil {
 
@@ -64,10 +67,12 @@ public class InvocationContextTestUtil {
 
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("iothub-connection-device-id", "");
+        properties.put("iothub-enqueuedtime", Instant.EPOCH.toString());
         properties.put("PartitionKey", partitionKey);
         properties.put("Offset", "OFFSET_VALUE");
+        properties.put(CommonConstants.PARTITION_ID, "testPartitionId");
         properties.put("SequenceNumber", "SEQUENCE_NUMBER_VALUE");
-        properties.put("EnqueuedTimeUtc", "ENQUEUED_TIME_VALUE");
+        properties.put("EnqueuedTimeUtc", Instant.EPOCH.toString());
 
         return new Map[]{properties};
     }

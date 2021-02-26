@@ -1,20 +1,21 @@
 package com.sap.iot.azure.ref.integration.commons.mapping;
 
 import com.sap.iot.azure.ref.integration.commons.adx.ADXTableManager;
+import com.sap.iot.azure.ref.integration.commons.cache.CacheKeyBuilder;
 import com.sap.iot.azure.ref.integration.commons.cache.api.CacheRepository;
 import com.sap.iot.azure.ref.integration.commons.cache.redis.AzureCacheRepository;
-import com.sap.iot.azure.ref.integration.commons.cache.CacheKeyBuilder;
 import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.exception.ADXClientException;
 import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
 import com.sap.iot.azure.ref.integration.commons.exception.MappingLookupException;
+import com.sap.iot.azure.ref.integration.commons.exception.TokenLookupException;
 import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
 import com.sap.iot.azure.ref.integration.commons.model.mapping.SensorMappingInfo;
-import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.SensorInfo;
 import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.PropertyMappingInfo;
 import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.SchemaWithADXStatus;
 import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.SensorAssignment;
+import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.SensorInfo;
 
 import java.util.List;
 import java.util.Optional;
@@ -84,10 +85,10 @@ public class MappingHelper {
      *
      * @param structureId, structure ID for which the AVRO schema is fetched
      * @return AVRO schema info as String
-     * @throws MappingLookupException thrown if the schema lookup fails
+     * @throws TokenLookupException thrown if the authentication token lookup fails
      * @throws ADXClientException thrown in case the ADX table creation fails
      */
-    public String getSchemaInfo(String structureId) throws MappingLookupException, ADXClientException {
+    public String getSchemaInfo(String structureId) throws TokenLookupException, ADXClientException {
         //avro schema with ADX table creation status
         SchemaWithADXStatus schemaInfo = fetchSchemaFromCache(structureId)
                 .orElseGet(() -> fetchSchemaInfoFromAPI(structureId));

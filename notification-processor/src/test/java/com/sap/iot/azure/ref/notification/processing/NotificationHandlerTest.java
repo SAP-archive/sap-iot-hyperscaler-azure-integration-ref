@@ -44,8 +44,18 @@ public class NotificationHandlerTest {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("/MappingNotificationCreateMessage.json"), StandardCharsets.UTF_8);
         notificationMessages.add(message);
         notificationMessage = mapper.readValue(message, NotificationMessage.class);
-        notificationHandler.executeNotificationHandling(notificationMessages, InvocationContextTestUtil.createSystemPropertiesMap());
+        notificationHandler.executeNotificationMessage(notificationMessages, InvocationContextTestUtil.createSystemPropertiesMap());
         Mockito.verify(notificationProcessor).handleCreateWithRetry(Mockito.any());
+    }
+
+    @Test
+    public void testCreateSourceId() throws IOException {
+        List<String> notificationMessages = new ArrayList<>();
+        String message = IOUtils.toString(this.getClass().getResourceAsStream("/SourceIdNotificationCreateMessage.json"), StandardCharsets.UTF_8);
+        notificationMessages.add(message);
+        notificationMessage = mapper.readValue(message, NotificationMessage.class);
+        notificationHandler.executeNotificationMessage(notificationMessages, InvocationContextTestUtil.createSystemPropertiesMap());
+        //no exception should be thrown.
     }
 
     @Test
@@ -54,7 +64,7 @@ public class NotificationHandlerTest {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("/MappingNotificationUpdateAddMeasureMessage.json"), StandardCharsets.UTF_8);
         notificationMessages.add(message);
         notificationMessage = mapper.readValue(message, NotificationMessage.class);
-        notificationHandler.executeNotificationHandling(notificationMessages, InvocationContextTestUtil.createSystemPropertiesMap());
+        notificationHandler.executeNotificationMessage(notificationMessages, InvocationContextTestUtil.createSystemPropertiesMap());
         Mockito.verify(notificationProcessor).handleUpdateWithRetry(Mockito.any());
     }
 
@@ -64,7 +74,7 @@ public class NotificationHandlerTest {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("/MappingNotificationDeleteMessage.json"), StandardCharsets.UTF_8);
         notificationMessages.add(message);
         notificationMessage = mapper.readValue(message, NotificationMessage.class);
-        notificationHandler.executeNotificationHandling(notificationMessages, InvocationContextTestUtil.createSystemPropertiesMap());
+        notificationHandler.executeNotificationMessage(notificationMessages, InvocationContextTestUtil.createSystemPropertiesMap());
         Mockito.verify(notificationProcessor).handleDeleteWithRetry(Mockito.any());
     }
 }

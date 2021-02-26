@@ -8,7 +8,7 @@ import com.microsoft.azure.eventhubs.EventData;
 import com.microsoft.azure.eventhubs.EventHubClient;
 import com.sap.iot.azure.ref.ingestion.util.Constants;
 import com.sap.iot.azure.ref.integration.commons.adx.ADXConstants;
-import com.sap.iot.azure.ref.integration.commons.api.Processor;
+import com.sap.iot.azure.ref.integration.commons.api.ProcessorWithPerfMetrics;
 import com.sap.iot.azure.ref.integration.commons.connection.EventHubClientFactory;
 import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
-public class ADXEventHubProcessor extends BaseEventHubProcessor<ProcessedMessageContainer> implements Processor<Map.Entry<String, ProcessedMessageContainer>,
+public class ADXEventHubProcessor extends BaseEventHubProcessor<ProcessedMessageContainer> implements ProcessorWithPerfMetrics<Map.Entry<String, ProcessedMessageContainer>,
         CompletableFuture<Void>> {
 
     private static final String CONNECTION_STRING = System.getenv(Constants.ADX_SOURCE_CONNECTION_STRING_PROP);

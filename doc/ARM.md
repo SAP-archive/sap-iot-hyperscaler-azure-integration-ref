@@ -149,6 +149,11 @@ Follow these steps to create and upload the zip file:
 * **Database Hot Cache Period**
 
   * Number of days to retain data in cache for quick access (minValue=1, maxValue=36500).
+  
+* **Ingestion Type**
+
+  * Determine the ingestion type for the ADX tables. Find more information about the streaming ingestion limitations at [Streaming Ingestion - Limitations
+   Documentation](https://docs.microsoft.com/en-us/azure/data-explorer/ingest-data-streaming#limitations)
 
 * **Event Hub SKU Name**
 

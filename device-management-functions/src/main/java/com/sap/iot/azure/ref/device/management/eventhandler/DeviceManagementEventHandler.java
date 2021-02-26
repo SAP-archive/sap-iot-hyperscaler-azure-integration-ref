@@ -69,6 +69,7 @@ public class DeviceManagementEventHandler implements Processor<CloudEvent<Attrib
                 // device management is successful
                 return DeviceManagementStatus.builder()
                         .deviceId(deviceAlias.getDeviceId())
+                        .deviceAlternateId(deviceAlias.getDeviceId())
                         .status("SUCCESS")
                         .build();
             } else {
@@ -90,6 +91,7 @@ public class DeviceManagementEventHandler implements Processor<CloudEvent<Attrib
 
                 return DeviceManagementStatus.builder()
                         .deviceId(deviceInfo.getDeviceId())
+                        .deviceAlternateId(deviceInfo.getDeviceId())
                         .status("ERROR")
                         .error(error)
                         .build();

@@ -20,7 +20,7 @@ Here are the Environment Variables that need to be configured for the applicatio
 | ------------- |:-------------|:-------------|
 | iothub-connection-string      | Endpoint=sb://\<FQDN/\>;SharedAccessKeyName=\<KeyName\>;SharedAccessKey=\<KeyValue\>;EntityPath=\<eventHubName\>      |   SAP IoT Hub's connection string |
 | processed-timeseries-connection-string | Endpoint=sb://\<FQDN\>/;SharedAccessKeyName=\<KeyName\>;SharedAccessKey=\<KeyValue\>;EntityPath=\<processedTimeSeriesName\>      |    Processed time series connection string from azure resource |
-| transform-default-message-type |  IOTS    |   Default message type |
+| transform-default-message-type |  SAPIoTDeviceModel    |   Default message type |
 | adx-source-connection-string | Endpoint=sb://\<FQDN\>/;SharedAccessKeyName=\<KeyName\>;SharedAccessKey=\<KeyValue\>;EntityPath=\<adxName\>      |   Adx connection string  |
 | adx-database-name | \<adx-database-name\>   |  ADX database name |
 | azure-cache-host | \<CacheName\>.redis.cache.windows.net      |  Azure cache host name |
@@ -311,12 +311,12 @@ Measures are written to the ADX Time Series Event Hub in JSON format. The Azure 
 
 ## Support for device formats
 
-The ingestion flow allows supports the IOTS device format which can be extended by implementing the interface DevicePayloadMapper as part of the
-reference template. The environment variable: "transform-default-message-type" defaults to IoTs format.
-Only Single and Batched Measure IoT Services Message format are supported. For more information, please refer to doc:
-[Single and Batched Measure IoT Services Message format](https://help.sap.com/viewer/9133dbb5799740f8b1e8a1c3f0234776/latest/en-US/548edc49e7d24db29826db346a00bb7a.html)
+The ingestion flow allows supports the SAP IoT device model device format which can be extended by implementing the interface DevicePayloadMapper as part of the
+reference template. The environment variable: "transform-default-message-type" defaults to SAP IoT device model device format.
+Only Single and Batched Measure IoT Device Model Message format are supported. For more information, please refer to doc:
+[Single and Batched Measure IoT Device Model Message format](https://help.sap.com/viewer/9133dbb5799740f8b1e8a1c3f0234776/2101a/en-US/755de2516dde4fafb446efaaafb2c81a.html#)
 
-### IoT Services format
+### IoT Device Model format
 
 ```java
     {
@@ -336,7 +336,7 @@ Only Single and Batched Measure IoT Services Message format are supported. For m
 #### Extending Supported Device Payload Formats
 
 You can extended the support for Device Payload Formats by implementing the DevicePayloadMapper Interface.
-The [IoTSPayloadMapper](../integration-commons/src/main/java/com/sap/iot/azure/ref/ingestion/device/mapping/IoTSPayloadMapper.java) shows how this interface is implemented.
+The [IoTDeviceModelPayloadMapper](../integration-commons/src/main/java/com/sap/iot/azure/ref/ingestion/device/mapping/IoTDeviceModelPayloadMapper.java) shows how this interface is implemented.
 
 ```java
 public interface DevicePayloadMapper extends Processor<DeviceMessage, List<DeviceMeasure>> {

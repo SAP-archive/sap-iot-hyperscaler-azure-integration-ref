@@ -15,6 +15,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CapabilityEntity {
 	private String capabilityId;
+	private String capabilityAlternateId;
 	private String operation;
 	private List<PropertyInfo> properties;
 

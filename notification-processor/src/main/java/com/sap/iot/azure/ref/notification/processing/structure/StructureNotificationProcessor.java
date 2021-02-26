@@ -1,5 +1,8 @@
 package com.sap.iot.azure.ref.notification.processing.structure;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.iot.azure.ref.integration.commons.adx.ADXDataManager;
 import com.sap.iot.azure.ref.integration.commons.adx.ADXTableManager;
 import com.sap.iot.azure.ref.integration.commons.cache.CacheKeyBuilder;
 import com.sap.iot.azure.ref.integration.commons.cache.api.CacheRepository;
@@ -7,6 +10,7 @@ import com.sap.iot.azure.ref.integration.commons.cache.redis.AzureCacheRepositor
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.mapping.MappingHelper;
 import com.sap.iot.azure.ref.integration.commons.mapping.MappingServiceLookup;
+import com.sap.iot.azure.ref.integration.commons.model.base.eventhub.SystemProperties;
 import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.SchemaWithADXStatus;
 import com.sap.iot.azure.ref.integration.commons.retry.RetryTaskExecutor;
 import com.sap.iot.azure.ref.notification.processing.NotificationMessage;
@@ -24,30 +28,28 @@ import java.util.logging.Level;
 public class StructureNotificationProcessor implements NotificationProcessor {
     private final MappingServiceLookup mappingServiceLookup;
     private final ADXTableManager adxTableManager;
+    private final ADXDataManager adxDataManager;
     private final CacheRepository cacheRepository;
     private final MappingHelper mappingHelper;
-    private final RetryTaskExecutor retryTaskExecutor;
+    private static final RetryTaskExecutor retryTaskExecutor = new RetryTaskExecutor();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public StructureNotificationProcessor() {
-        this(new MappingServiceLookup(), new ADXTableManager(), new AzureCacheRepository());
+        this(new MappingServiceLookup(), new ADXTableManager(), new ADXDataManager(), new AzureCacheRepository());
     }
 
-    StructureNotificationProcessor(MappingServiceLookup mappingServiceLookup, ADXTableManager adxTableManager, CacheRepository cacheRepository) {
-        this(mappingServiceLookup, adxTableManager, cacheRepository, new MappingHelper(mappingServiceLookup, cacheRepository, adxTableManager));
+    StructureNotificationProcessor(MappingServiceLookup mappingServiceLookup, ADXTableManager adxTableManager, ADXDataManager adxDataManager,
+                                   CacheRepository cacheRepository) {
+        this(mappingServiceLookup, adxTableManager, adxDataManager, cacheRepository, new MappingHelper(mappingServiceLookup, cacheRepository, adxTableManager));
     }
 
-    StructureNotificationProcessor(MappingServiceLookup mappingServiceLookup, ADXTableManager adxTableManager, CacheRepository cacheRepository,
-                                   MappingHelper mappingHelper) {
-        this(mappingServiceLookup, adxTableManager, cacheRepository, mappingHelper, new RetryTaskExecutor());
-    }
-
-    StructureNotificationProcessor(MappingServiceLookup mappingServiceLookup, ADXTableManager adxTableManager, CacheRepository cacheRepository,
-                                   MappingHelper mappingHelper, RetryTaskExecutor retryTaskExecutor) {
+    StructureNotificationProcessor(MappingServiceLookup mappingServiceLookup, ADXTableManager adxTableManager, ADXDataManager adxDataManager,
+                                   CacheRepository cacheRepository, MappingHelper mappingHelper) {
         this.mappingServiceLookup = mappingServiceLookup;
         this.adxTableManager = adxTableManager;
+        this.adxDataManager = adxDataManager;
         this.cacheRepository = cacheRepository;
         this.mappingHelper = mappingHelper;
-        this.retryTaskExecutor = retryTaskExecutor;
     }
 
     /**
@@ -116,7 +118,8 @@ public class StructureNotificationProcessor implements NotificationProcessor {
     public void handleUpdate(NotificationMessage notification) {
         List<ChangeEntity> changeList = notification.getChangeList();
         String structureId = getStructureId(notification);
-
+        SystemProperties systemProperties = notification.getSource();
+        JsonNode systemPropertiesJson = mapper.convertValue(systemProperties, JsonNode.class);
         try {
             //1. fetch schema with retry
             String schema =
@@ -124,9 +127,10 @@ public class StructureNotificationProcessor implements NotificationProcessor {
                             Constants.MAX_RETRIES).join();
 
             //update ADX
-            retryTaskExecutor.executeWithRetry(() -> updateCacheAndTable(structureId, schema, changeList), Constants.MAX_RETRIES).join();
+            retryTaskExecutor.executeWithRetry(() -> updateCacheAndTable(structureId, schema, changeList, systemProperties), Constants.MAX_RETRIES).join();
         } catch (Exception e) {
-            InvocationContext.getContext().getLogger().log(Level.SEVERE, "Processing of structure update notification failed.");
+            InvocationContext.getContext().getLogger().log(Level.SEVERE, String.format("Processing of structure update notification failed for message with " +
+                    "system properties: %s", systemPropertiesJson));
         }
     }
 
@@ -140,11 +144,14 @@ public class StructureNotificationProcessor implements NotificationProcessor {
     @Override
     public void handleDelete(NotificationMessage notification) {
         String structureId = getStructureId(notification);
+        SystemProperties systemProperties = notification.getSource();
+        JsonNode systemPropertiesJson = mapper.convertValue(systemProperties, JsonNode.class);
 
         try {
             retryTaskExecutor.executeWithRetry(() -> deleteCacheAndTable(structureId), Constants.MAX_RETRIES).join();
         } catch (Exception e) {
-            InvocationContext.getContext().getLogger().log(Level.SEVERE, "Processing of structure delete notification failed.");
+            InvocationContext.getContext().getLogger().log(Level.SEVERE, String.format("Processing of structure delete notification failed for message with " +
+                    "system properties: %s", systemPropertiesJson));
         }
     }
 
@@ -158,12 +165,12 @@ public class StructureNotificationProcessor implements NotificationProcessor {
         }));
     }
 
-    private CompletableFuture<Void> updateCacheAndTable(String structureId, String schema, List<ChangeEntity> changeList) {
+    private CompletableFuture<Void> updateCacheAndTable(String structureId, String schema, List<ChangeEntity> changeList, SystemProperties systemProperties) {
         return CompletableFuture.runAsync(InvocationContext.withContext(() -> {
             //we always want to update the cache
             SchemaWithADXStatus schemaWithADXStatus = new SchemaWithADXStatus(schema);
             mappingHelper.saveSchemaInCache(structureId, schemaWithADXStatus);
-
+            JsonNode systemPropertiesJson = mapper.convertValue(systemProperties, JsonNode.class);
             //update ADX
             changeList.forEach(changeEntity -> {
                 switch (changeEntity.getOperation()) {
@@ -178,10 +185,13 @@ public class StructureNotificationProcessor implements NotificationProcessor {
                         break;
                     default:
                         //for adding or deleting properties, we alter the table with the latest AVRO schema
-                        InvocationContext.getContext().getLogger().log(Level.WARNING, String.format("Unsupported Operation Type: %s.",
-                                changeEntity.getOperation()));
+                        InvocationContext.getContext().getLogger().log(Level.WARNING, String.format("Unsupported Operation Type: %s. for message with system " +
+                                        "properties: %s", changeEntity.getOperation(), systemPropertiesJson));
                 }
             });
+
+            adxTableManager.updateGdprDocString(structureId, schema);
+            adxTableManager.clearADXTableSchemaCache(structureId);
 
             mappingHelper.saveSchemaInCache(structureId, schemaWithADXStatus.withADXSyncStatus(true));
         }));
@@ -206,7 +216,7 @@ public class StructureNotificationProcessor implements NotificationProcessor {
     private void handlePropertyDelete(ChangeEntity changeEntity, String structureId, String schema) {
         String columnName = changeEntity.getEntity();
 
-        if (adxTableManager.dataExistsForColumn(structureId, columnName)) {
+        if (adxDataManager.dataExistsForColumn(structureId, columnName)) {
             InvocationContext.getContext().getLogger().log(Level.WARNING, String.format("Delete Request received for Column '%s'. Renaming Column to prevent " +
                     "data loss", columnName));
             //rename column
@@ -223,7 +233,7 @@ public class StructureNotificationProcessor implements NotificationProcessor {
             cacheRepository.delete(CacheKeyBuilder.constructSchemaInfoKey(structureId));
 
             //delete or soft delete ADX table
-            if (adxTableManager.dataExists(structureId)) {
+            if (adxDataManager.dataExists(structureId)) {
                 InvocationContext.getContext().getLogger().log(Level.WARNING, String.format("Delete Request received for Structure '%s'. Renaming table to " +
                         "prevent data loss", structureId));
                 adxTableManager.softDeleteTable(structureId);

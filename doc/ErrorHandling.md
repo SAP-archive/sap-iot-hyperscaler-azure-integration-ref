@@ -31,7 +31,7 @@ Non-transient errors are the ones which are permanent errors viz. invalid messag
 | EVENT_HUB_ERROR | Unable to access event hub |
 | MAPPING_LOOKUP_ERROR | Incorrect device mapping information or lookup error |
 | MAPPING_LOOKUP_ERROR | Incorrect device mapping information or lookup error |
-| INVALID_DEVICE_MESSAGE | Unable to parse device message to valid IoTS format |
+| INVALID_DEVICE_MESSAGE | Unable to parse device message to valid SAP IoT device model format |
 | INVALID_PROCESSED_MESSAGE | Invalid processed message with no avro schema |
 | INVALID_TIMESTAMP | Invalid timestamp |
 | JSON_PROCESSING_ERROR | Unable to prepare json mapping during ingestion |
