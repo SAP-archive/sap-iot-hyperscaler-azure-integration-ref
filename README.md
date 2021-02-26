@@ -1,6 +1,6 @@
-[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/sap-iot-hyperscaler-azure-integration-ref)](https://api.reuse.software/info/github.com/SAP-samples/sap-iot-hyperscaler-azure-integration-ref)
-
 # SAP IoT with Customer-managed Azure Ingestion and Persistence
+
+
 
 ## Description
 
@@ -32,12 +32,14 @@ Follow these steps to create and upload the zip file:
 
 1. Run maven build (install) on this project and locate the zip files from the maven build output for the required modules:  
     1. sap-iot-hyperscaler-azure-integration-ref/ingestion-functions/target folder will contain the ingestion-functions.zip file
-    2.  sap-iot-hyperscaler-azure-integration-ref/notification-processor/target folder will contain the notification-processor.zip file
-    3. sap-iot-hyperscaler-azure-integration-ref/device-management-functions/target folder will contain the device-management-functions.zip file.
+    2. sap-iot-hyperscaler-azure-integration-ref/notification-processor/target folder will contain the notification-processor.zip file
+    3. sap-iot-hyperscaler-azure-integration-ref/device-management-functions/target folder will contain the device-management-functions.zip file
+    4. sap-iot-hyperscaler-azure-integration-ref/timeseries-delete/target folder will contain the timeseries-delete.zip file
 2. [Upload the zip files to a blob storage container](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal)
     1. ingestion-functions.zip
     2. notification-processor.zip
     3. device-management-functions.zip
+    4. timeseries-delete.zip
 3. [Generate SAS token url as template input parameter](https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview)
     > Note: The expiry of the SAS token will lead to inactivity of the function. You should therefore ensure to pick an appropriate expiration date.
 
@@ -68,6 +70,7 @@ The content is provided "as-is". There is no guarantee that raised issues will b
 
 ## License
 
-Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved. This project is licensed under the Apache Software License, version 2.0  except as 
+Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, version 2.0  except as 
 noted otherwise in the REUSE files.
 
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/sap-iot-hyperscaler-azure-integration-ref)](https://api.reuse.software/info/github.com/SAP-samples/sap-iot-hyperscaler-azure-integration-ref)
