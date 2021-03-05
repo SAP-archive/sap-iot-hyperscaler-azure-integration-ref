@@ -1,11 +1,11 @@
-package com.sap.iot.azure.ref.ingestion.model.timeseries.raw.iots;
+package com.sap.iot.azure.ref.ingestion.model.timeseries.raw.device.model;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class IoTSMessageMeasure {
+public class IoTDeviceModelMeasure {
     private Map<String, Object> properties= new HashMap<String, Object>();
 
     public Map<String, Object> getProperties() {

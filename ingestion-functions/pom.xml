@@ -5,7 +5,7 @@
     <parent>
         <artifactId>azure-iot-integration</artifactId>
         <groupId>com.sap.iot.azure.ref</groupId>
-        <version>1.1.0</version>
+        <version>1.4.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -104,24 +104,17 @@
             <artifactId>applicationinsights-core</artifactId>
         </dependency>
 
-        <!-- vulas fixes -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-        <!-- vulas fixes -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
 
         <!-- Test -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>com.github.stefanbirkner</groupId>
             <artifactId>system-rules</artifactId>

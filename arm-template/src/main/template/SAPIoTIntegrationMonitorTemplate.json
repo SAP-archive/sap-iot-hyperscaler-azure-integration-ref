@@ -156,7 +156,7 @@
                                 }
                             ],
                             "operator": "GreaterThan",
-                            "timeAggregation": "Count",
+                            "timeAggregation": "Total",
                             "criterionType": "StaticThresholdCriterion"
                         }
                     ],
@@ -190,7 +190,7 @@
                             "metricName": "TotalNumberOfThrottledQueries",
                             "dimensions": [],
                             "operator": "GreaterThan",
-                            "timeAggregation": "Total",
+                            "timeAggregation": "Average",
                             "criterionType": "StaticThresholdCriterion"
                         }
                     ],
@@ -225,7 +225,8 @@
                             "dimensions": [],
                             "operator": "GreaterThan",
                             "timeAggregation": "Total",
-                            "criterionType": "StaticThresholdCriterion"
+                            "criterionType": "StaticThresholdCriterion",
+                            "skipMetricValidation": true
                         }
                     ],
                     "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
@@ -470,7 +471,7 @@
                 },
                 "autoMitigate": true,
                 "targetResourceType": "Microsoft.KeyVault/vaults",
-                "targetResourceRegion": "westeurope",
+                "targetResourceRegion": "[resourceGroup().location]",
                 "actions": []
             }
         },
@@ -478,7 +479,7 @@
             "type": "microsoft.insights/scheduledqueryrules",
             "apiVersion": "2018-04-16",
             "name": "[variables('scheduledQueryRulesNonTransientErrorsAlertName')]",
-            "location": "westeurope",
+            "location": "[resourceGroup().location]",
             "properties": {
                 "description": "The Azure function failed during message processing.",
                 "enabled": "true",
@@ -530,7 +531,8 @@
                             "dimensions": [],
                             "operator": "GreaterThan",
                             "timeAggregation": "Total",
-                            "criterionType": "StaticThresholdCriterion"
+                            "criterionType": "StaticThresholdCriterion",
+                            "skipMetricValidation": true
                         }
                     ],
                     "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
@@ -564,7 +566,8 @@
                             "dimensions": [],
                             "operator": "GreaterThan",
                             "timeAggregation": "Total",
-                            "criterionType": "StaticThresholdCriterion"
+                            "criterionType": "StaticThresholdCriterion",
+                            "skipMetricValidation": true
                         }
                     ],
                     "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
@@ -598,7 +601,8 @@
                             "dimensions": [],
                             "operator": "GreaterThan",
                             "timeAggregation": "Total",
-                            "criterionType": "StaticThresholdCriterion"
+                            "criterionType": "StaticThresholdCriterion",
+                            "skipMetricValidation": true
                         }
                     ],
                     "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
@@ -632,7 +636,8 @@
                             "dimensions": [],
                             "operator": "GreaterThan",
                             "timeAggregation": "Total",
-                            "criterionType": "StaticThresholdCriterion"
+                            "criterionType": "StaticThresholdCriterion",
+                            "skipMetricValidation": true
                         }
                     ],
                     "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
@@ -666,7 +671,8 @@
                             "dimensions": [],
                             "operator": "GreaterThan",
                             "timeAggregation": "Total",
-                            "criterionType": "StaticThresholdCriterion"
+                            "criterionType": "StaticThresholdCriterion",
+                            "skipMetricValidation": true
                         }
                     ],
                     "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"

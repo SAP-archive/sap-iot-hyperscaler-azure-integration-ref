@@ -58,7 +58,7 @@ public class MappingFunctionTest {
     }
 
     @Test
-    public void testHttpTriggerJava() {
+    public void testMappingFunction() {
         mappingFunction.run(getSampleMessages(), InvocationContextTestUtil.createSystemPropertiesMap(), InvocationContextTestUtil.createPartitionContext(),
                 InvocationContextTestUtil.getMockContext());
 

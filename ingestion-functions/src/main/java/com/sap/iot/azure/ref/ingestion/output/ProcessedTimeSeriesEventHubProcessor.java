@@ -6,9 +6,10 @@ import com.microsoft.azure.eventhubs.EventHubClient;
 import com.sap.iot.azure.ref.ingestion.exception.IngestionErrorType;
 import com.sap.iot.azure.ref.ingestion.exception.IngestionRuntimeException;
 import com.sap.iot.azure.ref.ingestion.util.Constants;
-import com.sap.iot.azure.ref.integration.commons.api.Processor;
+import com.sap.iot.azure.ref.integration.commons.api.ProcessorWithPerfMetrics;
 import com.sap.iot.azure.ref.integration.commons.avro.AvroHelper;
 import com.sap.iot.azure.ref.integration.commons.connection.EventHubClientFactory;
+import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
 import com.sap.iot.azure.ref.integration.commons.eventhub.BaseEventHubProcessor;
 import com.sap.iot.azure.ref.integration.commons.exception.CommonErrorType;
 import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
@@ -26,10 +27,10 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil.getIdentifier;
 
-public class ProcessedTimeSeriesEventHubProcessor extends BaseEventHubProcessor<ProcessedMessageContainer> implements Processor<Map.Entry<String, ProcessedMessageContainer>,
+public class ProcessedTimeSeriesEventHubProcessor extends BaseEventHubProcessor<ProcessedMessageContainer> implements ProcessorWithPerfMetrics<Map.Entry<String, ProcessedMessageContainer>,
         CompletableFuture<Void>> {
 
-    private static final String CONNECTION_STRING = System.getenv(Constants.PROCESSED_TIMESERIES_CONNECTION_STRING_PROP);
+    private static final String CONNECTION_STRING = System.getenv(Constants.PROCESSED_TIME_SERIES_CONNECTION_STRING_PROP);
 
     public ProcessedTimeSeriesEventHubProcessor() {
         this(new EventHubClientFactory().getEhClient(CONNECTION_STRING));
@@ -68,12 +69,11 @@ public class ProcessedTimeSeriesEventHubProcessor extends BaseEventHubProcessor<
             for (byte[] avroMessage : avroMessages) {
                 eventDataList.add(EventData.create(avroMessage));
             }
-
         } catch (AvroRuntimeException e) {
-            throw IoTRuntimeException.wrapNonTransient(getIdentifier(processedMessages.get(0).getSourceId(), processedMessageContainer.getStructureId()),
+            throw IoTRuntimeException.wrapNonTransient(getIdentifier(CommonConstants.SOURCE_ID_PROPERTY_KEY, processedMessages.get(0).getSourceId(),
+                    CommonConstants.STRUCTURE_ID_PROPERTY_KEY, processedMessageContainer.getStructureId()),
                     CommonErrorType.AVRO_EXCEPTION, "Avro runtime exception while processing message", e);
         }
-
         return eventDataList;
     }
 }

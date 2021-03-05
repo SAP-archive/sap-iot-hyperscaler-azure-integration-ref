@@ -5,6 +5,7 @@
     "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=<AccountName>;AccountKey=<AccountKey>;EndpointSuffix=core.windows.net",
     "delete-timeseries-eventhub-connection-string": "Endpoint=sb://<EndpointHost>/;SharedAccessKeyName=<SharedAccessKeyName>;SharedAccessKey=<SharedAccessKey>;EntityPath=<EntityPath>",
     "adx-resource-uri": "https://<host>.kusto.windows.net",
+    "adx-ingestion-resource-uri": "https://ingest-<host>.kusto.windows.net",
     "service-principal-application-client-id": "ClientId",
     "service-principal-application-key": "Key",
     "service-principal-authority-id": "AutorityId",

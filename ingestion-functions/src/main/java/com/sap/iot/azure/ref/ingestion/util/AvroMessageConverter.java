@@ -47,7 +47,7 @@ public class AvroMessageConverter {
      * is also converted to String type, if it is of Instant type during the process of deserialization.
      *
      * @param structureId, required for fetching schema information from the {@link MappingHelper},
-     * @param avro, required avro message to be deserialized from byte[] to List<JsonNode>
+     * @param avro,        required avro message to be deserialized from byte[] to List<JsonNode>
      * @return list<JsonNode> of {@link List<JsonNode> messages} after deserialization of avroMessage
      */
     public List<JsonNode> deserializeAvroMessage(String structureId, byte[] avro) throws MappingLookupException, ADXClientException, AvroIngestionException {
@@ -55,9 +55,8 @@ public class AvroMessageConverter {
         try {
             // INFO Call mapping helper to check ADX table existence
             mappingHelper.getSchemaInfo(structureId);
-
             return genericMessageAvroDecoder(avro);
-        } catch ( IOException | RuntimeException e) {
+        } catch (IOException | RuntimeException e) {
             throw new AvroIngestionException("Avro Message cannot be de-serialized", e, IdentifierUtil.getIdentifier(STRUCTURE_ID_PROPERTY_KEY, structureId));
         }
     }
@@ -68,7 +67,7 @@ public class AvroMessageConverter {
         DatumReader<GenericRecord> readerWithoutSchema = new GenericDatumReader<>();
         GenericRecord genericRecord = null;
         try (InputStream is = new ByteArrayInputStream(avro);
-                DataFileStream<GenericRecord> dataFileStream = new DataFileStream<>(is, readerWithoutSchema)) {
+             DataFileStream<GenericRecord> dataFileStream = new DataFileStream<>(is, readerWithoutSchema)) {
             if (dataFileStream.hasNext()) {
                 genericRecord = dataFileStream.next(genericRecord);
             }

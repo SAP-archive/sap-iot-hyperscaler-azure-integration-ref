@@ -7,9 +7,11 @@ import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.Cardinality;
 import com.microsoft.azure.functions.annotation.EventHubTrigger;
 import com.microsoft.azure.functions.annotation.FunctionName;
+import com.sap.iot.azure.ref.delete.logic.DeleteTimeSeriesHandler;
 import com.sap.iot.azure.ref.delete.util.Constants;
 import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
+import com.sap.iot.azure.ref.integration.commons.model.base.eventhub.SystemProperties;
 import com.sap.iot.azure.ref.integration.commons.retry.RetryTaskExecutor;
 
 import java.util.Map;
@@ -22,18 +24,26 @@ import static com.sap.iot.azure.ref.integration.commons.constants.CommonConstant
 public class DeleteTimeSeriesFunction {
 
     private final DeleteTimeSeriesHandler deleteTimeSeriesHandler;
-    private final RetryTaskExecutor retryTaskExecutor;
+    private static final RetryTaskExecutor retryTaskExecutor = new RetryTaskExecutor();
 
     public DeleteTimeSeriesFunction() {
-        this(new DeleteTimeSeriesHandler(), new RetryTaskExecutor());
+        this(new DeleteTimeSeriesHandler());
     }
 
     @VisibleForTesting
-    DeleteTimeSeriesFunction(DeleteTimeSeriesHandler deleteTimeSeriesHandler, RetryTaskExecutor retryTaskExecutor) {
+    DeleteTimeSeriesFunction(DeleteTimeSeriesHandler deleteTimeSeriesHandler) {
         this.deleteTimeSeriesHandler = deleteTimeSeriesHandler;
-        this.retryTaskExecutor = retryTaskExecutor;
     }
 
+    /**
+     * Azure function which invoked by an by an Event Hub trigger.
+     * The Trigger is connected to the Event Hub which is configured through {@link Constants#TRIGGER_EVENT_HUB_CONNECTION_STRING_PROP} environment variable.
+     * The message payload is passed to the {@link DeleteTimeSeriesHandler} for further processing. The processing is wrapped with a retry logic implemented
+     * by the {@link RetryTaskExecutor}.
+     * @param message, incoming delete request
+     * @param systemProperties, system properties including message header information
+     * @param context, invocation context of the current Azure Function invocation
+     */
     @FunctionName("DeleteTimeSeries")
     public void run(
             @EventHubTrigger(
@@ -47,10 +57,11 @@ public class DeleteTimeSeriesFunction {
             @BindingName(value = CommonConstants.PARTITION_CONTEXT) Map<String, Object> partitionContext,
             final ExecutionContext context) {
 
+        Map<String, Object> systemPropertiesMap = SystemProperties.selectRelevantKeys(systemProperties);
         try {
             InvocationContext.setupInvocationContext(context);
             retryTaskExecutor.executeWithRetry(() -> CompletableFuture.runAsync(InvocationContext.withContext(() ->
-                    deleteTimeSeriesHandler.processMessage(message))), Constants.MAX_RETRIES).join();
+                    deleteTimeSeriesHandler.processMessage(message, systemPropertiesMap))), Constants.MAX_RETRIES).join();
             InvocationContext.getLogger().log(Level.INFO, " Notification processed");
         } catch (Exception e) {
             JsonNode messageInfo = InvocationContext.getInvocationMessageInfo(partitionContext, systemProperties);

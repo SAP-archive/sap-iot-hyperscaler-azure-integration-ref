@@ -1,5 +1,6 @@
 package com.sap.iot.azure.ref.integration.commons.mapping;
 
+import com.sap.iot.azure.ref.integration.commons.adx.ADXDataManager;
 import com.sap.iot.azure.ref.integration.commons.adx.ADXTableManager;
 import com.sap.iot.azure.ref.integration.commons.cache.api.CacheRepository;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;

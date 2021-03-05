@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class DeviceManagementStatusWriter extends BaseEventHubProcessor<DeviceManagementStatusInfo> implements Processor<DeviceManagementStatusInfo, CompletableFuture<Void>>{
+public class DeviceManagementStatusWriter extends BaseEventHubProcessor<DeviceManagementStatusInfo> implements Processor<DeviceManagementStatusInfo, CompletableFuture<Void>> {
 
     private static final String CONNECTION_STRING = System.getenv(Constants.DEVICE_MANAGEMENT_STATUS_CONNECTION_STRING_PROP);
 

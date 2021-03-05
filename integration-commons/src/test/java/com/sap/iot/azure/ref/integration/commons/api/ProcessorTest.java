@@ -1,6 +1,5 @@
 package com.sap.iot.azure.ref.integration.commons.api;
 
-import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;
 import com.sap.iot.azure.ref.integration.commons.exception.CommonErrorType;
 import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;

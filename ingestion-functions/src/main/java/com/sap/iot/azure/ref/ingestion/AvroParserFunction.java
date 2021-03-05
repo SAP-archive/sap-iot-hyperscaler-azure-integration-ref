@@ -2,16 +2,20 @@ package com.sap.iot.azure.ref.ingestion;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.Cardinality;
 import com.microsoft.azure.functions.annotation.EventHubTrigger;
 import com.microsoft.azure.functions.annotation.FunctionName;
+import com.sap.iot.azure.ref.ingestion.exception.IngestionErrorType;
+import com.sap.iot.azure.ref.ingestion.exception.IngestionRuntimeException;
 import com.sap.iot.azure.ref.ingestion.output.ADXEventHubProcessor;
 import com.sap.iot.azure.ref.ingestion.service.AvroMessageService;
 import com.sap.iot.azure.ref.ingestion.util.Constants;
 import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
+import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
 import com.sap.iot.azure.ref.integration.commons.metrics.MetricsClient;
 import com.sap.iot.azure.ref.integration.commons.retry.RetryTaskExecutor;
 
@@ -28,21 +32,20 @@ import static com.sap.iot.azure.ref.ingestion.util.Constants.*;
 public class AvroParserFunction {
 
     private final AvroMessageService avroMessageService;
-    private final RetryTaskExecutor retryTaskExecutor;
+    private static final RetryTaskExecutor retryTaskExecutor = new RetryTaskExecutor();
     private final ADXEventHubProcessor adxEventHubProcessor;
 
     public AvroParserFunction() {
-        this( new AvroMessageService(), new ADXEventHubProcessor(), new RetryTaskExecutor());
+        this(new AvroMessageService(), new ADXEventHubProcessor());
     }
 
     static {
         InvocationContext.setupInitializationContext(AVRO_PARSER_FUNCTION);
     }
 
-    AvroParserFunction( AvroMessageService avroMessageService, ADXEventHubProcessor adxEventHubProcessor, RetryTaskExecutor retryTaskExecutor ) {
+    AvroParserFunction(AvroMessageService avroMessageService, ADXEventHubProcessor adxEventHubProcessor) {
         this.avroMessageService = avroMessageService;
         this.adxEventHubProcessor = adxEventHubProcessor;
-        this.retryTaskExecutor = retryTaskExecutor;
 
         InvocationContext.closeInitializationContext();
     }
@@ -54,34 +57,32 @@ public class AvroParserFunction {
      * The message payloads are brought in to an AVRO format following SAP-defined Processed-Time-Series AVRO Schema,
      * and deserialized into a map of sourceId & list of processedMessages and sent to the downstream ADXEventHub using the {@link ADXEventHubProcessor}.
      *
-     * @param avroMessages, incoming message payload in AVRO binary format
+     * @param avroMessages,     incoming message payload in AVRO binary format
      * @param systemProperties, system properties including message header information, such as the PartitionKey
-     * @param context, invocation context of the current Azure Function invocation
+     * @param context,          invocation context of the current Azure Function invocation
      */
     @FunctionName(value = AVRO_PARSER_FUNCTION)
     public void run(
             @EventHubTrigger(name = Constants.TRIGGER_NAME,
-                eventHubName = Constants.PROCESSED_TIMESERIES_IN_EVENT_HUB,
-                connection = Constants.PROCESSED_TIMESERIES_IN_CONNECTION_STRING,
-                consumerGroup = Constants.PROCESSED_TIMESERIES_IN_EVENT_HUB_CONSUMER_GROUP,
-                cardinality = Cardinality.MANY,
-                dataType = CommonConstants.TRIGGER_EVENT_HUB_DATA_TYPE_BINARY)
-            List<byte[]> avroMessages,
+                    eventHubName = Constants.PROCESSED_TIME_SERIES_IN_EVENT_HUB,
+                    connection = Constants.PROCESSED_TIME_SERIES_IN_CONNECTION_STRING,
+                    consumerGroup = Constants.PROCESSED_TIME_SERIES_IN_EVENT_HUB_CONSUMER_GROUP,
+                    cardinality = Cardinality.MANY,
+                    dataType = CommonConstants.TRIGGER_EVENT_HUB_DATA_TYPE_BINARY)
+                    List<byte[]> avroMessages,
             @BindingName(value = CommonConstants.TRIGGER_SYSTEM_PROPERTIES_ARRAY_NAME) Map<String, Object>[] systemProperties,
             @BindingName(value = CommonConstants.PARTITION_CONTEXT) Map<String, Object> partitionContext,
             final ExecutionContext context) {
-
+        JsonNode batchDetails = InvocationContext.getInvocationBatchInfo(partitionContext, systemProperties);
         try {
             InvocationContext.setupInvocationContext(context);
             retryTaskExecutor.executeWithRetry(() -> processMessages(avroMessages, systemProperties), Constants.MAX_RETRIES).join();
+        } catch (IoTRuntimeException e) {
+            e.addIdentifiers((ObjectNode) batchDetails);
+            throw e;
         } catch (Exception e) {
-
-            JsonNode batchDetails = InvocationContext.getInvocationBatchInfo(partitionContext, systemProperties);
-            InvocationContext.getLogger().log(Level.SEVERE, String.format("Parsing Avro Message and write to ADX Event Hub failed for batch Partition ID: %s," +
-                            " Start Offset: %s, End Offset: %s; Exiting after %s", batchDetails.get("PartitionId").asText(), batchDetails.get("OffsetStart").asText(),
-                    batchDetails.get("OffsetEnd").asText(), MAX_RETRIES), e);
-
-            throw e; // ensure function invocation status is set to failed
+            throw new IngestionRuntimeException("Parsing Avro Message and write to ADX Event Hub failed", e, IngestionErrorType.INVALID_PROCESSED_MESSAGE,
+                    batchDetails, false);
         } finally {
             InvocationContext.closeInvocationContext();
         }
@@ -90,7 +91,7 @@ public class AvroParserFunction {
     /**
      * all processes in this method happens in a async thread so that any exception can be caught by the catchExceptionally block
      *
-     * @param messages, list of Avro messages
+     * @param messages,         list of Avro messages
      * @param systemProperties, system properties
      * @return completable future for processing the incoming message asynchronously
      */
@@ -106,7 +107,7 @@ public class AvroParserFunction {
                             MetricsClient.trackMetric(MetricsClient.getMetricName("MessagesProcessed"), entry.getValue().getProcessedMessages().size());
                         })
                         .map(messageGroup -> CompletableFuture.allOf(adxEventHubProcessor.apply(messageGroup))).toArray(CompletableFuture[]::new))
-                .join()
+                        .join()
         ));
     }
 }

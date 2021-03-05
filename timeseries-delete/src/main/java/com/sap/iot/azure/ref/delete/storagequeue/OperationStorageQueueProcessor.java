@@ -2,17 +2,17 @@ package com.sap.iot.azure.ref.delete.storagequeue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.storage.RetryExponentialRetry;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.queue.CloudQueue;
 import com.microsoft.azure.storage.queue.CloudQueueClient;
 import com.microsoft.azure.storage.queue.CloudQueueMessage;
-import com.microsoft.azure.storage.queue.QueueRequestOptions;
 import com.sap.iot.azure.ref.delete.connection.CloudQueueClientFactory;
 import com.sap.iot.azure.ref.delete.exception.DeleteTimeSeriesErrorType;
 import com.sap.iot.azure.ref.delete.exception.DeleteTimeSeriesException;
 import com.sap.iot.azure.ref.delete.model.OperationInfo;
+import com.sap.iot.azure.ref.delete.model.OperationType;
 import com.sap.iot.azure.ref.delete.util.Constants;
+import com.sap.iot.azure.ref.integration.commons.api.Processor;
 import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
 
 import java.net.URISyntaxException;
@@ -23,7 +23,7 @@ import java.util.GregorianCalendar;
 import java.util.Optional;
 import java.util.Random;
 
-public class OperationStorageQueueProcessor {
+public class OperationStorageQueueProcessor implements Processor<StorageQueueMessageInfo, Void> {
     private final ObjectMapper mapper;
     private final CloudQueueClient cloudQueueClient;
     private final Random random = new SecureRandom();
@@ -37,8 +37,17 @@ public class OperationStorageQueueProcessor {
         this.mapper = mapper;
     }
 
-    public void process(CloudQueueMessage message, Optional<Date> nextVisibleTimeOpt) throws DeleteTimeSeriesException {
-        String messageIdKey = "messageId";
+    /**
+     * Sends a {@link StorageQueueMessageInfo} to the operation storage queue with the name defined in {@link Constants#STORAGE_QUEUE_NAME}.
+     * An exponential backoff is used to increase the visibility of the message. The maximum time is defined in {@link Constants#TARGET_TIME_MINUTES}.
+     * The built-in retry mechanic of the storage queue is used to recover from transient errors.
+     *
+     * @param messageInfo info to be forwarded to storage queue
+     * @throws DeleteTimeSeriesException exception in storage queue interaction
+     */
+    public Void process(StorageQueueMessageInfo messageInfo) throws DeleteTimeSeriesException {
+        CloudQueueMessage message = messageInfo.getCloudQueueMessage();
+        Optional<Date> nextVisibleTimeOpt = messageInfo.getNextVisibleTimeOpt();
 
         try {
             // Retrieve a reference to a queue.
@@ -59,22 +68,33 @@ public class OperationStorageQueueProcessor {
                     initialVisibilityDelayInSeconds = finalBackoff / 1000;
                 }
             }
-            RetryExponentialRetry retryExponentialRetry = new RetryExponentialRetry(Constants.STORAGE_QUEUE_MIN_BACKOFF,
-                    Constants.STORAGE_QUEUE_DELTA_BACKOFF, Constants.STORAGE_QUEUE_MAX_BACKOFF, Constants.STORAGE_QUEUE_MAX_RETRIES);
-            QueueRequestOptions queueRequestOptions = new QueueRequestOptions();
-            queueRequestOptions.setRetryPolicyFactory(retryExponentialRetry);
-            queue.addMessage(message, 0, initialVisibilityDelayInSeconds, queueRequestOptions, null);
+            queue.addMessage(message, 0, initialVisibilityDelayInSeconds, StorageQueueUtil.getRetryOptions(), null);
         } catch (StorageException e) {
-            throw new DeleteTimeSeriesException(String.format("Error while adding cloudQueueMessage to queue. HTTPStatusCode: %s and Error Code: %s",
-                    e.getHttpStatusCode(), e.getErrorCode()), e, DeleteTimeSeriesErrorType.STORAGE_QUEUE_ERROR,
-                    IdentifierUtil.getIdentifier(messageIdKey, message.getId()), true);
+            throw new DeleteTimeSeriesException(String.format("Error while adding cloudQueueMessage to queue after %s retries. HTTPStatusCode: %s and Error " +
+                    "Code: %s", Constants.STORAGE_QUEUE_MAX_RETRIES, e.getHttpStatusCode(), e.getErrorCode()), e,
+                    DeleteTimeSeriesErrorType.STORAGE_QUEUE_ERROR, IdentifierUtil.getIdentifier(Constants.MESSAGE_ID_KEY, message.getId()), false);
         } catch (URISyntaxException e) {
             throw new DeleteTimeSeriesException("Invalid Storage Queue Address", e, DeleteTimeSeriesErrorType.STORAGE_QUEUE_ERROR,
-                    IdentifierUtil.getIdentifier(messageIdKey, message.getId()), false);
+                    IdentifierUtil.getIdentifier(Constants.MESSAGE_ID_KEY, message.getId()), false);
         }
+
+        return null; //required to implement the processor interface
     }
 
-    public CloudQueueMessage getOperationInfoMessage(String operationId, String eventId, String structureId, String correlationId) throws DeleteTimeSeriesException {
+    /**
+     * Creates a {@link CloudQueueMessage} from the provided operation information.
+     * The message content is based on the {@link OperationInfo} POJO and is formatted as json string.
+     *
+     * @param operationId id of the delete operation
+     * @param eventId id of the according cloud event
+     * @param structureId id of the affected structure
+     * @param correlationId id for logging and error tracing purposes
+     * @param operationType type of delete operation
+     * @return cloud queue message containing all relevant operation information
+     * @throws DeleteTimeSeriesException exception while forming operation info object
+     */
+    public CloudQueueMessage getOperationInfoMessage(String operationId, String eventId, String structureId, String correlationId,
+                                                     OperationType operationType) throws DeleteTimeSeriesException {
         try {
             return new CloudQueueMessage(
                     mapper.writeValueAsString(
@@ -83,6 +103,7 @@ public class OperationStorageQueueProcessor {
                                     .eventId(eventId)
                                     .structureId(structureId)
                                     .correlationId(correlationId)
+                                    .operationType(operationType)
                                     .build()));
         } catch (JsonProcessingException e) {
             throw new DeleteTimeSeriesException("Unable to form Operation Info object", e, DeleteTimeSeriesErrorType.JSON_PROCESSING_ERROR,

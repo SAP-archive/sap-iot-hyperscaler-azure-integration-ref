@@ -51,7 +51,7 @@ public class ProcessedTimeSeriesEventHubProcessorTest {
 
     @ClassRule
     public static final EnvironmentVariables environmentVariables = new EnvironmentVariables()
-            .set(Constants.PROCESSED_TIMESERIES_CONNECTION_STRING_PROP, CONNECTION_STRING);
+            .set(Constants.PROCESSED_TIME_SERIES_CONNECTION_STRING_PROP, CONNECTION_STRING);
 
     private ProcessedTimeSeriesEventHubProcessor processedTimeSeriesEventHubProcessor;
 

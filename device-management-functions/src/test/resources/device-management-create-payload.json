@@ -11,9 +11,11 @@
   "datacontenttype": "application/json",
   "data": {
     "deviceId": "d1",
+    "deviceAlternateId": "d1",
     "sensors": [
       {
-        "sensorId": "s1",
+        "sensorId": "d1/ref1",
+        "sensorAlternateId": "ref1",
         "operation": "ADD",
         "capabilities": [
           {
@@ -30,6 +32,7 @@
     "capabilities": [
       {
         "capabilityId": "c1",
+        "capabilityAlternateId": "c1",
         "operation": "ADD",
         "properties": [
           {
@@ -41,6 +44,7 @@
       },
       {
         "capabilityId": "c2",
+        "capabilityAlternateId": "c2",
         "operation": "ADD",
         "properties": [
           {

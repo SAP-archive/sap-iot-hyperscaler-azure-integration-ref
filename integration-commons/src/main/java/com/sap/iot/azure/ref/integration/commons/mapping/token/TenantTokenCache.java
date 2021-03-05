@@ -3,10 +3,11 @@ package com.sap.iot.azure.ref.integration.commons.mapping.token;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.net.HttpHeaders;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
-import com.sap.iot.azure.ref.integration.commons.exception.MappingLookupException;
+import com.sap.iot.azure.ref.integration.commons.exception.TokenLookupException;
 import com.sap.iot.azure.ref.integration.commons.mapping.MappingServiceConstants;
 import com.sap.iot.azure.ref.integration.commons.mapping.api.AsyncHttpClientFactory;
 import com.sap.iot.azure.ref.integration.commons.mapping.util.HttpResponseUtil;
@@ -36,7 +37,12 @@ public class TenantTokenCache {
 
 
     public TenantTokenCache() {
-        this.asyncHttpClient = new AsyncHttpClientFactory().getAsyncHttpClient();
+        this(new AsyncHttpClientFactory().getAsyncHttpClient());
+    }
+
+    @VisibleForTesting
+    TenantTokenCache(AsyncHttpClient asyncHttpClient) {
+        this.asyncHttpClient = asyncHttpClient;
     }
 
     /**
@@ -69,7 +75,7 @@ public class TenantTokenCache {
 
             if (tokenResponse.getStatusCode() == HttpStatus.SC_BAD_REQUEST) { // invalid scopes are provided as env, fetch the token with all scopes
                 InvocationContext.getLogger().warning(String.format("Invalid scopes %s provided in the function setting. Token fetch failed with response - " +
-                        "%s. Will continue to fetch all scopes", SystemUtils.getEnvironmentVariable("sap-iot-required-api-scopes", ""),
+                                "%s. Will continue to fetch all scopes", SystemUtils.getEnvironmentVariable("sap-iot-required-api-scopes", ""),
                         tokenResponse.getResponseBody()));
 
                 tokenResponse = getScopesRequestBuilder(clientId, clientSecret)
@@ -81,15 +87,15 @@ public class TenantTokenCache {
 
             token = objectMapper.readTree(tokenResponse.getResponseBody()).get(MappingServiceConstants.TOKEN_BODY_KEY).textValue();
         } catch (JsonParseException | JsonMappingException e) {
-            throw new MappingLookupException("Error while fetching token", IdentifierUtil.getIdentifier(MappingServiceConstants.TOKEN_URL_PROPERTY_KEY,
+            throw new TokenLookupException("Error while fetching token", IdentifierUtil.getIdentifier(MappingServiceConstants.TOKEN_URL_PROPERTY_KEY,
                     MappingServiceConstants.TOKEN_ENDPOINT), false);
         } catch (IOException | ExecutionException e) {
-            throw new MappingLookupException("Error while fetching token", IdentifierUtil.getIdentifier(MappingServiceConstants.TOKEN_URL_PROPERTY_KEY,
+            throw new TokenLookupException("Error while fetching token", IdentifierUtil.getIdentifier(MappingServiceConstants.TOKEN_URL_PROPERTY_KEY,
                     MappingServiceConstants.TOKEN_ENDPOINT), true);
         } catch (InterruptedException e) {
             // Restore interrupted state...
             Thread.currentThread().interrupt();
-            throw new MappingLookupException("Error while fetching token due to an interruption",
+            throw new TokenLookupException("Error while fetching token due to an interruption",
                     IdentifierUtil.getIdentifier(MappingServiceConstants.TOKEN_URL_PROPERTY_KEY, MappingServiceConstants.TOKEN_ENDPOINT), true);
         }
 

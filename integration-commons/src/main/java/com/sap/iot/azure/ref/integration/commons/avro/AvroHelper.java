@@ -2,9 +2,9 @@ package com.sap.iot.azure.ref.integration.commons.avro;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.microsoft.azure.eventhubs.impl.ClientConstants;
 import com.sap.iot.azure.ref.integration.commons.adx.ADXConstants;
 import com.sap.iot.azure.ref.integration.commons.avro.logicaltypes.RegisterService;
-import com.microsoft.azure.eventhubs.impl.ClientConstants;
 import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.exception.AvroIngestionException;
@@ -49,8 +49,7 @@ public class AvroHelper {
             // ~1024 KB (supported message size in standard tier) with tolerance of 512B for headers
             EVENT_HUB_MSG_BODY_SIZE_LIMIT = (EVENTHUB_SKU_STANDARD_TIER_SIZE * 1024) - ClientConstants.MAX_EVENTHUB_AMQP_HEADER_SIZE_BYTES;
             InvocationContext.getContext().getLogger().log(Level.INFO, "Standard tier is configured for Event Hub");
-        }
-        else {
+        } else {
             InvocationContext.getContext().getLogger().log(Level.INFO, "Basic tier is configured for Event Hub");
         }
     }
@@ -93,7 +92,7 @@ public class AvroHelper {
      * Note - if a single {@link ProcessedMessage} is more than allowed size limit of Event Hub, this method cannot handle this.
      *
      * @param processedMessages, message which will be converted to AVRO message
-     * @param schemaStr,        AVRO schema used for AVRO conversion
+     * @param schemaStr,         AVRO schema used for AVRO conversion
      * @return AVRO message
      * @throws AvroIngestionException exception in avro processing
      */
@@ -309,7 +308,25 @@ public class AvroHelper {
      */
     public static Map<String, String> getColumnInfo(String structureId, String schemaString) throws AvroIngestionException {
         try {
-            Schema schema = new Schema.Parser().parse(schemaString);
+            return getColumnInfo(structureId, new Schema.Parser().parse(schemaString));
+        } catch (AvroRuntimeException ex) {
+            throw new AvroIngestionException("Error in fetching column types from Avro Scheam", ex,
+                    IdentifierUtil.getIdentifier(CommonConstants.STRUCTURE_ID_PROPERTY_KEY, structureId));
+        }
+    }
+
+    /**
+     * Get ADX column information for a given schema.
+     * The column information consists of certain default columns, such as source ID and enqueued time, as well as columns which are added depending on the
+     * AVRO schemas measure and tag fields.
+     *
+     * @param schema, column information will be extracted from schema
+     * @param structureId   structure id
+     * @return {@link Map<String, String>} Map containing column name and types
+     * @throws AvroIngestionException any error in avro processing
+     */
+    public static Map<String, String> getColumnInfo(String structureId, Schema schema) throws AvroIngestionException {
+        try {
             LinkedHashMap<String, String> columnInfo = new LinkedHashMap<>();
 
             columnInfo.put(CommonConstants.SOURCE_ID_PROPERTY_KEY, ADXConstants.ADX_DATATYPE_STRING);
@@ -326,6 +343,56 @@ public class AvroHelper {
             throw new AvroIngestionException("Error in fetching column types from Avro Scheam", ex,
                     IdentifierUtil.getIdentifier(CommonConstants.STRUCTURE_ID_PROPERTY_KEY, structureId));
         }
+    }
+
+    /**
+     * Determines if a structure is GDPR relevant based on it's Avro schema.
+     *
+     * @param schemaString, Avro schema as string
+     * @return boolean indicating GDPR relevance
+     */
+    public static boolean isGdprRelevant(String schemaString) {
+        return isGdprRelevant(new Schema.Parser().parse(schemaString));
+    }
+
+    /**
+     * Determines if a structure is GDPR relevant based on it's Avro schema.
+     *
+     * @param schema, Avro schema
+     * @return boolean indicating GDPR relevance
+     */
+    public static boolean isGdprRelevant(Schema schema) {
+        String gdprDataCategory = getGdprDataCategory(schema);
+
+        return AvroConstants.GDPR_CATEGORY_PII.equals(gdprDataCategory) || AvroConstants.GDPR_CATEGORY_SPI.equals(gdprDataCategory);
+    }
+
+    /**
+     * Returns the gdpr data category from given Avro schema
+     * @param schemaString given Avro schema string
+     * @return gdpr data category as string
+     */
+    public static String getGdprDataCategory(String schemaString) {
+        return getGdprDataCategory(new Schema.Parser().parse(schemaString));
+    }
+
+    /**
+     * Returns the gdpr data category from given Avro schema
+     * @param schema given Avro schema
+     * @return gdpr data category as string
+     */
+    public static String getGdprDataCategory(Schema schema) {
+        return schema.getProp(AvroConstants.GDPR_DATA_CATEGORY);
+    }
+
+    /**
+     * Parses a schema string to an Avro schema
+     *
+     * @param schemaString which is to be parsed
+     * @return Avro schema
+     */
+    public static Schema parseSchema(String schemaString) {
+        return new Schema.Parser().parse(schemaString);
     }
 
     private static LinkedHashMap<String, String> addFieldInfo(List<Schema.Field> measureFields, LinkedHashMap<String, String> columnInfo) {

@@ -1,5 +1,8 @@
 package com.sap.iot.azure.ref.notification.processing.assignment;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.sap.iot.azure.ref.integration.commons.cache.api.CacheRepository;
 import com.sap.iot.azure.ref.integration.commons.cache.redis.AzureCacheRepository;
@@ -8,6 +11,7 @@ import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
 import com.sap.iot.azure.ref.integration.commons.mapping.MappingServiceConstants;
+import com.sap.iot.azure.ref.integration.commons.model.base.eventhub.SystemProperties;
 import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.SensorAssignment;
 import com.sap.iot.azure.ref.notification.exception.NotificationErrorType;
 import com.sap.iot.azure.ref.notification.exception.NotificationProcessException;
@@ -22,6 +26,7 @@ import java.util.logging.Level;
 public class AssignmentNotificationProcessor implements NotificationProcessor {
 
     private final CacheRepository cacheRepository;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public static final String MAPPING_ID = "MappingId";
     public static final String OBJECT_ID = "ObjectId";
@@ -44,14 +49,16 @@ public class AssignmentNotificationProcessor implements NotificationProcessor {
     @Override
     public void handleCreate(NotificationMessage notification) throws NotificationProcessException {
         String assignmentId = notification.getChangeEntity();
+        SystemProperties systemProperties = notification.getSource();
         try {
-            String mappingId = getMappingIdFromDataEntityList(notification.getEntityDataList());
-            String objectId = getObjectIdFromDataEntityList(notification.getEntityDataList());
-            String sensorId = getSensorIdFromPartitionKey(notification.getPartitionKey());
+            String mappingId = getMappingIdFromDataEntityList(notification);
+            String objectId = getObjectIdFromDataEntityList(notification);
+            String sensorId = getSensorIdFromPartitionKey(notification);
             setSensorAssignmentCacheEntry(sensorId, assignmentId, mappingId, objectId);
-        }
-        catch (NotificationProcessException ex) {
+        } catch (NotificationProcessException ex) {
+            ObjectNode systemPropertiesJson = mapper.convertValue(systemProperties, ObjectNode.class);
             ex.addIdentifier(CommonConstants.ASSIGNMENT_ID, assignmentId);
+            ex.addIdentifiers(systemPropertiesJson);
             throw ex;
         }
     }
@@ -66,10 +73,11 @@ public class AssignmentNotificationProcessor implements NotificationProcessor {
      */
     @Override
     public void handleUpdate(NotificationMessage notification) throws NotificationProcessException {
-        String mappingId = getMappingIdFromDataEntityList(notification.getEntityDataList());
-        String sensorId = getSensorIdFromPartitionKey(notification.getPartitionKey());
+        String mappingId = getMappingIdFromDataEntityList(notification);
+        String sensorId = getSensorIdFromPartitionKey(notification);
         String assignmentId = notification.getChangeEntity();
-        String objectId = getObjectIdFromDataEntityList(notification.getEntityDataList());
+        String objectId = getObjectIdFromDataEntityList(notification);
+        SystemProperties systemProperties = notification.getSource();
         List<ChangeEntity> changeList = notification.getChangeList();
 
         for (ChangeEntity changeEntity : changeList) {
@@ -86,7 +94,8 @@ public class AssignmentNotificationProcessor implements NotificationProcessor {
                     }
                     break;
                 default:
-                    InvocationContext.getContext().getLogger().log(Level.WARNING, String.format("Unsupported Operation Type: %s.", changeEntity.getOperation()));
+                    InvocationContext.getContext().getLogger().log(Level.WARNING, String.format("Unsupported operation type: %s. for message with " +
+                            "system properties : %s", changeEntity.getOperation(), systemProperties));
             }
         }
     }
@@ -98,8 +107,7 @@ public class AssignmentNotificationProcessor implements NotificationProcessor {
      */
     @Override
     public void handleDelete(NotificationMessage notification) throws NotificationProcessException {
-        String partitionKey = notification.getPartitionKey();
-        String sensorId = getSensorIdFromPartitionKey(partitionKey);
+        String sensorId = getSensorIdFromPartitionKey(notification);
         List<String> cacheKeys = cacheRepository.scanCacheKey(MappingServiceConstants.CACHE_KEY_CREATOR_PREFIX + MappingServiceConstants.CACHE_SENSOR_KEY_PREFIX + sensorId);
         for (String cacheKey : cacheKeys) {
             cacheRepository.delete(CacheKeyBuilder.getKeyAsBytes(cacheKey));
@@ -117,36 +125,45 @@ public class AssignmentNotificationProcessor implements NotificationProcessor {
         cacheRepository.set(sensorCacheKey, sensorAssignment, SensorAssignment.class);
     }
 
-    private String getMappingIdFromDataEntityList(List<DataEntity> dataEntityList) throws NotificationProcessException {
+    private String getMappingIdFromDataEntityList(NotificationMessage notificationMessage) throws NotificationProcessException {
+        List<DataEntity> dataEntityList = notificationMessage.getEntityDataList();
+        SystemProperties systemProperties = notificationMessage.getSource();
+        JsonNode systemPropertiesJson = mapper.convertValue(systemProperties, JsonNode.class);
+
         for (DataEntity entityData : dataEntityList) {
             if (entityData.getName().equals(MAPPING_ID)) {
                 return entityData.getValue();
             }
         }
-
         throw new NotificationProcessException("Unable to retrieve mappingId from entity data",
-                NotificationErrorType.NOTIFICATION_PARSER_ERROR, IdentifierUtil.empty(), false);
+                NotificationErrorType.NOTIFICATION_PARSER_ERROR, systemPropertiesJson, false);
     }
 
-    private String getObjectIdFromDataEntityList(List<DataEntity> dataEntityList) throws NotificationProcessException {
+    private String getObjectIdFromDataEntityList(NotificationMessage notificationMessage) throws NotificationProcessException {
+        List<DataEntity> dataEntityList = notificationMessage.getEntityDataList();
+        SystemProperties systemProperties = notificationMessage.getSource();
+        JsonNode systemPropertiesJson = mapper.convertValue(systemProperties, JsonNode.class);
+
         for (DataEntity entityData : dataEntityList) {
             if (entityData.getName().equals(OBJECT_ID)) {
                 return entityData.getValue();
             }
         }
-
         throw new NotificationProcessException("Unable to retrieve objectId from entity data",
-                NotificationErrorType.NOTIFICATION_PARSER_ERROR, IdentifierUtil.empty(), false);
+                NotificationErrorType.NOTIFICATION_PARSER_ERROR, systemPropertiesJson, false);
     }
 
-    private String getSensorIdFromPartitionKey(String partitionKey) {
+    private String getSensorIdFromPartitionKey(NotificationMessage notificationMessage) {
+        String partitionKey = notificationMessage.getPartitionKey();
+        SystemProperties systemProperties = notificationMessage.getSource();
+
         if (partitionKey.contains("Assignment/")) {
             String[] partitionKeyArray = partitionKey.split("Assignment/");
             return partitionKeyArray[partitionKeyArray.length - 1];
         }
-
+        JsonNode systemPropertiesJson = mapper.convertValue(systemProperties, JsonNode.class);
         throw new NotificationProcessException("Unable to retrieve sensorId from partitionKey",
-                NotificationErrorType.NOTIFICATION_PARSER_ERROR, IdentifierUtil.getIdentifier(CommonConstants.PARTITION_KEY, partitionKey), false);
+                NotificationErrorType.NOTIFICATION_PARSER_ERROR, systemPropertiesJson, false);
     }
 
 }

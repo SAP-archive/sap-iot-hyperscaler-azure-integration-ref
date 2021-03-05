@@ -5,7 +5,7 @@
     <parent>
         <artifactId>azure-iot-integration</artifactId>
         <groupId>com.sap.iot.azure.ref</groupId>
-        <version>1.1.0</version>
+        <version>1.4.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -52,10 +52,17 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
+
+        <!-- eventhub related -->
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-eventhubs</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.microsoft.azure.functions</groupId>
             <artifactId>azure-functions-java-library</artifactId>
@@ -89,27 +96,26 @@
             <artifactId>applicationinsights-core</artifactId>
         </dependency>
 
-        <!-- vulas fixes -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-        <!-- vulas fixes -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+        </dependency>
+
+        <!-- Collection Utils -->
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
         </dependency>
 
         <!-- Test -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

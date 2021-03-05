@@ -8,6 +8,7 @@ import com.sap.iot.azure.ref.integration.commons.mapping.MappingServiceConstants
 import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.SensorAssignment;
 import com.sap.iot.azure.ref.notification.exception.NotificationProcessException;
 import com.sap.iot.azure.ref.notification.processing.NotificationMessage;
+import com.sap.iot.azure.ref.notification.processing.util.SystemPropertiesGenerator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.Before;
@@ -39,6 +40,7 @@ public class AssignmentNotificationProcessorTest {
     public ExpectedException expectedException = ExpectedException.none();
     AssignmentNotificationProcessor assignmentNotificationProcessor;
     NotificationMessage notificationMessage;
+    SystemPropertiesGenerator systemPropertiesGenerator = new SystemPropertiesGenerator();
 
     public static final String SENSOR_ID = "384109E0F2534A6A382J110/ST_J110";
     public static final String ASSIGNMENT_ID = "bdabe161-cdf7-429e-a9f9-db0cb9c67012";
@@ -59,6 +61,7 @@ public class AssignmentNotificationProcessorTest {
     public void testHandleCreate() throws IOException {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("/AssignmentNotificationCreateMessage.json"), StandardCharsets.UTF_8);
         notificationMessage = mapper.readValue(message, NotificationMessage.class);
+        notificationMessage.setSource(systemPropertiesGenerator.generateSystemProperties());
         notificationMessage.setPartitionKey(PARTITION_KEY);
         assignmentNotificationProcessor.handleCreate(notificationMessage);
         verify(cacheRepository, times(1)).set(CacheKeyBuilder.constructSensorKey(SENSOR_ID), createSensorAssignment(), SensorAssignment.class);
@@ -68,6 +71,7 @@ public class AssignmentNotificationProcessorTest {
     public void testHandleUpdateAddNewSensor() throws IOException {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("/AssignmentNotificationUpdateAddSensorMessage.json"), StandardCharsets.UTF_8);
         notificationMessage = mapper.readValue(message, NotificationMessage.class);
+        notificationMessage.setSource(systemPropertiesGenerator.generateSystemProperties());
         notificationMessage.setPartitionKey(PARTITION_KEY);
         assignmentNotificationProcessor.handleUpdate(notificationMessage);
         verify(cacheRepository, times(1)).set(CacheKeyBuilder.constructSensorKey(SENSOR_ID), createSensorAssignment(), SensorAssignment.class);
@@ -77,6 +81,7 @@ public class AssignmentNotificationProcessorTest {
     public void testHandleUpdateDeleteSensor() throws IOException {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("/AssignmentNotificationUpdateDeleteSensorMessage.json"), StandardCharsets.UTF_8);
         notificationMessage = mapper.readValue(message, NotificationMessage.class);
+        notificationMessage.setSource(systemPropertiesGenerator.generateSystemProperties());
         notificationMessage.setPartitionKey(PARTITION_KEY);
         assignmentNotificationProcessor.handleUpdate(notificationMessage);
         verify(cacheRepository, times(1)).scanCacheKey(MappingServiceConstants.CACHE_KEY_CREATOR_PREFIX + MappingServiceConstants.CACHE_SENSOR_KEY_PREFIX + SENSOR_ID);
@@ -86,6 +91,7 @@ public class AssignmentNotificationProcessorTest {
     public void testHandleDelete() throws IOException {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("/AssignmentNotificationDeleteMessage.json"), StandardCharsets.UTF_8);
         notificationMessage = mapper.readValue(message, NotificationMessage.class);
+        notificationMessage.setSource(systemPropertiesGenerator.generateSystemProperties());
         notificationMessage.setPartitionKey(PARTITION_KEY);
         assignmentNotificationProcessor.handleDelete(notificationMessage);
         verify(cacheRepository, times(1)).scanCacheKey(MappingServiceConstants.CACHE_KEY_CREATOR_PREFIX + MappingServiceConstants.CACHE_SENSOR_KEY_PREFIX + SENSOR_ID);
@@ -95,6 +101,7 @@ public class AssignmentNotificationProcessorTest {
     public void testHandleNotificationMessageWithMissingMappingId() throws IOException {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("/AssignmentNotificationMessageWithMissingObjectId.json"), StandardCharsets.UTF_8);
         notificationMessage = mapper.readValue(message, NotificationMessage.class);
+        notificationMessage.setSource(systemPropertiesGenerator.generateSystemProperties());
         notificationMessage.setPartitionKey(PARTITION_KEY);
         try {
             assignmentNotificationProcessor.handleCreate(notificationMessage);
@@ -109,6 +116,7 @@ public class AssignmentNotificationProcessorTest {
     public void testHandleNotificationMessageWithMissingObjectId() throws IOException {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("/AssignmentNotificationMessageWithMissingMappingId.json"), StandardCharsets.UTF_8);
         notificationMessage = mapper.readValue(message, NotificationMessage.class);
+        notificationMessage.setSource(systemPropertiesGenerator.generateSystemProperties());
         notificationMessage.setPartitionKey(PARTITION_KEY);
         try {
             assignmentNotificationProcessor.handleCreate(notificationMessage);
@@ -123,6 +131,7 @@ public class AssignmentNotificationProcessorTest {
     public void testHandleNotificationMessageWithIncorrectPartitionKey() throws IOException {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("/AssignmentNotificationCreateMessage.json"), StandardCharsets.UTF_8);
         notificationMessage = mapper.readValue(message, NotificationMessage.class);
+        notificationMessage.setSource(systemPropertiesGenerator.generateSystemProperties());
         notificationMessage.setPartitionKey(INCORRECT_PARTITION_KEY);
         try {
             assignmentNotificationProcessor.handleCreate(notificationMessage);

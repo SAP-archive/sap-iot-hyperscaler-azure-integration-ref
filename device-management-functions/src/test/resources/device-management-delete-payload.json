@@ -10,6 +10,7 @@
   },
   "datacontenttype": "application/json",
   "data": {
-    "deviceId": "d1"
+    "deviceId": "d1",
+    "deviceAlternateId": "d1"
   }
 }

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
+import lombok.Setter;
 
 /**
  * all exception in this application extends from IoTRuntimeException, thus allowing each exception to be classified either as transient / permanent type
  * that can be used in deciding the retry logic
- *
  */
 public class IoTRuntimeException extends RuntimeException {
 
@@ -21,12 +21,16 @@ public class IoTRuntimeException extends RuntimeException {
     private final JsonNode identifier;
     private final boolean isTransient;
 
+    // set to true if this exception is wrapped in another IoTRuntimeException
+    @Setter
+    private boolean isWrapped = false;
+
     /**
      * IoTRuntimeException without a given exception {@param cause}
      * {@param errorType} can only be an enum implementing the ErrorType interface
      */
     public <T extends Enum<T> & ErrorType> IoTRuntimeException(String message, T errorType, String invocationId, JsonNode identifier,
-                                                                  boolean isTransient) {
+                                                               boolean isTransient) {
         super(message);
         this.errorType = errorType;
         this.invocationId = invocationId;
@@ -43,8 +47,19 @@ public class IoTRuntimeException extends RuntimeException {
         super(message, cause);
         this.errorType = errorType;
         this.invocationId = invocationId;
-        this.identifier = identifier;
         this.isTransient = isTransient;
+
+        if (cause instanceof IoTRuntimeException) {
+            ((IoTRuntimeException) cause).setWrapped(true);
+
+            // merge identifiers
+            ObjectNode wrappedIdentifier = ((IoTRuntimeException) cause).identifier.deepCopy();
+            ObjectNode mergedIdentifier = identifier.deepCopy();
+            mergedIdentifier.setAll(wrappedIdentifier);
+            this.identifier = mergedIdentifier;
+        } else {
+            this.identifier = identifier;
+        }
     }
 
     /**
@@ -85,7 +100,7 @@ public class IoTRuntimeException extends RuntimeException {
      *
      * @param identifier, provides context information about the occurring exception
      * @param errorType,  categorization of the occurring error
-     * @param cause,         {@link Exception} which will be wrapped
+     * @param cause,      {@link Exception} which will be wrapped
      * @param message,    exception message
      * @return {@link IoTRuntimeException} which contains the wrapped exception and error information
      */
@@ -99,7 +114,7 @@ public class IoTRuntimeException extends RuntimeException {
      * @param identifier, provides context information about the occurring exception
      * @param errorType,  categorization of the occurring error
      * @param message,    exception message
-     * @param cause,         {@link Exception} which will be wrapped
+     * @param cause,      {@link Exception} which will be wrapped
      * @return {@link IoTRuntimeException} which contains the wrapped exception and error information
      */
     public static <T extends Enum<T> & ErrorType> IoTRuntimeException wrapTransient(JsonNode identifier, T errorType, String message, Throwable cause) {
@@ -109,11 +124,15 @@ public class IoTRuntimeException extends RuntimeException {
     /**
      * Adds entry to identifier json node.
      *
-     * @param key,  key for the new identifier entry
-     * @param value,  value for the new identifier entry
+     * @param key,   key for the new identifier entry
+     * @param value, value for the new identifier entry
      */
     public void addIdentifier(String key, String value) {
-        ((ObjectNode)identifier).put(key, value);
+        ((ObjectNode) identifier).put(key, value);
+    }
+
+    public void addIdentifiers(ObjectNode properties) {
+        ((ObjectNode) identifier).setAll(properties);
     }
 
     /**
@@ -136,6 +155,7 @@ public class IoTRuntimeException extends RuntimeException {
 
     /**
      * returns the error type
+     *
      * @return error type
      */
     public ErrorType getErrorType() {
@@ -144,11 +164,22 @@ public class IoTRuntimeException extends RuntimeException {
 
     /**
      * add the identifier to the default message
+     *
      * @return message enriched with identifier corresponding to data object impacted (e.g., sensorId, structureId, etc.,)
      */
     @Override
     public String getMessage() {
-        return jsonify().toString();
+        // prints the json message only in case of top most IoTRuntime in the exception chain
+        return isWrapped ? super.getMessage() : jsonify().toString();
+    }
+
+    /**
+     * returns the identifier
+     *
+     * @return identifier
+     */
+    public JsonNode getIdentifiers() {
+        return identifier;
     }
 
 }

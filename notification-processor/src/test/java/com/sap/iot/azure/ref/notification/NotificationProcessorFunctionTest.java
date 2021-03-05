@@ -2,6 +2,7 @@ package com.sap.iot.azure.ref.notification;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;
+import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
 import com.sap.iot.azure.ref.notification.processing.NotificationHandler;
 import com.sap.iot.azure.ref.notification.processing.NotificationMessage;
 import org.apache.commons.io.IOUtils;
@@ -53,16 +54,15 @@ public class NotificationProcessorFunctionTest {
         List<String> notificationMessages = createNotificationMessage("/AssignmentNotificationCreateMessage.json");
         notificationProcessorFunction.run(notificationMessages, createSystemPropertiesMap(), createPartitionContext(),
                 InvocationContextTestUtil.getMockContext());
-        verify(notificationHandler, times(1)).executeNotificationHandling(notificationMessages, createSystemPropertiesMap());
+        verify(notificationHandler, times(1)).executeNotificationMessage(notificationMessages, createSystemPropertiesMap());
     }
 
     @Test
     public void testRunWithException() throws IOException {
         List<String> notificationMessages = createNotificationMessage("/AssignmentNotificationCreateMessage.json");
-        Mockito.doThrow(new RuntimeException("test error")).when(notificationHandler).executeNotificationHandling(Mockito.any(), Mockito.any());
+        Mockito.doThrow(new RuntimeException("test error")).when(notificationHandler).executeNotificationMessage(Mockito.any(), Mockito.any());
 
-        thrown.expect(RuntimeException.class);
-        thrown.expectMessage("test error");
+        thrown.expect(IoTRuntimeException.class);
         notificationProcessorFunction.run(notificationMessages, createSystemPropertiesMap(), createPartitionContext(),
                 InvocationContextTestUtil.getMockContext());
     }

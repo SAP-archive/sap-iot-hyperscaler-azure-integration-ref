@@ -5,7 +5,7 @@ import com.microsoft.azure.eventhubs.EventDataBatch;
 import com.microsoft.azure.eventhubs.EventHubClient;
 import com.microsoft.azure.eventhubs.EventHubException;
 import com.sap.iot.azure.ref.delete.model.DeleteStatusMessage;
-import com.sap.iot.azure.ref.delete.model.DeleteStatustoEventhub;
+import com.sap.iot.azure.ref.delete.model.DeleteStatus;
 import com.sap.iot.azure.ref.integration.commons.eventhub.BaseEventHubProcessorTest;
 import com.sap.iot.azure.ref.integration.commons.util.CompletableFutures;
 import org.junit.Before;
@@ -37,7 +37,7 @@ public class DeleteStatusEventHubProcessorTest {
     @Test
     public void testProcess(){
         DeleteStatusMessage deleteStatusMessage = new DeleteStatusMessage();
-        deleteStatusMessage.setStatus(DeleteStatustoEventhub.SUCCESS);
+        deleteStatusMessage.setStatus(DeleteStatus.SUCCESS);
         deleteStatusMessage.setEventId("testEventId");
         deleteStatusMessage.setStructureId("testStructureId");
         deleteStatusMessage.setCorrelationId("testCorrelationId");

@@ -12,7 +12,10 @@ public enum EntityType {
     MAPPING("com.sap.iot.i4c.Mapping"),
     PROVIDERIOTMAPPING("com.sap.iot.i4c.ProviderIoTMapping"),
     SENSOR("com.sap.iot.i4c.Sensor"),
-    STRUCTUREPROPERTY("com.sap.iot.i4c.StructureProperty");
+    STRUCTUREPROPERTY("com.sap.iot.i4c.StructureProperty"),
+    SOURCEID("com.sap.iot.i4c.SourceId"),
+    TAGS("com.sap.iot.i4c.Tags"),
+    SENSORID("com.sap.iot.i4c.SensorId");
 
     private static final Map<String, EntityType> ENUM_LOOKUP = new HashMap<>();
 

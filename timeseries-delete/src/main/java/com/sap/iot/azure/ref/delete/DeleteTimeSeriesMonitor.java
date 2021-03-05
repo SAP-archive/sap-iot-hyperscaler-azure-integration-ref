@@ -15,17 +15,9 @@ import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
 import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
 import com.sap.iot.azure.ref.integration.commons.metrics.MetricsClient;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.logging.Level;
 
-/**
- * Azure Function with Azure Storage Queue trigger that is responsible for monitoring the Delete Operation status. The
- * queue being monitored contains messages with operation id information. The function then handles retrieving operation status
- * and if completed, writes status to an Eventhub. If operation is not completed then the message is re-written into the queue to continue monitoring the
- * operation status.
- */
 @SuppressWarnings("unused") // Azure Function
 public class DeleteTimeSeriesMonitor {
     private final DeleteMonitoringProcessor deleteMonitoringProcessor;
@@ -41,6 +33,18 @@ public class DeleteTimeSeriesMonitor {
         this.hostConfig = hostConfig;
     }
 
+    /**
+     * Azure Function with Azure Storage Queue trigger that is responsible for monitoring the Delete Operation status. The
+     * queue being monitored contains messages with operation id information. The function then handles retrieving operation status
+     * and if completed, writes status to an Eventhub. If operation is not completed then the message is re-written into the queue to continue monitoring the
+     * operation status.
+     *
+     * @param message,         incoming delete operation information
+     * @param nextVisibleTime, information about the message visibility
+     * @param messageId,       message ID used for logging purposes
+     * @param dequeueCount,    message dequeue count used for logging purposes
+     * @param context,         invocation context of the current Azure Function invocation
+     */
     @FunctionName("DeleteMonitoringFunction")
     public void run(
             @QueueTrigger(name = "deleteOperationMonitoringMessage", queueName = Constants.STORAGE_QUEUE_NAME, connection =

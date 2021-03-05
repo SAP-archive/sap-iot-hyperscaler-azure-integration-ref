@@ -6,13 +6,8 @@ import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.logging.Level;
 
 public class HostConfig {
@@ -28,12 +23,22 @@ public class HostConfig {
         }
     }
 
+    /**
+     * Returns the visibility timeout in seconds based on the configuration in the host.json file.
+     *
+     * @return visibilty timeout in seconds
+     */
     public Integer getVisibilityTimeout(){
         String visibilityTimeoutStr = jsonNode.get("queues").get("visibilityTimeout").asText();
         Integer visibilityTimeout = Math.toIntExact(Duration.between(LocalTime.MIN, LocalTime.parse(visibilityTimeoutStr)).getSeconds());
         return visibilityTimeout;
     }
 
+    /**
+     * Returns the max dequeue count based on the configuration in the host.json file.
+     *
+     * @return max dequeue count as Integer
+     */
     public Integer getMaxDequeueCount(){
         Integer maxDequeueCount = jsonNode.get("queues").get("maxDequeueCount").intValue();
         return maxDequeueCount;

@@ -26,12 +26,14 @@ Follow these steps to create and upload the zip file:
 1. Clone this repository
 2. Run maven build (install) on this project and locate the zip files from the maven build output for the required modules:  
     1. sap-iot-hyperscaler-azure-integration-ref/ingestion-functions/target folder will contain the ingestion-functions.zip file
-    2.  sap-iot-hyperscaler-azure-integration-ref/notification-processor/target folder will contain the notification-processor.zip file
-    3. sap-iot-hyperscaler-azure-integration-ref/device-management-functions/target folder will contain the device-management-functions.zip file.
-3. [Upload to the zip files to a blob storage container](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal)
-  1. ingestion-functions.zip
-  2. notification-processor.zip
-  3. device-management-functions.zip
+    2. sap-iot-hyperscaler-azure-integration-ref/notification-processor/target folder will contain the notification-processor.zip file
+    3. sap-iot-hyperscaler-azure-integration-ref/device-management-functions/target folder will contain the device-management-functions.zip file
+    4. sap-iot-hyperscaler-azure-integration-ref/timeseries-delete/target folder will contain the timeseries-delete.zip file
+3. [Upload the zip files to a blob storage container](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal)
+   1. ingestion-functions.zip
+   2. notification-processor.zip
+   3. device-management-functions.zip
+   4. timeseries-delete.zip
 4. [Generate SAS token url as template input parameter](https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview)
     > Note: The expiry of the SAS token will lead to inactivity of the function. You should therefore ensure to pick an appropriate expiration date.
 
@@ -147,6 +149,11 @@ Follow these steps to create and upload the zip file:
 * **Database Hot Cache Period**
 
   * Number of days to retain data in cache for quick access (minValue=1, maxValue=36500).
+  
+* **Ingestion Type**
+
+  * Determine the ingestion type for the ADX tables. Find more information about the streaming ingestion limitations at [Streaming Ingestion - Limitations
+   Documentation](https://docs.microsoft.com/en-us/azure/data-explorer/ingest-data-streaming#limitations)
 
 * **Event Hub SKU Name**
 
@@ -263,9 +270,10 @@ Resource                         | Parameters                                   
 
 ## Deployment
 
-* Open Create Resource in Azure Resource Manager and choose Template Deployment.
-* Choose Build your own template using the editor in the list. You can build your own template in the editor or upload it using the Load File option.
-* You can check the progress of the deployment from Notifications menu.
+1.  Open Create Resource in Azure Resource Manager and choose Template Deployment.
+2.  Choose Build your own template using the editor in the list. You can build your own template in the editor or upload it using the Load File option.
+3.  Use the ARM template from the target package (sap-iot-hyperscaler-azure-integration-ref/arm-template/target) where the version number is populated. This version number depicts the reference template's release version.
+4.  You can check the progress of the deployment from Notifications menu.
 
 ![ARM template deployment](img/armDeployment.png)
 

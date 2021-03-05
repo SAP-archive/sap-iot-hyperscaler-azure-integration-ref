@@ -1,4 +1,4 @@
-package com.sap.iot.azure.ref.ingestion.model.timeseries.raw.iots;
+package com.sap.iot.azure.ref.ingestion.model.timeseries.raw.device.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -7,8 +7,8 @@ import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IoTSMessage {
+public class IoTDeviceModelMessage {
     private String sensorAlternateId;
     private String capabilityAlternateId;
-    private List<IoTSMessageMeasure> measures;
+    private List<IoTDeviceModelMeasure> measures;
 }

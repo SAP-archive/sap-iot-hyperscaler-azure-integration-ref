@@ -1,30 +1,35 @@
 package com.sap.iot.azure.ref.integration.commons.adx;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.microsoft.azure.kusto.data.ClientImpl;
+import com.microsoft.azure.kusto.data.Client;
 import com.microsoft.azure.kusto.data.Results;
 import com.microsoft.azure.kusto.data.exceptions.DataClientException;
 import com.microsoft.azure.kusto.data.exceptions.DataServiceException;
 import com.microsoft.azure.kusto.data.exceptions.DataWebException;
 import com.sap.iot.azure.ref.integration.commons.avro.AvroHelper;
 import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
+import com.sap.iot.azure.ref.integration.commons.constants.IngestionType;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.exception.ADXClientException;
 import com.sap.iot.azure.ref.integration.commons.exception.AvroIngestionException;
 import com.sap.iot.azure.ref.integration.commons.exception.CommonErrorType;
 import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
 import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
-import com.sap.iot.azure.ref.integration.commons.model.timeseries.delete.DeleteInfo;
+import com.sap.iot.azure.ref.integration.commons.util.EnvUtils;
+import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.time.Clock;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 public class ADXTableManager {
     private final String ADX_DATABASE_NAME = System.getenv(ADXConstants.ADX_DATABASE_NAME_PROP);
-    private ClientImpl kustoClient;
+    private Client kustoClient;
     private Clock clock;
 
 
@@ -32,7 +37,7 @@ public class ADXTableManager {
         this(KustoClientFactory.getClient(), Clock.systemUTC());
     }
 
-    ADXTableManager(ClientImpl kustoClient, Clock clock) {
+    ADXTableManager(Client kustoClient, Clock clock) {
         this.kustoClient = kustoClient;
         this.clock = clock;
     }
@@ -42,7 +47,7 @@ public class ADXTableManager {
      * If the table or mapping does not exist, it is created with an ingestion policy. The table and mapping names are constructed of the structure ID and
      * {@link ADXConstants#TABLE_PREFIX}.
      * The column information is retrieved from the AVRO schema, which is passed as parameter.
-     * For executing the kusto queries, this class uses the {@link ClientImpl Azure Kusto Client}.
+     * For executing the kusto queries, this class uses the {@link Client Azure Kusto Client}.
      * The ADX database name is fetched from {@link ADXConstants#ADX_DATABASE_NAME_PROP}.
      *
      * @param schemaString, AVRO schema. Used for constructing the column information.
@@ -59,12 +64,14 @@ public class ADXTableManager {
         //if not correct, create new one
         if (!tableExists || !mappingExists) {
             try {
+                Schema schema = AvroHelper.parseSchema(schemaString);
                 //fetch columns
-                Map<String, String> columnInfo = AvroHelper.getColumnInfo(structureId, schemaString);
+                Map<String, String> columnInfo = AvroHelper.getColumnInfo(structureId, schema);
 
                 if (!tableExists) {
                     //create table
                     createTable(structureId, columnInfo);
+                    updateGdprDocString(structureId, schema);
                     createPolicy(structureId);
                 }
                 if (!mappingExists) {
@@ -133,8 +140,8 @@ public class ADXTableManager {
     /**
      * Drops a given ADX column.
      *
-     * @param structureId, Structure ID. Used for forming the query.
-     * @param columnName,  Column which should be dropped
+     * @param structureId,  Structure ID. Used for forming the query.
+     * @param columnName,   Column which should be dropped
      * @param schemaString, AVRO schema. Used for constructing the column information.
      * @throws ADXClientException exception in adx interaction
      */
@@ -154,47 +161,10 @@ public class ADXTableManager {
     }
 
     /**
-     * Check if data exists for a given Structure ID.
-     *
-     * @param structureId, Structure ID. Used for forming the data exists query.
-     * @throws ADXClientException exception in adx interaction
-     */
-    public boolean dataExists(String structureId) throws ADXClientException {
-        Results results = executeQueryForStructureId(KQLQueries.getDataExistsQuery(structureId), structureId);
-
-        if (results.getValues().isEmpty()) {
-            InvocationContext.getLogger().log(Level.INFO, String.format("No data found for structure ID '%s'", structureId));
-            return false;
-        } else {
-            InvocationContext.getLogger().log(Level.INFO, String.format("Data found for structure ID '%s'", structureId));
-            return true;
-        }
-    }
-
-    /**
-     * Check if data exists for a given Structure ID and column.
-     *
-     * @param structureId, Structure ID. Used for forming the data exists query.
-     * @param columnName,  Column Name. Used for forming the data exists query.
-     * @throws ADXClientException exception in adx interaction
-     */
-    public boolean dataExistsForColumn(String structureId, String columnName) throws ADXClientException {
-        Results results = executeQueryForStructureId(KQLQueries.getColumnDataExistsQuery(structureId, columnName), structureId);
-
-        if (results.getValues().isEmpty()) {
-            InvocationContext.getLogger().log(Level.INFO, String.format("No data found for column '%s' and structure ID '%s'", columnName, structureId));
-            return false;
-        } else {
-            InvocationContext.getLogger().log(Level.INFO, String.format("Data found for column '%s' and structure ID '%s'", columnName, structureId));
-            return true;
-        }
-    }
-
-    /**
      * Execute soft delete request for a given structure ID and column name.
      *
-     * @param structureId used for generating the table name
-     * @param columnName  name of the column
+     * @param structureId   used for generating the table name
+     * @param columnName    name of the column
      * @param schemaString, AVRO schema. Used for constructing the column information.
      * @throws ADXClientException exception in adx interaction
      */
@@ -224,24 +194,80 @@ public class ADXTableManager {
     }
 
     /**
-     * Execute soft delete time series request.
-     * Returns the operation ID of the delete query.
+     * Update the Doc String for a given structure Id with the according GDPR data schema information. This is derived from the Avro schema.
      *
-     * @param request used for generating time series deletion query
-     * @return Operation ID of delete query
+     * @param structureId used for generating the table name
+     * @param schema used for getting the GDPR data category
      * @throws ADXClientException exception in adx interaction
      */
-    public String deleteTimeSeries(DeleteInfo request) throws ADXClientException {
-        String structureId = request.getStructureId();
-        Results results = executeQueryForStructureId(KQLQueries.getDeleteTimeSeriesQuery(request),
-                structureId);
+    public void updateGdprDocString(String structureId, Schema schema) throws ADXClientException {
+        executeQueryForStructureId(KQLQueries.getGdprDocstringQuery(structureId, AvroHelper.getGdprDataCategory(schema)), structureId);
+    }
+    /**
+     * Update the Doc String for a given structure Id with the according GDPR data schema information. This is derived from the Avro schema.
+     *
+     * @param structureId used for generating the table name
+     * @param schema used for getting the GDPR data category
+     * @throws ADXClientException exception in adx interaction
+     */
+    public void updateGdprDocString(String structureId, String schema) throws ADXClientException {
+        //Fetch doc string
+        String docString = getDocString(structureId);
+        //Fetch data category
+        String gdprDataCategory = AvroHelper.getGdprDataCategory(schema);
+        String newDocString;
 
-        if (results.getValues().isEmpty() || results.getValues().get(0).isEmpty()) {
-            throw new ADXClientException("Delete TimeSeries Query did not return an operation ID",
-                    IdentifierUtil.getIdentifier(CommonConstants.STRUCTURE_ID_PROPERTY_KEY, structureId), false);
-        } else {
-            return results.getValues().get(0).get(0);
+        if (!docString.contains(gdprDataCategory)) {
+            if (StringUtils.isEmpty(docString)) {
+                newDocString = gdprDataCategory;
+            } else {
+                newDocString = String.join(" ", docString, gdprDataCategory);
+            }
+
+            executeQueryForStructureId(KQLQueries.getGdprDocstringQuery(structureId, newDocString), structureId);
         }
+    }
+
+    /**
+     * Clear the table schema cache for a given structure.
+     * Based on the returned results, it is verified if all nodes were cleared.
+     * The query execution is repeated until all nodes are cleared.
+     *
+     * @param structureId used for forming query
+     */
+    public void clearADXTableSchemaCache(String structureId) {
+        boolean cacheCleared;
+
+        do {
+            Results results = executeQueryForStructureId(KQLQueries.getClearSchemaCacheQuery(structureId), structureId);
+            cacheCleared = allCacheNodesCleared(results);
+        } while(!cacheCleared);
+    }
+
+    private String getDocString(String structureId) {
+        Results results = executeQueryForStructureId(KQLQueries.getCSLSchemaQuery(structureId), structureId);
+        if (CollectionUtils.isNotEmpty(results.getValues())
+                && CollectionUtils.isNotEmpty(results.getValues().get(0))
+                && results.getValues().get(0).get(results.getColumnNameToIndex().get(ADXConstants.DOC_STRING)) != null) {
+            return results.getValues().get(0).get(results.getColumnNameToIndex().get(ADXConstants.DOC_STRING));
+        } else {
+            return "";
+        }
+    }
+
+    private boolean allCacheNodesCleared(Results results) {
+        AtomicBoolean allCleared = new AtomicBoolean(true);
+        int statusIndex = results.getColumnNameToIndex().get(ADXConstants.STATUS);
+
+        if (results.getValues() != null) {
+            results.getValues().forEach(result -> {
+                if (!result.get(statusIndex).equals(ADXConstants.SUCCEEDED)) {
+                    allCleared.set(false);
+                }
+            });
+        }
+
+        return allCleared.get();
     }
 
     private void createTable(String structureId, Map<String, String> columnInfo) throws DataClientException, DataServiceException {
@@ -255,7 +281,14 @@ public class ADXTableManager {
     }
 
     private void createPolicy(String structureId) throws DataClientException, DataServiceException {
-        kustoClient.execute(ADX_DATABASE_NAME, KQLQueries.getCreatePolicyQuery(structureId));
+        String ingestionType = EnvUtils.getEnv(ADXConstants.INGESTION_TYPE_PROP, IngestionType.BATCHING.getValue());
+
+        if (ingestionType.equals(IngestionType.BATCHING.getValue())) {
+            kustoClient.execute(ADX_DATABASE_NAME, KQLQueries.getCreateBatchingPolicyQuery(structureId));
+        } else {
+            kustoClient.execute(ADX_DATABASE_NAME, KQLQueries.getCreateStreamingPolicyQuery(structureId));
+        }
+
         InvocationContext.getLogger().log(Level.INFO, String.format("Created policy for structure ID '%s'", structureId));
     }
 
@@ -301,19 +334,4 @@ public class ADXTableManager {
                 structureId), isTransient);
     }
 
-    public DeleteOperationStatus getDeleteOperationStatus(String operationId, String structureId) throws ADXClientException {
-        try {
-            DeleteOperationStatus status;
-            Results results = kustoClient.execute(KQLQueries.getDeleteOperationStatus(operationId));
-            if (results.getValues() != null && !results.getValues().isEmpty()) {
-                status = DeleteOperationStatus.ofType(results.getValues().get(0).get(results.getColumnNameToIndex().get("State")));
-            } else {
-                throw new ADXClientException("Delete time series query did not return an operation status",
-                        IdentifierUtil.getIdentifier(CommonConstants.OPERATION_ID, operationId), false);
-            }
-            return status;
-        } catch (DataServiceException | DataClientException ex) {
-            throw getADXExceptionWithStructureId(ex, structureId);
-        }
-    }
 }
