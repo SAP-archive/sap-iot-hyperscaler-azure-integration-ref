@@ -21,4 +21,6 @@ public class DeleteInfo {
     private String toTimestamp;
     private Boolean fromTimestampInclusive;
     private Boolean toTimestampInclusive;
+    private String eventId;
+    private String correlationId;
 }

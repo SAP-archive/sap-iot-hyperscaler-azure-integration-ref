@@ -1,6 +1,6 @@
 package com.sap.iot.azure.ref.delete.model;
 
-public enum DeleteStatustoEventhub {
+public enum DeleteStatus {
     SUCCESS,
     FAILED;
 }

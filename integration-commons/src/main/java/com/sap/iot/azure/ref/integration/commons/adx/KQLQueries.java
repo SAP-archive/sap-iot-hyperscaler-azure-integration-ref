@@ -21,8 +21,9 @@ class KQLQueries {
     static final String MAPPING_EXISTS_QUERY = ".show table %s ingestion json mapping '%s'";
     private static final String TABLE_QUERY = ".%s table %s (%s)";
     private static final String DROP_TABLE_QUERY = ".drop table %s ifexists";
-    static final String CREATE_POLICY_QUERY = ".alter table %s policy ingestionbatching @'{\"MaximumBatchingTimeSpan\":\"00:01:00\", " +
+    static final String CREATE_BATCHING_POLICY_QUERY = ".alter table %s policy ingestionbatching @'{\"MaximumBatchingTimeSpan\":\"00:01:00\", " +
             "\"MaximumNumberOfItems\": %s, \"MaximumRawDataSizeMB\": %s}'";
+    static final String CREATE_STREAMING_POLICY_QUERY = ".alter table %s policy streamingingestion enable";
     private static final String UPDATE_COLUMN_QUERY = ".alter column ['%s'].['%s'] type=%s";
     private static final String DROP_COLUMN_QUERY = ".drop column %s . %s";
     private static final String CREATE_MAPPING_QUERY = ".create-or-alter table %s ingestion json mapping '%s' '%s'";
@@ -34,13 +35,22 @@ class KQLQueries {
     private static final String FROM_INCLUSIVE_PLACEHOLDER = "{FROM_INCLUSIVE}";
     private static final String TO_INCLUSIVE_PLACEHOLDER = "{TO_INCLUSIVE}";
     private static final String SOURCE_ID_FILTER_CLAUSE = "and sourceId in (%s) ";
-    private static final String DELETE_TIMESERIES_QUERY = ".set-or-append async %s <| %s " +
+    private static final String DELETE_TIME_SERIES_QUERY = ".set-or-append async %s <| %s " +
             "| where (_time >" + FROM_INCLUSIVE_PLACEHOLDER + " datetime(\"%s\") " +
             "and _time <" + TO_INCLUSIVE_PLACEHOLDER + " datetime(\"%s\")) " +
             SOURCE_ID_FILTER_PLACEHOLDER +
             "and _enqueued_time < datetime(\"%s\") " +
             "| where _isDeleted != true " +
             "| extend _enqueued_time = now(), _isDeleted = true";
+    private static final String PURGE_FILTER_SET = "(_time >" + FROM_INCLUSIVE_PLACEHOLDER + " (datetime(\"%s\")) " +
+            "and _time <" + TO_INCLUSIVE_PLACEHOLDER + " (datetime(\"%s\")) " +
+            SOURCE_ID_FILTER_PLACEHOLDER +
+            "and _enqueued_time < (datetime(\"%s\")))";
+    private static final String PURGE_TIME_SERIES_QUERY_BASE = ".purge table [%s] records in database [%s] with (noregrets='true') <| " +
+            "where ";
+    private static final String CSL_SCHEMA_QUERY = ".show table %s cslschema";
+    private static final String GDPR_DOCSTRING_QUERY = ".alter table %s docstring \"%s\"";
+    private static final String CLEAR_SCHEMA_CACHE_QUERY = ".clear table %s cache streamingingestion schema";
     private static final String KEY_VALUE_PLACEHOLDER = "%s: %s";
     private static final String MAPPING_COLUMN_KEY = "column";
     private static final String MAPPING_PATH_KEY = "path";
@@ -56,10 +66,13 @@ class KQLQueries {
     private static final String MAX_RAW_DATA_SIZE_PROP = "max-number-of-items";
     private static final String MAX_NUMBER_OF_ITEMS = EnvUtils.getEnv(MAX_NUMBER_OF_ITEMS_PROP, DEFAULT_MAX_NUMBER_OF_ITEMS);
     private static final String MAX_RAW_DATA_SIZE = EnvUtils.getEnv(MAX_RAW_DATA_SIZE_PROP, DEFAULT_MAX_RAW_DATA_SIZE);
-    public static final String SOFT_DELETE_SUFFIX = "_D_%s";
+    static final String SOFT_DELETE_SUFFIX = "_D_%s";
     private static final String DELETE_OPERATION_STATUS = ".show operations %s";
-    public static final String INCLUSIVE_OPERATOR = "=";
-    public static final String IN_CONDITION_SPLITTER = ", ";
+    private static final String PURGE_OPERATION_STATUS = ".show purges %s";
+    private static final String INCLUSIVE_OPERATOR = "=";
+    private static final String IN_CONDITION_SPLITTER = ", ";
+    private static final String OR_CONDITION_SPLITTER = " or ";
+    private static final String QUOTATION_MARK = "\"";
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -91,8 +104,12 @@ class KQLQueries {
                 createMappingString(columnInfo));
     }
 
-    static String getCreatePolicyQuery(String structureId) {
-        return String.format(CREATE_POLICY_QUERY, getTableName(structureId), MAX_NUMBER_OF_ITEMS, MAX_RAW_DATA_SIZE);
+    static String getCreateBatchingPolicyQuery(String structureId) {
+        return String.format(CREATE_BATCHING_POLICY_QUERY, getTableName(structureId), MAX_NUMBER_OF_ITEMS, MAX_RAW_DATA_SIZE);
+    }
+
+    static String getCreateStreamingPolicyQuery(String structureId) {
+        return String.format(CREATE_STREAMING_POLICY_QUERY, getTableName(structureId));
     }
 
     static String getColumnUpdateQuery(String structureId, String column, String datatype) {
@@ -123,13 +140,46 @@ class KQLQueries {
 
     static String getDeleteTimeSeriesQuery(DeleteInfo request) {
         String tableName = getTableName(request.getStructureId());
-        String query = DELETE_TIMESERIES_QUERY;
+        String query = DELETE_TIME_SERIES_QUERY;
         query = addInclusiveInfo(query, request.getFromTimestampInclusive(), request.getToTimestampInclusive());
         query = addSourceIdFilter(query, request.getSourceIds());
 
         query = String.format(query, tableName, tableName, request.getFromTimestamp(), request.getToTimestamp(), request.getIngestionTimestamp());
 
         return query;
+    }
+
+    static String getPurgeTimeSeriesQuery(String structureId, List<DeleteInfo> requests, String databaseName) {
+        String tableName = getTableName(structureId);
+        String query = String.format(PURGE_TIME_SERIES_QUERY_BASE, tableName, databaseName);
+        List<String> filters = new ArrayList<>();
+
+        requests.forEach(request -> {
+            String filter = PURGE_FILTER_SET;
+            filter = addInclusiveInfo(filter, request.getFromTimestampInclusive(), request.getToTimestampInclusive());
+            filter = addSourceIdFilter(filter, request.getSourceIds());
+
+            //add timestamps
+            filter = String.format(filter, request.getFromTimestamp(), request.getToTimestamp(), request.getIngestionTimestamp());
+
+            filters.add(filter);
+        });
+
+        query += filters.stream().collect(Collectors.joining(OR_CONDITION_SPLITTER));
+
+        return query;
+    }
+
+    static String getCSLSchemaQuery(String structureId) {
+        return String.format(CSL_SCHEMA_QUERY, getTableName(structureId));
+    }
+
+    static String getGdprDocstringQuery(String structureId, String gdprDataCatagory) {
+        return String.format(GDPR_DOCSTRING_QUERY, getTableName(structureId), gdprDataCatagory);
+    }
+
+    static String getClearSchemaCacheQuery(String structureId) {
+        return String.format(CLEAR_SCHEMA_CACHE_QUERY, getTableName(structureId));
     }
 
     private static String getTableName(String structureId) {
@@ -197,7 +247,13 @@ class KQLQueries {
         return String.format(DELETE_OPERATION_STATUS, operationId);
     }
 
-    private static String addInclusiveInfo(String input, boolean fromTimestampInclusive, boolean toTimestampInclusive) {
+    static String getPurgeOperationStatus(String operationId) {
+        return String.format(PURGE_OPERATION_STATUS, operationId);
+    }
+
+    private static String addInclusiveInfo(String input, Boolean fromTimestampInclusive, Boolean toTimestampInclusive) {
+        fromTimestampInclusive = fromTimestampInclusive == null ? Boolean.TRUE : fromTimestampInclusive;
+        toTimestampInclusive = toTimestampInclusive == null ? Boolean.TRUE : toTimestampInclusive;
         String fromInclusive = fromTimestampInclusive ? INCLUSIVE_OPERATOR : "";
         String toInclusive = toTimestampInclusive ? INCLUSIVE_OPERATOR : "";
 
@@ -218,7 +274,7 @@ class KQLQueries {
 
     private static String getSourceIdFilterString(List<String> sourceIds) {
         return String.format(SOURCE_ID_FILTER_CLAUSE, sourceIds.stream()
-                .map((sourceId) -> {return "\"" + sourceId + "\"";})
+                .map((sourceId) -> QUOTATION_MARK + sourceId + QUOTATION_MARK)
                 .collect(Collectors.joining(IN_CONDITION_SPLITTER)));
     }
 }

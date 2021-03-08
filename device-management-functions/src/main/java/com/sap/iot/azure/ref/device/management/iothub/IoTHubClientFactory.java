@@ -5,9 +5,13 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.sap.iot.azure.ref.device.management.exception.DeviceManagementErrorType;
 import com.sap.iot.azure.ref.device.management.exception.DeviceManagementException;
 import com.sap.iot.azure.ref.device.management.util.Constants;
+import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
 
 import java.io.IOException;
+import java.util.logging.Level;
+
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 
 class IoTHubClientFactory {
 
@@ -16,16 +20,22 @@ class IoTHubClientFactory {
     synchronized RegistryManager getIoTHubClient() {
         if (registryManager == null) {
             try {
-                registryManager =  createRegistryManager();
+                registryManager = createRegistryManager();
                 registerClientShutdown(registryManager);
             } catch (IllegalArgumentException ex) {
                 throw new DeviceManagementException("Invalid connection string provided for IoT Hub", ex, DeviceManagementErrorType.IOTHUB_ERROR,
                         IdentifierUtil.empty(), false);
-            } catch(IOException ex) {
-                // requires manual restart with providing new connection string in the KeyVault
-                // todo: will be enhanced with circuit-break implementation in next release
+            } catch (IOException ex) {
+                String iotHubName = "unknown";
+                try {
+                    iotHubName = IotHubConnectionString.createConnectionString("string").getIotHubName();
+                    // requires manual restart with providing new connection string in the KeyVault
+                    // todo: will be enhanced with circuit-break implementation in next release
+                } catch (IOException e) {
+                    InvocationContext.getLogger().log(Level.WARNING, "Error in retrieving IoTHub Name", e);
+                }
                 throw new DeviceManagementException("Error in initializing connection to IoT Hub Registry Manager", ex, DeviceManagementErrorType.IOTHUB_ERROR,
-                        IdentifierUtil.empty(), false);
+                        IdentifierUtil.getIdentifier(Constants.IOTHUB_NAME, iotHubName), false);
             }
         }
 

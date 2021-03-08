@@ -7,31 +7,38 @@ import com.sap.iot.azure.ref.ingestion.exception.IngestionRuntimeException;
 import com.sap.iot.azure.ref.ingestion.model.device.mapping.DeviceMessage;
 import com.sap.iot.azure.ref.ingestion.model.timeseries.raw.DeviceMeasure;
 import com.sap.iot.azure.ref.ingestion.util.Constants;
+import com.sap.iot.azure.ref.integration.commons.api.Processor;
 import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
+import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.logging.log4j.core.util.ReflectionUtil;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import static org.hamcrest.Matchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class IoTSPayloadMapperTest {
+public class IoTDeviceModelPayloadMapperTest {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -44,7 +51,7 @@ public class IoTSPayloadMapperTest {
     private final String SAMPLE_PROPERTY_VALUE = "samplePropertyValue";
     private final Instant TIMESTAMP = Instant.now();
 
-    private final IoTSPayloadMapper iotsPayloadMapper = new IoTSPayloadMapper();
+    private final IoTDeviceModelPayloadMapper iotDeviceModelPayloadMapper = new IoTDeviceModelPayloadMapper();
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -56,67 +63,69 @@ public class IoTSPayloadMapperTest {
 
     @Test
     public void testAbstractRawMessagesWithIsoTimeFormat()  {
-        DeviceMeasure deviceMeasure = iotsPayloadMapper.process(getSampleIOTSMessages(TIMESTAMP.toString(), true)).get(0);
-        assertIoTSDeviceMeasure(deviceMeasure, false);
+        DeviceMeasure deviceMeasure = iotDeviceModelPayloadMapper.process(getSampleIOTDeviceModelMessages(TIMESTAMP.toString(), true)).get(0);
+        assertIoTDeviceModelMeasure(deviceMeasure, false);
     }
 
     @Test
     public void testAbstractRawMessagesWithLongTimeFormat()  {
-        DeviceMeasure deviceMeasure = iotsPayloadMapper.process(getSampleIOTSMessages(String.valueOf(TIMESTAMP.toEpochMilli()), true)).get(0);
-        assertIoTSDeviceMeasure(deviceMeasure, false);
+        DeviceMeasure deviceMeasure = iotDeviceModelPayloadMapper.process(getSampleIOTDeviceModelMessages(String.valueOf(TIMESTAMP.toEpochMilli()), true)).get(0);
+        assertIoTDeviceModelMeasure(deviceMeasure, false);
     }
 
     @Test
     public void testAbstractRawMessageWithEnqueuedTime() {
-        DeviceMeasure deviceMeasure = iotsPayloadMapper.process(getSampleIOTSMessages(TIMESTAMP.toString(), false)).get(0);
-        assertIoTSDeviceMeasure(deviceMeasure, false);
+        DeviceMeasure deviceMeasure = iotDeviceModelPayloadMapper.process(getSampleIOTDeviceModelMessages(TIMESTAMP.toString(), false)).get(0);
+        assertIoTDeviceModelMeasure(deviceMeasure, false);
     }
 
     @Test
     public void testAbstractRawMessageWithCurrentProcessingTime() {
-        DeviceMeasure deviceMeasure = iotsPayloadMapper.process(getSampleIOTSMessages(null, false)).get(0);
-        assertIoTSDeviceMeasure(deviceMeasure, true);
+        DeviceMeasure deviceMeasure = iotDeviceModelPayloadMapper.process(getSampleIOTDeviceModelMessages(null, false)).get(0);
+        assertIoTDeviceModelMeasure(deviceMeasure, true);
     }
 
     @Test
-    public void testAbstractRawMessageWithInvalidTimeProperty() {
-        expectedException.expect(IngestionRuntimeException.class);
-        expectedException.expectMessage("Provided invalid-time cannot be parsed to valid timestamp");
-        expectedException.expectMessage("INVALID_TIMESTAMP");
-        expectedException.expectMessage("\"Identifier\":{\"sensorId\":\"deviceId/Pump_00554\",\"CapabilityId\":\"Rotating_Equipment_Measurements\"}");
-        expectedException.expectCause(isA(DateTimeParseException.class));
+    public void testAbstractRawMessageWithInvalidTimeProperty() throws NoSuchFieldException, IllegalAccessException {
 
-        iotsPayloadMapper.process(getSampleIOTSMessages("invalid-time", false));
+        lenient().doAnswer(args -> {
+            LogRecord logRecord = args.getArgument(0);
+            assertTrue(logRecord.getMessage().contains("INVALID_TIMESTAMP"));
+            assertTrue(logRecord.getMessage().contains("Provided invalid-time cannot be parsed to valid timestamp"));
+            return null;
+        }).when(InvocationContextTestUtil.LOGGER).log(any(LogRecord.class));
+        Mockito.reset(InvocationContextTestUtil.LOGGER);
+        iotDeviceModelPayloadMapper.process(getSampleIOTDeviceModelMessages("invalid-time", false));
     }
 
     @Test
     public void testBatchMessagesWithIsoFormat()  {
-        //If I call abstractRawMessages with Messages in IOTS Format, they should be correctly abstracted.
-        List<DeviceMeasure> deviceMeasures = iotsPayloadMapper.process(getBatchMessages(TIMESTAMP.toString(), true));
+        //If I call abstractRawMessages with Messages in IOT Device Model Format, they should be correctly abstracted.
+        List<DeviceMeasure> deviceMeasures = iotDeviceModelPayloadMapper.process(getBatchMessages(TIMESTAMP.toString(), true));
 
         deviceMeasures.forEach(deviceMeasure -> {
-            assertIoTSDeviceMeasure(deviceMeasure, true);
+            assertIoTDeviceModelMeasure(deviceMeasure, true);
         });
     }
 
     @Test
     public void testBatchMessagesWithLongFormat()  {
-        List<DeviceMeasure> deviceMeasures = iotsPayloadMapper.process(getBatchMessages(TIMESTAMP.toString(), true));
+        List<DeviceMeasure> deviceMeasures = iotDeviceModelPayloadMapper.process(getBatchMessages(TIMESTAMP.toString(), true));
 
         deviceMeasures.forEach(deviceMeasure -> {
-            assertIoTSDeviceMeasure(deviceMeasure, true);
+            assertIoTDeviceModelMeasure(deviceMeasure, true);
         });
     }
 
     @Test
-    public void testFaultyMessage()  {
+    public void testFaultyMessage() {
         expectedException.expect(IngestionRuntimeException.class);
-        iotsPayloadMapper.process(ConversionTestUtil.getFaultyMessage());
+        iotDeviceModelPayloadMapper.process(ConversionTestUtil.getFaultyMessage());
 
         verify(InvocationContextTestUtil.LOGGER, times(1)).log(any(Level.class), anyString(), any(Throwable.class));
     }
 
-    private void assertIoTSDeviceMeasure(DeviceMeasure deviceMeasure, boolean processingTimestamp) {
+    private void assertIoTDeviceModelMeasure(DeviceMeasure deviceMeasure, boolean processingTimestamp) {
         assertEquals(AZ_DEVICE_ID + Constants.SEPARATOR + SENSOR_ALT_ID, deviceMeasure.getSensorId());
         assertEquals(CAPABILITY_ID, deviceMeasure.getCapabilityId());
 
@@ -129,7 +138,7 @@ public class IoTSPayloadMapperTest {
         assertEquals(SAMPLE_PROPERTY_VALUE, deviceMeasure.getProperties().get(SAMPLE_PROPERTY_KEY).toString());
     }
 
-    private DeviceMessage getSampleIOTSMessages(String timestamp, boolean _timeProvided) {
+    private DeviceMessage getSampleIOTDeviceModelMessages(String timestamp, boolean _timeProvided) {
         ObjectNode sampleMessage = getSampleMessageObjectNode(timestamp, _timeProvided);
 
         return DeviceMessage.builder().deviceId(AZ_DEVICE_ID).enqueuedTime(timestamp).payload(sampleMessage.toString()).build();

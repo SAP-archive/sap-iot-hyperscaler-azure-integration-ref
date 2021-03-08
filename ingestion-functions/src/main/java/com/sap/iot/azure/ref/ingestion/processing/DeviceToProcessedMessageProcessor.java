@@ -8,7 +8,7 @@ import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.PropertyMap
 import com.sap.iot.azure.ref.ingestion.model.timeseries.raw.DeviceMeasure;
 import com.sap.iot.azure.ref.ingestion.model.timeseries.raw.DeviceMeasureKey;
 import com.sap.iot.azure.ref.ingestion.util.Constants;
-import com.sap.iot.azure.ref.integration.commons.api.Processor;
+import com.sap.iot.azure.ref.integration.commons.api.ProcessorWithPerfMetrics;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
 import com.sap.iot.azure.ref.integration.commons.model.mapping.cache.Tag;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-public class DeviceToProcessedMessageProcessor implements Processor<Map.Entry<DeviceMeasureKey, List<DeviceMeasure>>, Map.Entry<String, ProcessedMessageContainer>> {
+public class DeviceToProcessedMessageProcessor implements ProcessorWithPerfMetrics<Map.Entry<DeviceMeasureKey, List<DeviceMeasure>>, Map.Entry<String, ProcessedMessageContainer>> {
     private final MappingHelper mappingHelper;
 
     public DeviceToProcessedMessageProcessor() {

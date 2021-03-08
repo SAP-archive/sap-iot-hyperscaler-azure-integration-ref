@@ -2,13 +2,16 @@ package com.sap.iot.azure.ref.ingestion;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.Cardinality;
 import com.microsoft.azure.functions.annotation.EventHubTrigger;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.sap.iot.azure.ref.ingestion.device.mapping.DevicePayloadMapper;
-import com.sap.iot.azure.ref.ingestion.device.mapping.IoTSPayloadMapper;
+import com.sap.iot.azure.ref.ingestion.device.mapping.IoTDeviceModelPayloadMapper;
+import com.sap.iot.azure.ref.ingestion.exception.IngestionErrorType;
+import com.sap.iot.azure.ref.ingestion.exception.IngestionRuntimeException;
 import com.sap.iot.azure.ref.ingestion.model.device.mapping.DeviceMessage;
 import com.sap.iot.azure.ref.ingestion.model.timeseries.raw.DeviceMeasure;
 import com.sap.iot.azure.ref.ingestion.output.ADXEventHubProcessor;
@@ -16,9 +19,12 @@ import com.sap.iot.azure.ref.ingestion.output.ProcessedTimeSeriesEventHubProcess
 import com.sap.iot.azure.ref.ingestion.processing.DeviceToProcessedMessageProcessor;
 import com.sap.iot.azure.ref.ingestion.util.Constants;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
+import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
 import com.sap.iot.azure.ref.integration.commons.metrics.MetricsClient;
+import com.sap.iot.azure.ref.integration.commons.model.base.eventhub.SystemProperties;
 import com.sap.iot.azure.ref.integration.commons.retry.RetryTaskExecutor;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -77,13 +83,14 @@ public class MappingFunction {
     /**
      * Azure function which invoked by an by an Event Hub trigger.
      * The Trigger is connected to the built in Event Hub Endpoint of the respective IoTHub.
-     * The supported payload format is {@link Constants#TRANSFORM_TYPE_IOTS}.
+     * The supported payload format is {@link Constants#TRANSFORM_TYPE_IOT_DEVICE_MODEL}.
      * The message payloads are brought into a common format using the {@link DevicePayloadMapper}, augmented with mapping information using the
      * {@link DeviceToProcessedMessageProcessor} and sent to the downstream Event Hubs using the {@link ADXEventHubProcessor} and the
      * {@link ProcessedTimeSeriesEventHubProcessor}.
-     * @param messages, incoming device payloads
+     *
+     * @param messages,         incoming device payloads
      * @param systemProperties, system properties including message header information, such as the IoT Hub device ID
-     * @param context, invocation context of the current Azure Function invocation
+     * @param context,          invocation context of the current Azure Function invocation
      */
     @FunctionName(INGESTION_FUNCTION)
     public void run(
@@ -97,10 +104,9 @@ public class MappingFunction {
             @BindingName(value = TRIGGER_SYSTEM_PROPERTIES_ARRAY_NAME) Map<String, Object>[] systemProperties,
             @BindingName(value = PARTITION_CONTEXT) Map<String, Object> partitionContext,
             final ExecutionContext context) {
-
+        JsonNode batchDetails = InvocationContext.getInvocationBatchInfo(partitionContext, systemProperties);
         try {
             InvocationContext.setupInvocationContext(context);
-
             MetricsClient.trackPerfMetric(MetricsClient.getMetricName("StartUp"), System.currentTimeMillis() - start);
             trackProcessingOffset(partitionContext, systemProperties);
             devicePayloadMapper = getDevicePayloadToRawMessageMapper();
@@ -111,14 +117,15 @@ public class MappingFunction {
 
             // this metric is always published since it's used in the default dashboard
             MetricsClient.trackMetric(MetricsClient.getMetricName("MessagesProcessed"), messages.size());
-        } catch (Exception e) {
 
-            JsonNode batchDetails = InvocationContext.getInvocationBatchInfo(partitionContext, systemProperties);
-            InvocationContext.getLogger().log(Level.SEVERE, String.format("Ingestion failed for batch Partition ID: %s, Start Offset: %s, End Offset: %s; Exiting after %s",
-                    batchDetails.get("PartitionId").asText(), batchDetails.get("OffsetStart").asText(), batchDetails.get("OffsetEnd").asText(), MAX_RETRIES), e);
-
-            // throwing the exception to fail the function execution
+            // calculate per-message latency in azure ingestion
+            trackProcessingLatency(systemProperties);
+        } catch (IoTRuntimeException e) {
+            e.addIdentifiers((ObjectNode) batchDetails);
             throw e;
+        } catch (Exception e) {
+            throw new IngestionRuntimeException("Ingestion Failure", e, IngestionErrorType.INVALID_PROCESSED_MESSAGE,
+                    batchDetails, false);
         } finally {
             MetricsClient.trackPerfMetric(MetricsClient.getMetricName("RunDuration"), System.currentTimeMillis() - start);
             InvocationContext.closeInvocationContext();
@@ -128,7 +135,7 @@ public class MappingFunction {
     /**
      * all processes in this method happens in a async thread so that any exception can be caught by the catchExceptionally block
      *
-     * @param messages incoming batch of messages
+     * @param messages         incoming batch of messages
      * @param systemProperties system properties with partition key and other header properties
      * @return completable future for processing the incoming message asynchronously
      */
@@ -167,7 +174,7 @@ public class MappingFunction {
 
                         // wait for sending to EventHub to complete
                         MetricsClient.timed(() -> CompletableFuture.allOf(avroConversionAndEventHubSendFutureFinal, adxEventHubSendFutureFinal).join(),
-                                 "EventHubSendSync");
+                                "EventHubSendSync");
                     });
 
             return null;
@@ -175,11 +182,13 @@ public class MappingFunction {
     }
 
     private List<DeviceMessage> getDeviceMessages(List<String> messages, Map<String, Object>[] systemProperties) {
+
         List<DeviceMessage> deviceMessages = new ArrayList<>();
         for (int i = 0; i < messages.size(); i++) {
             deviceMessages.add(DeviceMessage.builder()
-                    .deviceId(Objects.toString(systemProperties[i].get("iothub-connection-device-id"), null))
-                    .enqueuedTime(Objects.toString(systemProperties[i].get("iothub-enqueuedtime"), null))
+                    .deviceId(Objects.toString(systemProperties[i].get(IOT_HUB_DEVICE_ID), null))
+                    .enqueuedTime(Objects.toString(systemProperties[i].get(IOT_HUB_ENQUEUED_TIME), null))
+                    .source(SystemProperties.from(systemProperties[i]))
                     .payload(messages.get(i))
                     .build());
         }
@@ -187,15 +196,25 @@ public class MappingFunction {
         return deviceMessages;
     }
 
+    private void trackProcessingLatency(Map<String, Object>[] messageProps) {
+        long now = System.currentTimeMillis();
+        for (Map<String, Object> messageProp : messageProps) {
+            if (!Objects.isNull(messageProp.get(IOT_HUB_ENQUEUED_TIME))) {
+                MetricsClient.trackMetric(MetricsClient.getMetricName("Latency"),
+                        now - Instant.parse(messageProp.get(IOT_HUB_ENQUEUED_TIME).toString()).toEpochMilli());
+            }
+        }
+    }
+
     DevicePayloadMapper getDevicePayloadToRawMessageMapper() {
         if (devicePayloadMapper == null) {
             switch (TRANSFORM_DEFAULT_TYPE) {
-                case TRANSFORM_TYPE_IOTS:
-                    devicePayloadMapper = new IoTSPayloadMapper();
+                case TRANSFORM_TYPE_IOT_DEVICE_MODEL:
+                    devicePayloadMapper = new IoTDeviceModelPayloadMapper();
                     break;
                 default:
-                    InvocationContext.getLogger().info("No payload type configured. Defaulting to IoTS Format.");
-                    devicePayloadMapper = new IoTSPayloadMapper();
+                    InvocationContext.getLogger().info("No payload type configured. Defaulting to SAP IoT device model Format.");
+                    devicePayloadMapper = new IoTDeviceModelPayloadMapper();
                     break;
             }
         }
@@ -206,7 +225,7 @@ public class MappingFunction {
     private void trackProcessingOffset(Map<String, Object> partitionContext, Map<String, Object>[] systemProperties) {
         if (InvocationContext.getLogger().isLoggable(Level.FINE) && MetricsClient.PERF_METRICS_ENABLED) {
             JsonNode batchDetails = InvocationContext.getInvocationBatchInfo(partitionContext, systemProperties);
-            InvocationContext.getLogger().log(Level.FINE,"OFFSET_MONITOR: " + batchDetails.toString());
+            InvocationContext.getLogger().log(Level.FINE, "OFFSET_MONITOR: " + batchDetails.toString());
         }
     }
 }

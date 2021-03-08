@@ -14,5 +14,7 @@ public class AvroConstants {
     public static final String AVRO_DATUM_KEY_MEASUREMENTS = "measurements";
     public static final String AVRO_SCHEMA_UNION = "union";
     public static final String AVRO_SCHEMA_NULL = "null";
-
+    public static final String GDPR_DATA_CATEGORY = "gdprDataCategory";
+    public static final String GDPR_CATEGORY_PII = "com.sap.appiot.security:pii";
+    public static final String GDPR_CATEGORY_SPI = "com.sap.appiot.security:spi";
 }

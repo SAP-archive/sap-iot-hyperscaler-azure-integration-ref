@@ -3,7 +3,7 @@ package com.sap.iot.azure.ref.ingestion.device.mapping;
 import com.sap.iot.azure.ref.ingestion.exception.IngestionRuntimeException;
 import com.sap.iot.azure.ref.ingestion.model.device.mapping.DeviceMessage;
 import com.sap.iot.azure.ref.ingestion.model.timeseries.raw.DeviceMeasure;
-import com.sap.iot.azure.ref.integration.commons.api.Processor;
+import com.sap.iot.azure.ref.integration.commons.api.ProcessorWithPerfMetrics;
 import com.sap.iot.azure.ref.integration.commons.exception.base.IoTRuntimeException;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
  * DeviceMeasures}. the {@link DeviceMessage} holds the Azure device ID as well as the payload as {@link String Strings}.
  * The {@link DeviceMeasure} represents a general format which can be used by other classes of this Azure Function.
  */
-public interface DevicePayloadMapper extends Processor<DeviceMessage, List<DeviceMeasure>> {
+public interface DevicePayloadMapper extends ProcessorWithPerfMetrics<DeviceMessage, List<DeviceMeasure>> {
 
     /**
      * maps the incoming device message (string) to the {@link DeviceMeasure} identifying sensor & capability id from the device payload

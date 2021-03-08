@@ -175,9 +175,11 @@ The message schema is based on Cloud Events ([cloud-events v1.0](https://github.
   "datacontenttype": "application/json",
   "data": {
     "deviceId": "d1",
+    "deviceAlternateId": "d1",
     "sensors": [
       {
-        "sensorId": "s1",
+        "sensorId": "d1/ref1",
+        "sensorAlternateId": "ref1",
         "operation": "ADD",
         "capabilities": [
           {
@@ -194,6 +196,7 @@ The message schema is based on Cloud Events ([cloud-events v1.0](https://github.
     "capabilities": [
       {
         "capabilityId": "c1",
+        "capabilityAlternateId": "c1",
         "operation": "ADD",
         "properties": [
           {
@@ -205,6 +208,7 @@ The message schema is based on Cloud Events ([cloud-events v1.0](https://github.
       },
       {
         "capabilityId": "c2",
+        "capabilityAlternateId": "c2",
         "operation": "ADD",
         "properties": [
           {
@@ -236,9 +240,11 @@ The message schema is based on Cloud Events ([cloud-events v1.0](https://github.
   "datacontenttype": "application/json",
   "data": {
     "deviceId": "d1",
+    "deviceAlternateId": "d1",
     "sensors": [
       {
-        "sensorId": "s1",
+        "sensorId": "d1/ref1",
+        "sensorAlternateId": "ref1",
         "operation": "UPDATE",
         "capabilities": [
           {
@@ -248,7 +254,8 @@ The message schema is based on Cloud Events ([cloud-events v1.0](https://github.
         ]
       },
       {
-        "sensorId": "s3",
+        "sensorId": "d1/ref2",
+        "sensorAlternateId": "ref2",
         "operation": "ADD",
         "capabilities": [
           {
@@ -261,6 +268,7 @@ The message schema is based on Cloud Events ([cloud-events v1.0](https://github.
     "capabilities": [
       {
         "capabilityId": "c3",
+        "capabilityAlternateId": "c3",
         "operation": "ADD",
         "properties": [
           {
@@ -290,7 +298,8 @@ The message schema is based on Cloud Events ([cloud-events v1.0](https://github.
   },
   "datacontenttype": "application/json",
   "data": {
-    "deviceId": "d1"
+    "deviceId": "d1",
+    "deviceAlternateId": "d1"
   }
 }
 ```

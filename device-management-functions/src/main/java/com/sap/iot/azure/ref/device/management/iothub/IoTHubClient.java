@@ -14,6 +14,7 @@ import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
 import com.sap.iot.azure.ref.integration.commons.retry.RetryTaskExecutor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
@@ -22,7 +23,7 @@ import static com.sap.iot.azure.ref.device.management.util.Constants.MAX_RETRIES
 public class IoTHubClient {
 
 	private final RegistryManager registryManager;
-	private final RetryTaskExecutor retryTaskExecutor;
+	private static final RetryTaskExecutor retryTaskExecutor = new RetryTaskExecutor();
 
 	public IoTHubClient() {
 		this(new IoTHubClientFactory().getIoTHubClient());
@@ -31,7 +32,6 @@ public class IoTHubClient {
 	@VisibleForTesting
 	IoTHubClient(RegistryManager registryManager) {
 		this.registryManager = registryManager;
-		this.retryTaskExecutor = new RetryTaskExecutor();
 	}
 
 	/**

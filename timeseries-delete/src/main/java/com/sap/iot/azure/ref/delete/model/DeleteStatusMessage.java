@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeleteStatusMessage {
-    private DeleteStatustoEventhub status;
+    private DeleteStatus status;
     private String eventId;
     private String error;
     private String structureId;

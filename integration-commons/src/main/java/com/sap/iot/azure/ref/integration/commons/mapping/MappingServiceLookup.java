@@ -75,8 +75,7 @@ public class MappingServiceLookup {
                     .assignmentId(assignmentId)
                     .mappingId(mappingId)
                     .build();
-        }
-        else {
+        } else {
             //retrieving assignment information from the API endpoint for a given sensorId
             assignmentEndpointResponse = getAssignment(sensorId);
         }
@@ -205,7 +204,7 @@ public class MappingServiceLookup {
         }
     }
 
-    private List<MappingEndpointResponse> getMappings(String mappingId) throws ExecutionException, InterruptedException, IOException{
+    private List<MappingEndpointResponse> getMappings(String mappingId) throws ExecutionException, InterruptedException, IOException {
         Response mappingsResponse = asyncHttpClient.prepareGet(MappingServiceConstants.MAPPING_ENDPOINT.replace(MappingServiceConstants.MAPPING_ID_PLACEHOLDER, mappingId))
                 .setHeader(HttpHeaders.AUTHORIZATION, MappingServiceConstants.BEARER_TOKEN_PREFIX + tenantTokenCache.getToken())
                 .execute()
@@ -223,11 +222,12 @@ public class MappingServiceLookup {
                 .execute()
                 .get();
         String schemaString = schemaResponse.getResponseBody();
+        HttpResponseUtil.validateHttpResponse(schemaResponse, "schema service");
 
         try {
             new Schema.Parser().parse(schemaString);
         } catch (SchemaParseException e) {
-            throw new MappingLookupException("Invalid Schema returned",IdentifierUtil.getIdentifier(CommonConstants.STRUCTURE_ID_PROPERTY_KEY, structureId,
+            throw new MappingLookupException("Invalid Schema returned", IdentifierUtil.getIdentifier(CommonConstants.STRUCTURE_ID_PROPERTY_KEY, structureId,
                     CommonConstants.STRUCTURE_ID_PROPERTY_KEY, structureId), false);
         }
 

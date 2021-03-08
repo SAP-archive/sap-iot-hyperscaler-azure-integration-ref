@@ -1,13 +1,11 @@
 package com.sap.iot.azure.ref.ingestion;
 
 import com.google.common.collect.ImmutableMap;
-import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;
 import com.sap.iot.azure.ref.ingestion.output.ADXEventHubProcessor;
-import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessage;
 import com.sap.iot.azure.ref.ingestion.service.AvroMessageService;
 import com.sap.iot.azure.ref.ingestion.service.TestUtil;
+import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;
 import com.sap.iot.azure.ref.integration.commons.model.timeseries.processed.ProcessedMessageContainer;
-import com.sap.iot.azure.ref.integration.commons.retry.RetryTaskExecutor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -32,7 +29,6 @@ public class AvroParserFunctionTest {
     private AvroMessageService avroMessageService;
     @Mock
     private ADXEventHubProcessor adxEventHubProcessor;
-    private RetryTaskExecutor retryTaskExecutor = new RetryTaskExecutor();
 
     @InjectMocks
     AvroParserFunction avroParserFunction;
@@ -42,7 +38,7 @@ public class AvroParserFunctionTest {
         Map<String, ProcessedMessageContainer> processedMessageMap = ImmutableMap.of("S1", new ProcessedMessageContainer("IG1",
                 TestUtil.getProcessedMessageList()));
         doReturn(processedMessageMap).when(avroMessageService).createProcessedMessage(Mockito.any(), Mockito.any());
-        avroParserFunction = new AvroParserFunction(avroMessageService, adxEventHubProcessor, retryTaskExecutor);
+        avroParserFunction = new AvroParserFunction(avroMessageService, adxEventHubProcessor);
         InvocationContextTestUtil.initInvocationContext();
     }
 

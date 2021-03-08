@@ -7,6 +7,7 @@ The delete time series function in the reference template is responsible for han
 The Delete Time Series function has the following key features:
 
 - Consume message from Delete Time Series Request Event Hub
+- Determine, if soft delete or data purge is required for the specific delete request based on the data categorization for the structure in SAP IoT
 - Process the message and delete the data from the ADX table based on the request
 - Write the operation ID returned from the asynchronous ADX delete operation to a Storage Queue
 - Check the operation status using a Storage Queue triggered function and, once completed write the async delete time series status to the Delete Time Series Status Event Hub. This message will be consumed from SAP IoT layer and set the deletion status to completed
@@ -111,6 +112,7 @@ Here are the Environment Variables that need to be configured for the applicatio
 | ENV_NAME        | Sample Value           | Description  |
 | ------------- |:-------------|:-------------|
 | adx-resource-uri | https://\<adx-resource-name\>.\<adx-resource-location\>.kusto.windows.net   |  ADX resource URI |
+| adx-ingestion-resource-uri | https://ingest-\<adx-resource-name\>.\<adx-resource-location\>.kusto.windows.net   |  ADX ingestion resource URI |
 | adx-database-name | \<adx-database-name\>      |  ADX database name |
 | service-principal-application-client-id |  \<ClientIdValue\>  |  Client ID for service principal |
 | service-principal-application-key |  \<KeyValue\>  |  Key for service principal |
@@ -118,11 +120,19 @@ Here are the Environment Variables that need to be configured for the applicatio
 | delete-timeseries-eventhub-connection-string | Endpoint=sb://\<FQDN\>/;SharedAccessKeyName=\<KeyName\>;SharedAccessKey=\<KeyValue\>;EntityPath=\<eventHubName\> | Adx connection string  |
 | operation-storage-connection-string |  Endpoint=sb://\<FQDN/\>;SharedAccessKeyName=\<KeyName\>;SharedAccessKey=\<KeyValue\>;EntityPath=\<storageQueueName\>|  Operation Storage Queue name |
 | delete-status-eventhub-connection-string |  Endpoint=sb://\<FQDN/\>;SharedAccessKeyName=\<KeyName\>;SharedAccessKey=\<KeyValue\>;EntityPath=\<eventHubName\>|  Delete status Event Hub connection string |
+| lookup-app-host | "https://i4c-model-configuration-sap.cfapps.eu20.hana.ondemand.com" | Endpoint for lookup application |
+| token-endpoint | "https://\<tenant-subdomain\>.authentication.eu20.hana.ondemand.com" | Token endpoint |
+| client-id | \<ClientIdValue\> | Client ID for SAP IoT tenant |
+| client-secret | \<ClientSecretValue\> | Client secret for SAP IoT tenant |
+| azure-cache-host | "\<host\>.redis.cache.windows.net" | Host address of Azure cache resource |
+| azure-cache-key | \<CacheKeyValue\> | Key of Azure cache resource |
+| immediate-purge-execution | false | Flag for configuring immediate or batched purge execution
 
 ## Delete Time Series Function
 
 The Delete Time Series function consumes the delete requests from the according Event Hub. It then forms and executes the ADX delete query. 
 The operation ID which is returned from the delete query is then written into te according Storage Queue.
+Depending on the GDPR data category of the affected structure, the Time series Delete Function will either execute a soft-delete of the time series data or purge the data.
 
 ### Soft Delete
 A soft delete is realized by re-ingesting the affected entries with the delete flag set to true.
@@ -162,15 +172,65 @@ The only fields which are changed are '_enqueued_time' and '_isDeleted'.
 
 Considering how the described read time series query works, it becomes clear how this newly ingested data masks the original data. Since it has the same
  'sourceId' and '_time' values and a higher '_enqueued_time' value as the original data, it will mask the original data. Since we also changed the '_isDeleted
- ' value to 'true', the read time series query will not return these entries.  
+ ' value to 'true', the read time series query will not return these entries. 
+ 
+### Purge
+A data purge removes the data physically from the database instead of masking it which retains the original sensor readings.
 
-> Note: In future, data purge will be enabled additional to the soft delete. As of now, only soft delete is supported. 
+Following is a sample purge query:
+```
+.purge async table TEST_IG1 records  <| 
+    where (
+        _time >= datetime("2020-11-06T10:59:00Z") and 
+        _time <= datetime("2020-11-06T11:01:00Z") and 
+        sourceId in ("s1") and 
+        _enqueued_time < datetime("2020-11-30T18:55:11.737Z")
+    )  or 
+    (
+        _time >= datetime("2020-11-06T11:59:00Z") and 
+        _time <= datetime("2020-11-06T12:01:00Z") and 
+        sourceId in ("s2") and 
+        _enqueued_time < datetime("2020-11-30T18:55:15.635Z")
+    ) or (
+        _time >= datetime("2020-11-06T12:59:00Z") and 
+        _time <= datetime("2020-11-06T13:01:00Z") and 
+        sourceId in ("s3") and 
+        _enqueued_time < datetime("2020-11-30T18:55:18.655Z")
+    )
+```
+This sample purge query consolidates three purge requests for the same structure.
+For the ADX tables that are used in conjunction with SAP IoT Applications, it is essential that delete of data (especially for purge) is executed using the SAP IoT APIs consumed by the SAP business application in order to keep the raw & aggregated time series data in HANA consistent.
+
+> Note: Directly purging the time series data in ADX tables, could result in inconsistencies of materialized aggregates in HANA and the raw data your ADX database.
+ 
 
 ### Error Handling
 The Delete Time Series Function uses the [RetryTaskExecutor](../integration-commons/src/main/java/com/sap/iot/azure/ref/integration/commons/retry/RetryTaskExecutor.java)
 to implement a custom retry logic. More details can be found in the [Error Handling Documentation](ErrorHandling.md).
 Unlike other Azure Functions, the Delete Time Series Function uses a single trigger cardinality. Therefore, it consumes and processes each delete request
  individually.
+ 
+ ## Batch Purge Time Series Function 
+ 
+ Since the purge operation is a performance intensive task, the purge operations will be collected and consolidated by default. Further information can be
+  found in the [Azure Data Explorer purge documentation](https://docs.microsoft.com/en-us/azure/data-explorer/kusto/concepts/data-purge#purge-guidelines).
+ If however an immediate data purge execution is preferred, this can be achieved by setting the environment variable 'immediate-purge-execution' to true. 
+ 
+ The Batch Purge Time Series function is configured to run every 12 hours and performs the following steps: 
+ 1. Consume the purge requests from the purge storage queue.
+ 2. Consolidate purge requests by combining requests for the same structure ID into a single Kusto query. 
+ 3. Execute the consolidated requests against ADX.
+ 4. Forward the returned operation IDs to the delete operation monitor storage queue. 
+ 5. If the purge request is completed successfully, the delete-monitor function removes the respective delete requests from the storage queue.
+ 
+> Note: If large amounts of purge requests are being executed, it is possible that the Batch Purge Time Series Function times out. In case of such a
+> timeout, the purge requests will be processed with the next invocation of the Batch Purge Time Series Function. If the amount of purge requests continues
+> to lead to timeouts, the timeout duration of the function should be increased ([Azure Function Scale - Timeout Configuration](https://docs.microsoft.com/en-us/azure/azure-functions/functions-scale#timeout)).  
+ 
+ ### Error Handling
+ For all storage queue operations, the built-in retry mechanism of the Azure storage queue is used. 
+ For executing the purge query against ADX, the [RetryTaskExecutor](../integration-commons/src/main/java/com/sap/iot/azure/ref/integration/commons/retry
+ /RetryTaskExecutor.java) is used.
 
 ## Delete Time Series Monitor
 

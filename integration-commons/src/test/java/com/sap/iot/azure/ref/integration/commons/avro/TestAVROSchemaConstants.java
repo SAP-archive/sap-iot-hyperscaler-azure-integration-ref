@@ -382,4 +382,72 @@ public class TestAVROSchemaConstants {
             "    }" +
             "  ]" +
             "}";
+
+    public static final String SAMPLE_AVRO_SCHEMA_GDPR_RELEVANT_PII = "{" +
+            "    \"type\": \"record\"," +
+            "    \"name\": \"schema\"," +
+            "    \"gdprDataCategory\": \"com.sap.appiot.security:pii\",\n" +
+            "    \"structureId\": \"schema\",\n" +
+            "    \"tenant\": \"tenant-guid-1\",\n" +
+            "    \"fields\": [" +
+            "        {" +
+            "            \"name\": \"tags\"," +
+            "            \"type\": {" +
+            "                \"type\": \"array\"," +
+            "                \"items\": {" +
+            "                    \"type\": \"record\"," +
+            "                    \"name\": \"queryParams\"," +
+            "                    \"fields\": [" +
+            "                    ]" +
+            "                }" +
+            "            }" +
+            "        }," +
+            "        {" +
+            "            \"name\": \"measurements\"," +
+            "            \"type\": {" +
+            "                \"type\": \"array\"," +
+            "                \"items\": {" +
+            "                    \"type\": \"record\"," +
+            "                    \"name\": \"timeseriesRecord\"," +
+            "                    \"fields\": [" +
+            "                    ]" +
+            "                }" +
+            "            }" +
+            "        }" +
+            "    ]" +
+            "}";
+
+    public static final String SAMPLE_AVRO_SCHEMA_GDPR_RELEVANT_SPI = "{" +
+            "    \"type\": \"record\"," +
+            "    \"name\": \"schema\"," +
+            "    \"gdprDataCategory\": \"com.sap.appiot.security:spi\",\n" +
+            "    \"structureId\": \"schema\",\n" +
+            "    \"tenant\": \"tenant-guid-1\",\n" +
+            "    \"fields\": [" +
+            "        {" +
+            "            \"name\": \"tags\"," +
+            "            \"type\": {" +
+            "                \"type\": \"array\"," +
+            "                \"items\": {" +
+            "                    \"type\": \"record\"," +
+            "                    \"name\": \"queryParams\"," +
+            "                    \"fields\": [" +
+            "                    ]" +
+            "                }" +
+            "            }" +
+            "        }," +
+            "        {" +
+            "            \"name\": \"measurements\"," +
+            "            \"type\": {" +
+            "                \"type\": \"array\"," +
+            "                \"items\": {" +
+            "                    \"type\": \"record\"," +
+            "                    \"name\": \"timeseriesRecord\"," +
+            "                    \"fields\": [" +
+            "                    ]" +
+            "                }" +
+            "            }" +
+            "        }" +
+            "    ]" +
+            "}";
 }

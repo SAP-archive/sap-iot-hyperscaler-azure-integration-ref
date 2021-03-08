@@ -1,8 +1,10 @@
 package com.sap.iot.azure.ref.notification.processing;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.iot.azure.ref.integration.commons.api.Processor;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContext;
 import com.sap.iot.azure.ref.integration.commons.exception.IdentifierUtil;
+import com.sap.iot.azure.ref.integration.commons.model.base.eventhub.SystemProperties;
+import com.sap.iot.azure.ref.integration.commons.model.mapper.CustomObjectMapper;
 import com.sap.iot.azure.ref.notification.exception.NotificationErrorType;
 import com.sap.iot.azure.ref.notification.exception.NotificationProcessException;
 import com.sap.iot.azure.ref.notification.processing.model.EntityType;
@@ -10,16 +12,16 @@ import com.sap.iot.azure.ref.notification.util.Constants;
 import lombok.AccessLevel;
 import lombok.Setter;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class NotificationHandler {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final CustomObjectMapper mapper = new CustomObjectMapper();
 
     @Setter(AccessLevel.PACKAGE)
     private NotificationProcessorFactory notificationProcessorFactory = new NotificationProcessorFactory();
@@ -29,33 +31,40 @@ public class NotificationHandler {
      * The messages are internally mapped to {@link NotificationMessage} format along with partitionKey, and passed to executeProcessorHandler()
      * which invokes a specific operation based on the operation type.
      *
-     * @param messages incoming messages received from the notification processor function
+     * @param messages         incoming messages received from the notification processor function
      * @param systemProperties message application properties like offset details, partitionKey etc.
      */
-    public void executeNotificationHandling(List<String> messages, Map<String, Object>[] systemProperties) throws RuntimeException, IOException {
+    public void executeNotificationMessage(List<String> messages, Map<String, Object>[] systemProperties) throws RuntimeException {
         List<NotificationMessage> notificationMessages = getNotificationMessages(messages, systemProperties);
         for (NotificationMessage notificationMessage : notificationMessages) {
             EntityType entityType = notificationMessage.getType();
             try {
-                NotificationProcessor notificationProcessor = notificationProcessorFactory.getProcessor(Objects.requireNonNull(entityType));
-                executeProcessorHandler(notificationMessage, notificationProcessor);
-            } catch (NotificationProcessException e){
-                InvocationContext.getLogger().log(Level.SEVERE, "Notification processor exception for notification message:"+ notificationMessage, e);
+                if (notificationMessage.getType() == EntityType.SOURCEID || notificationMessage.getType() == EntityType.TAGS) {
+                    InvocationContext.getLogger().log(Level.WARNING, "Source ID Type not yet supported");
+                } else {
+                    NotificationProcessor notificationProcessor = notificationProcessorFactory.getProcessor(Objects.requireNonNull(entityType));
+                    executeProcessorHandler(notificationMessage, notificationProcessor);
+                }
+            } catch (NotificationProcessException e) {
+                InvocationContext.getLogger().log(Level.SEVERE, "Notification processor exception for notification message:" + notificationMessage, e);
             }
         }
     }
 
-    private List<NotificationMessage> getNotificationMessages(List<String> messages, Map<String, Object>[] systemProperties) throws IOException {
-        List<NotificationMessage> notificationMessages = new ArrayList<>();
-        for (int i = 0; i < messages.size(); i++) {
-            NotificationMessage notificationMessage = mapper.readValue(messages.get(i), NotificationMessage.class);
-            notificationMessage.setPartitionKey(systemProperties[i].get("PartitionKey").toString());
-            notificationMessages.add(notificationMessage);
-        }
-        return notificationMessages;
+    private List<NotificationMessage> getNotificationMessages(List<String> messages, Map<String, Object>[] systemProperties) {
+        return IntStream.range(0, messages.size())
+                .mapToObj(index -> {
+                    Map<String, Object> systemPropertiesMap = SystemProperties.selectRelevantKeys(systemProperties[index]);
+                    return ((Processor<String, NotificationMessage>) message -> {
+                        return mapper.readValue(message, systemPropertiesMap, NotificationMessage.class,
+                                SystemProperties.class);
+                    }).apply(messages.get(index));
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
-    private void executeProcessorHandler(NotificationMessage notificationMessage, NotificationProcessor notificationProcessor){
+    private void executeProcessorHandler(NotificationMessage notificationMessage, NotificationProcessor notificationProcessor) {
         switch (notificationMessage.getOperation()) {
             case POST:
                 notificationProcessor.handleCreateWithRetry(notificationMessage);

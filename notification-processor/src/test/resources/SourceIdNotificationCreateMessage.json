@@ -1,0 +1,27 @@
+{
+  "operation": "POST",
+  "timestamp": 1611771577986,
+  "type": "com.sap.iot.i4c.SourceId",
+  "changeEntity": "39c84b6008d44a698fdc74adb7683e15",
+  "tenant": "89e4259c-e41b-4552-9561-e8a096720248",
+  "changeList": [{
+    "type": "com.sap.iot.i4c.SensorId",
+    "entity": "384109E0F2534A6A382M009/Model_Template_M009",
+    "operation": "ADD",
+    "additionalEntityData": []
+  }],
+  "version": "0",
+  "entityDataList": [{
+    "name": "equipmentId",
+    "value": "384109E0F2534A6A382M009"
+  },
+    {
+      "name": "modelId",
+      "value": "MT_M009"
+    },
+    {
+      "name": "indicatorGroupId",
+      "value": "E10100304AEFE7A616005E02C64AM009"
+    }
+  ]
+}

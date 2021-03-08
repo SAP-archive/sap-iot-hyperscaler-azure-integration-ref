@@ -97,6 +97,30 @@
 				"description": "Defines a value for delete time series function Zip URI."
 			}
 		},
+		"ingestionType": {
+			"type": "string",
+			"defaultValue": "Batching",
+			"allowedValues": [
+				"Batching",
+				"Streaming"
+			],
+			"metadata": {
+				"description": "Defines ingestion type for mapping and notification function."
+			}
+		},
+		"ingestionFunctionServicePlan": {
+			"defaultValue": "Consumption",
+			"allowedValues": [
+				"Consumption",
+				"ElasticPremiumEP1",
+				"ElasticPremiumEP2",
+				"ElasticPremiumEP3"
+			],
+			"type": "String",
+			"metadata": {
+				"description": "Defines ingestion function SKU. Check details at https://docs.microsoft.com/en-us/azure/azure-functions/functions-scale?WT.mc_id=Portal-WebsitesExtension"
+			}
+		},
 		"enableDiagnosticsSettingsForServices": {
 			"type": "string",
 			"defaultValue": "Yes",
@@ -214,6 +238,17 @@
 				"description": "Defines the number of days to retain data in cache for quick access (minValue=1, maxValue=36500)."
 			}
 		},
+		"ingestionType": {
+			"type": "string",
+			"defaultValue": "Batching",
+			"allowedValues": [
+				"Batching",
+				"Streaming"
+			],
+			"metadata": {
+				"description": "Defines ingestion type for mapping and notification function."
+			}
+		},
 		"eventHubSKUTier": {
 			"type": "string",
 			"defaultValue": "Standard",
@@ -229,7 +264,6 @@
 			"type": "int",
 			"defaultValue": 1,
 			"allowedValues": [
-				0,
 				1,
 				2,
 				3,
@@ -253,6 +287,47 @@
 			],
 			"metadata": {
 				"description": "Defines event hubs throughput units."
+			}
+		},
+		"eventHubAutoInflateThroughput": {
+			"defaultValue": "Yes",
+			"allowedValues": [
+				"Yes",
+				"No"
+			],
+			"type": "String",
+			"metadata": {
+				"description": "Auto-Inflate enables you to scale-up your throughput units automatically to meet your usage needs."
+			}
+		},
+		"eventHubThroughputUnits": {
+			"defaultValue": 5,
+			"allowedValues": [
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20
+			],
+			"type": "Int",
+			"metadata": {
+				"description": "Defines auto-inflate throughput units."
 			}
 		},
 		"eventHubPartitionsForADXTimeSeries": {
@@ -608,7 +683,7 @@
 		},
 		"redisCacheSKUCapacity": {
 			"type": "int",
-			"defaultValue": 1,
+			"defaultValue": 0,
 			"allowedValues": [
 				0,
 				1,
@@ -701,7 +776,54 @@
 		"redisCacheDiagnosticName": "[substring(concat('redis-ds-', uniqueString(variables('uniqueAppName'))), 0, 16)]",
 		"notificationEventhubConnectionString": "notification-eventhub-connection-string",
 		"iothubRegistryConnectionString": "iothub-registry-connection-string",
-		"enabledSettings": "Yes"
+		"enabledSettings": "Yes",
+		"ingestionTypeSettings": {
+			"Streaming": {
+				"enabled": true
+			},
+			"Batching": {
+				"enabled": false
+			}
+		},
+		"ingestionFunctionSKU": {
+			"Consumption": {
+				"name": "Y1",
+				"tier": "Dynamic",
+				"propName": ""
+			},
+			"ElasticPremiumEP1": {
+				"name": "EP1",
+				"tier": "ElasticPremium",
+				"propName": "-ep"
+			},
+			"ElasticPremiumEP2": {
+				"name": "EP2",
+				"tier": "ElasticPremium",
+				"propName": "-ep"
+			},
+			"ElasticPremiumEP3": {
+				"name": "EP3",
+				"tier": "ElasticPremium",
+				"propName": "-ep"
+			}
+		},
+		"autoInflateSettings": {
+			"Yes": {
+				"enabled": true,
+				"throughputUnits": "[parameters('eventHubThroughputUnits')]"
+			},
+			"No": {
+				"enabled": false,
+				"throughputUnits": ""
+			}
+		},
+		"ep": "[string(variables('ingestionFunctionSKU')[parameters('ingestionFunctionServicePlan')].propName)]",
+		"serverFarmsEP": "[concat(variables('uniqueAppName'), '-ep')]",
+		"ingestionStorageConnectionString": "ingestion-storage-connection-string",
+		"notificationStorageConnectionString": "notification-storage-connection-string",
+		"deviceStorageConnectionString": "device-storage-connection-string",
+		"deleteTimeseriesStorageConnectionString": "delete-timeseries-storage-connection-string",
+		"appInsightsIntrumentationKey": "app-insights-instrumentation-key"
 	},
 	"resources": [
 		{
@@ -719,11 +841,27 @@
 			}
 		},
 		{
+			"condition": "[not(equals(parameters('ingestionFunctionServicePlan'), 'Consumption'))]",
+			"type": "Microsoft.Web/serverfarms",
+			"apiVersion": "2018-02-01",
+			"name": "[variables('serverFarmsEP')]",
+			"location": "[resourceGroup().location]",
+			"sku": {
+				"name": "[variables('ingestionFunctionSKU')[parameters('ingestionFunctionServicePlan')].name]",
+				"tier": "[variables('ingestionFunctionSKU')[parameters('ingestionFunctionServicePlan')].tier]"
+			},
+			"kind": "elastic",
+			"properties": {
+				"maximumElasticWorkerCount": 32
+			}
+		},
+		{
 			"apiVersion": "2016-03-01",
 			"name": "[variables('uniqueAppName')]",
 			"type": "Microsoft.Web/sites",
 			"properties": {
 				"name": "[variables('uniqueAppName')]",
+				"serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(variables('uniqueAppName'), variables('ep')))]",
 				"httpsOnly": true
 			},
 			"tags": {
@@ -731,7 +869,7 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
-				"[resourceId('Microsoft.Web/serverfarms', variables('uniqueAppName'))]"
+				"[resourceId('Microsoft.Web/serverfarms', concat(variables('uniqueAppName'), variables('ep')))]"
 			],
 			"resources": [
 				{
@@ -748,9 +886,9 @@
 					],
 					"properties": {
 						"FUNCTIONS_WORKER_RUNTIME": "java",
-						"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2019-04-01').keys[0].value)]",
-						"FUNCTIONS_EXTENSION_VERSION": "~2",
-						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2019-04-01').keys[0].value)]",
+						"AzureWebJobsStorage": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('ingestionStorageConnectionString'))).secretUriWithVersion, ')')]",
+						"FUNCTIONS_EXTENSION_VERSION": "~3",
+						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('ingestionStorageConnectionString'))).secretUriWithVersion, ')')]",
 						"WEBSITE_CONTENTSHARE": "[concat(toLower(variables('uniqueAppName')))]",
 						"WEBSITE_RUN_FROM_ZIP": "[parameters('mappingFunctionZipURI')]",
 						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey]",
@@ -762,20 +900,22 @@
 						"client-secret": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('clientSecret'))).secretUriWithVersion, ')')]",
 						"azure-cache-host": "[concat(variables('redisCacheName'), '.redis.cache.windows.net')]",
 						"adx-resource-uri": "[concat('https://', variables('ADXClustersName'), '.', variables('ADXResourceLocation'), '.kusto.windows.net')]",
+						"adx-ingestion-resource-uri": "[concat('https://', 'ingest-', variables('ADXClustersName'), '.', variables('ADXResourceLocation'), '.kusto.windows.net')]",
 						"adx-source-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('ADXSourceConnectionString'))).secretUriWithVersion, ')')]",
 						"processed-timeseries-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('processedTimeSeriesConnectionString'))).secretUriWithVersion, ')')]",
 						"processed-timeseries-in-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('processedTimeSeriesIn'))).secretUriWithVersion, ')')]",
 						"iothub-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('eventProcessHubConnectionString'))).secretUriWithVersion, ')')]",
 						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey)]",
 						"azure-cache-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('azureCacheKey'))).secretUriWithVersion, ')')]",
-						"transform-default-message-type": "IOTS",
+						"transform-default-message-type": "SAPIoTDeviceModel",
 						"sap-iot-tenant": "[parameters('SAPIotTenantID')]",
 						"adx-database-name": "[variables('ADXClustersDatabaseName')]",
 						"eventhub-sku-tier": "[parameters('eventHubSKUTier')]",
 						"lookup-app-host": "[parameters('modelConfigurationAppHost')]",
 						"mapping-app-host": "[parameters('modelMappingAppHost')]",
 						"token-endpoint": "[parameters('SAPIotTenantAuthenticationTokenEndpoint')]",
-						"sap-iot-required-api-scopes": "[parameters('scopesToAccessSAPIotApis')]"
+						"sap-iot-required-api-scopes": "[parameters('scopesToAccessSAPIotApis')]",
+						"ingestion-type": "[parameters('ingestionType')]"
 					}
 				},
 				{
@@ -832,7 +972,7 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('notificationStorageName'))]",
-				"[resourceId('Microsoft.Web/serverfarms', variables('uniqueAppName'))]"
+				"[resourceId('Microsoft.Web/serverfarms', concat(variables('uniqueAppName'), variables('ep')))]"
 			],
 			"resources": [
 				{
@@ -850,9 +990,9 @@
 					],
 					"properties": {
 						"FUNCTIONS_WORKER_RUNTIME": "java",
-						"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('notificationStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('notificationStorageName')), '2019-04-01').keys[0].value)]",
-						"FUNCTIONS_EXTENSION_VERSION": "~2",
-						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('notificationStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('notificationStorageName')), '2019-04-01').keys[0].value)]",
+						"AzureWebJobsStorage": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('notificationStorageConnectionString'))).secretUriWithVersion, ')')]",
+						"FUNCTIONS_EXTENSION_VERSION": "~3",
+						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('notificationStorageConnectionString'))).secretUriWithVersion, ')')]",
 						"WEBSITE_CONTENTSHARE": "[concat(toLower(concat(variables('uniqueAppName'), '-notify')))]",
 						"WEBSITE_RUN_FROM_ZIP": "[parameters('notificationFunctionZipURI')]",
 						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey]",
@@ -864,15 +1004,16 @@
 						"client-secret": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('clientSecret'))).secretUriWithVersion, ')')]",
 						"azure-cache-host": "[concat(variables('redisCacheName'), '.redis.cache.windows.net')]",
 						"adx-resource-uri": "[concat('https://', variables('ADXClustersName'), '.', variables('ADXResourceLocation'), '.kusto.windows.net')]",
+						"adx-ingestion-resource-uri": "[concat('https://', 'ingest-', variables('ADXClustersName'), '.', variables('ADXResourceLocation'), '.kusto.windows.net')]",
 						"APPLICATIONINSIGHTS_CONNECTION_STRING": "[concat('InstrumentationKey=',reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey)]",
 						"azure-cache-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('azureCacheKey'))).secretUriWithVersion, ')')]",
 						"adx-database-name": "[variables('ADXClustersDatabaseName')]",
 						"eventhub-sku-tier": "[parameters('eventHubSKUTier')]",
 						"lookup-app-host": "[parameters('modelConfigurationAppHost')]",
-						"mapping-app-host": "[parameters('modelMappingAppHost')]",
 						"token-endpoint": "[parameters('SAPIotTenantAuthenticationTokenEndpoint')]",
 						"notification-eventhub-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('notificationEventhubConnectionString'))).secretUriWithVersion, ')')]",
-						"sap-iot-required-api-scopes": "[parameters('scopesToAccessSAPIotApis')]"
+						"sap-iot-required-api-scopes": "[parameters('scopesToAccessSAPIotApis')]",
+						"ingestion-type": "[parameters('ingestionType')]"
 					}
 				},
 				{
@@ -929,7 +1070,7 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('deviceStorageName'))]",
-				"[resourceId('Microsoft.Web/serverfarms', variables('uniqueAppName'))]"
+				"[resourceId('Microsoft.Web/serverfarms', concat(variables('uniqueAppName'), variables('ep')))]"
 			],
 			"resources": [
 				{
@@ -943,9 +1084,9 @@
 					],
 					"properties": {
 						"FUNCTIONS_WORKER_RUNTIME": "java",
-						"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deviceStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deviceStorageName')), '2019-04-01').keys[0].value)]",
-						"FUNCTIONS_EXTENSION_VERSION": "~2",
-						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deviceStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deviceStorageName')), '2019-04-01').keys[0].value)]",
+						"AzureWebJobsStorage": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deviceStorageConnectionString'))).secretUriWithVersion, ')')]",
+						"FUNCTIONS_EXTENSION_VERSION": "~3",
+						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deviceStorageConnectionString'))).secretUriWithVersion, ')')]",
 						"WEBSITE_CONTENTSHARE": "[concat(toLower(concat(variables('uniqueAppName'), '-device')))]",
 						"WEBSITE_RUN_FROM_ZIP": "[parameters('deviceManagementFunctionZipURI')]",
 						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey]",
@@ -1010,7 +1151,7 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts', variables('deleteTimeseriesStorageName'))]",
-				"[resourceId('Microsoft.Web/serverfarms', variables('uniqueAppName'))]"
+				"[resourceId('Microsoft.Web/serverfarms', concat(variables('uniqueAppName'), variables('ep')))]"
 			],
 			"resources": [
 				{
@@ -1029,7 +1170,7 @@
 					],
 					"properties": {
 						"FUNCTIONS_WORKER_RUNTIME": "java",
-						"AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deleteTimeseriesStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deleteTimeseriesStorageName')), '2019-04-01').keys[0].value)]",
+						"AzureWebJobsStorage": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deleteTimeseriesStorageConnectionString'))).secretUriWithVersion, ')')]",
 						"delete-timeseries-eventhub-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deleteTimeseriesConnectionString'))).secretUriWithVersion, ')')]",
 						"delete-status-eventhub-connection-string": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deleteStatusConnectionString'))).secretUriWithVersion, ')')]",
 						"service-principal-application-client-id": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('SPAclientId'))).secretUriWithVersion, ')')]",
@@ -1039,14 +1180,16 @@
 						"client-secret": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('clientSecret'))).secretUriWithVersion, ')')]",
 						"azure-cache-host": "[concat(variables('redisCacheName'), '.redis.cache.windows.net')]",
 						"adx-resource-uri": "[concat('https://', variables('ADXClustersName'), '.', variables('ADXResourceLocation'), '.kusto.windows.net')]",
+						"adx-ingestion-resource-uri": "[concat('https://', 'ingest-', variables('ADXClustersName'), '.', variables('ADXResourceLocation'), '.kusto.windows.net')]",
 						"azure-cache-key": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('azureCacheKey'))).secretUriWithVersion, ')')]",
 						"adx-database-name": "[variables('ADXClustersDatabaseName')]",
 						"lookup-app-host": "[parameters('modelConfigurationAppHost')]",
 						"mapping-app-host": "[parameters('modelMappingAppHost')]",
 						"token-endpoint": "[parameters('SAPIotTenantAuthenticationTokenEndpoint')]",
 						"operation-storage-connection-string": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deleteTimeseriesStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deleteTimeseriesStorageName')), '2019-04-01').keys[0].value)]",
-						"FUNCTIONS_EXTENSION_VERSION": "~2",
-						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deleteTimeseriesStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deleteTimeseriesStorageName')), '2019-04-01').keys[0].value)]",
+						"max-purge-requests": "32",
+						"FUNCTIONS_EXTENSION_VERSION": "~3",
+						"WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('@Microsoft.KeyVault(SecretUri=', reference(concat('Microsoft.KeyVault/vaults/', variables('vaultName'), '/secrets/', variables('deleteTimeseriesStorageConnectionString'))).secretUriWithVersion, ')')]",
 						"WEBSITE_CONTENTSHARE": "[concat(toLower(concat(variables('uniqueAppName'), '-delete-ts')))]",
 						"WEBSITE_RUN_FROM_ZIP": "[parameters('deleteTimeSeriesFunctionZipURI')]",
 						"APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey]",
@@ -1172,7 +1315,7 @@
 			},
 			"resources": [
 				{
-					"name": "[concat('default/', 'delete-operation-monitoring-queue')]",
+					"name": "default/delete-operation-monitoring-queue",
 					"type": "queueServices/queues",
 					"apiVersion": "2019-06-01",
 					"dependsOn": [
@@ -1183,7 +1326,18 @@
 					}
 				},
 				{
-					"name": "[concat('default/', 'delete-operation-monitoring-queue-poison')]",
+					"name": "default/delete-operation-monitoring-queue-poison",
+					"type": "queueServices/queues",
+					"apiVersion": "2019-06-01",
+					"dependsOn": [
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deleteTimeseriesStorageName'))]"
+					],
+					"properties": {
+						"metadata": {}
+					}
+				},
+				{
+					"name": "default/purge-operation-queue",
 					"type": "queueServices/queues",
 					"apiVersion": "2019-06-01",
 					"dependsOn": [
@@ -1315,10 +1469,12 @@
 				"tier": "[parameters('AzureDataExplorerSKUTier')]",
 				"capacity": "[parameters('AzureDataExplorerSKUCapacity')]"
 			},
-			"apiVersion": "2019-11-09",
+			"apiVersion": "2020-06-14",
 			"location": "[resourceGroup().location]",
 			"properties": {
-				"enableDiskEncryption": true
+				"enableDiskEncryption": true,
+				"enableStreamingIngest": "[variables('ingestionTypeSettings')[parameters('ingestionType')].enabled]",
+				"enablePurge": true
 			},
 			"resources": [
 				{
@@ -1344,31 +1500,7 @@
 						],
 						"metrics": [
 							{
-								"category": "Cluster health",
-								"enabled": true,
-								"retentionPolicy": {
-									"enabled": true,
-									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
-								}
-							},
-							{
-								"category": "Query performance",
-								"enabled": true,
-								"retentionPolicy": {
-									"enabled": true,
-									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
-								}
-							},
-							{
-								"category": "Ingestion health and performance",
-								"enabled": true,
-								"retentionPolicy": {
-									"enabled": true,
-									"days": "[parameters('diagnosticsLogsRetentionInDays')]"
-								}
-							},
-							{
-								"category": "Export health and performance",
+								"category": "AllMetrics",
 								"enabled": true,
 								"retentionPolicy": {
 									"enabled": true,
@@ -1572,8 +1704,8 @@
 			},
 			"properties": {
 				"zoneRedundant": false,
-				"isAutoInflateEnabled": false,
-				"maximumThroughputUnits": 0,
+				"isAutoInflateEnabled": "[variables('autoInflateSettings')[parameters('eventHubAutoInflateThroughput')].enabled]",
+				"maximumThroughputUnits": "[variables('autoInflateSettings')[parameters('eventHubAutoInflateThroughput')].throughputUnits]",
 				"kafkaEnabled": false
 			},
 			"resources": [
@@ -2321,6 +2453,66 @@
 						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
 						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deviceStorageName'))]",
 						"[resourceId('Microsoft.Devices/IotHubs/', variables('iotHubName'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('ingestionStorageConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2019-04-01').keys[0].value)]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('notificationStorageConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('notificationStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('notificationStorageName')), '2019-04-01').keys[0].value)]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('notificationStorageName'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('deviceStorageConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deviceStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deviceStorageName')), '2019-04-01').keys[0].value)]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deviceStorageName'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('deleteTimeseriesStorageConnectionString')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('deleteTimeseriesStorageName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('deleteTimeseriesStorageName')), '2019-04-01').keys[0].value)]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Storage/storageAccounts/', variables('deleteTimeseriesStorageName'))]"
+					]
+				},
+				{
+					"type": "secrets",
+					"name": "[variables('appInsightsIntrumentationKey')]",
+					"apiVersion": "2018-02-14",
+					"properties": {
+						"value": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2018-05-01-preview').InstrumentationKey]"
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.KeyVault/vaults/', variables('vaultName'))]",
+						"[resourceId('Microsoft.Insights/components/', variables('appInsightsName'))]"
 					]
 				},
 				{

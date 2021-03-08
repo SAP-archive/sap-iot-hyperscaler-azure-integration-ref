@@ -153,6 +153,8 @@ As discussed in the above table, structure notifications handling will differ de
 Once this payload is received, the NotificationHandler delegates the notification to the Structure Notification Processor and is processed by handleCreate.
 This function creates fetches the AVRO schema using the Structure ID (changeEntity). This schema is stored in the cache and an ADX table is created based on
 this schema.
+The ingestion type of the created table depends on the configuration defined by the "ingestion-type". It can be set to "Batching" or "Streaming". More
+ information about the streaming ingestion type and its limitations can be found [here](https://docs.microsoft.com/en-us/azure/data-explorer/ingest-data-streaming#limitations).
 
 ##### Update Structure
 
@@ -612,3 +614,4 @@ If there is an error in creating new entry in cache, retry is executed as per MA
 **PATCH / DELETE**
 
 If there is error in updating entry in cache, retry is executed as per MAX_RETRIES configuration. If there is failure even after retries, it is logged at SEVERE level and returned
+

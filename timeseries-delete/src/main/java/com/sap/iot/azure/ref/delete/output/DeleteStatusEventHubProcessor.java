@@ -76,6 +76,14 @@ public class DeleteStatusEventHubProcessor extends BaseEventHubProcessor<DeleteS
         return EventData.create(io.cloudevents.json.Json.binaryEncode(deleteStatusCloudEvent));
     }
 
+    /**
+     * Send a delete status message to the Event Hub configured through the enviroment variable name
+     * {@link Constants#DELETE_STATUS_EVENT_HUB_CONNECTION_STRING_PROP}.
+     *
+     * @param deleteStatusMessageEntry delete status message object
+     * @return completable future from sending status message to Event Hub
+     * @throws IoTRuntimeException exception in Event Hub interaction
+     */
     @Override
     public CompletableFuture<Void> process(DeleteStatusMessage deleteStatusMessageEntry) throws IoTRuntimeException {
         return super.process(deleteStatusMessageEntry, deleteStatusMessageEntry.getStructureId());

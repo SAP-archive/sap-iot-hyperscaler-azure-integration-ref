@@ -99,6 +99,9 @@ public class InvocationContext {
         addLoggingFilter(initializationContext);
     }
 
+    /**
+     * Closes initialization context by removing the thread local.
+     */
     public static void closeInitializationContext() {
         initializationContextThreadLocal.remove();
     }

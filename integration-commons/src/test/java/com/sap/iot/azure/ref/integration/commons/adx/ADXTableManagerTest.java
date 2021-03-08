@@ -1,15 +1,15 @@
 package com.sap.iot.azure.ref.integration.commons.adx;
 
-import com.microsoft.azure.kusto.data.ClientImpl;
+import com.microsoft.azure.kusto.data.Client;
 import com.microsoft.azure.kusto.data.Results;
 import com.microsoft.azure.kusto.data.exceptions.DataClientException;
 import com.microsoft.azure.kusto.data.exceptions.DataServiceException;
+import com.sap.iot.azure.ref.integration.commons.avro.AvroConstants;
 import com.sap.iot.azure.ref.integration.commons.avro.TestAVROSchemaConstants;
-import com.sap.iot.azure.ref.integration.commons.constants.CommonConstants;
+import com.sap.iot.azure.ref.integration.commons.constants.IngestionType;
 import com.sap.iot.azure.ref.integration.commons.context.InvocationContextTestUtil;
 import com.sap.iot.azure.ref.integration.commons.exception.ADXClientException;
 import com.sap.iot.azure.ref.integration.commons.exception.AvroIngestionException;
-import com.sap.iot.azure.ref.integration.commons.model.timeseries.delete.DeleteInfo;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -23,13 +23,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -37,7 +32,7 @@ import static org.mockito.Mockito.*;
 public class ADXTableManagerTest {
 
     @Mock
-    private ClientImpl kustoClient;
+    private Client kustoClient;
     @Mock
     Clock clock;
 
@@ -51,8 +46,9 @@ public class ADXTableManagerTest {
     private final static String DB_NAME = "sampledb";
     private final String SIMPLE_TABLE_CREATION_QUERY = String.format(".create-merge table %s (sourceId: string, _enqueued_time: datetime, _isDeleted: bool)",
             TABLE_NAME);
-    private final String POLICY_CREATION_QUERY = String.format(KQLQueries.CREATE_POLICY_QUERY, TABLE_NAME, KQLQueries.DEFAULT_MAX_NUMBER_OF_ITEMS,
+    private final String BATCHING_POLICY_CREATION_QUERY = String.format(KQLQueries.CREATE_BATCHING_POLICY_QUERY, TABLE_NAME, KQLQueries.DEFAULT_MAX_NUMBER_OF_ITEMS,
             KQLQueries.DEFAULT_MAX_RAW_DATA_SIZE);
+    private final String STREAMING_POLICY_CREATION_QUERY = String.format(KQLQueries.CREATE_STREAMING_POLICY_QUERY, TABLE_NAME);
     private final String COMPLEX_TABLE_CREATION_QUERY = String.format(".create-merge table %s (sourceId: string, _enqueued_time: datetime, _isDeleted: bool, " +
             "_time:" +
             " datetime, decimalMeasure: decimal, booleanMeasure: bool, intMeasure: int, longMeasure: long, floatMeasure: real, tag1: string, tag2: string, tag3: string, tag4: string)", TABLE_NAME);
@@ -64,12 +60,11 @@ public class ADXTableManagerTest {
     private final String UPDATE_COLUMN_QUERY = String.format(".alter column ['%s'].['%s'] type=%s", TABLE_NAME, COLUMNN_NAME, COLUMNN_DATA_TYPE);
     private final String DROP_TABLE_QUERY = String.format(".drop table %s ifexists", TABLE_NAME);
     private final String DROP_COLUMN_QUERY = String.format(".drop column %s . %s", TABLE_NAME, COLUMNN_NAME);
-    private final String DATA_EXISTS_QUERY = String.format("%s | take 1", TABLE_NAME);
-    private final String COLUMN_DATA_EXISTS_QUERY = String.format("%s | project %s | where isnotempty(%s) | take 1", TABLE_NAME, COLUMNN_NAME, COLUMNN_NAME);
     private final String SIMPLE_TABLE_UPDATE_QUERY = String.format(".alter-merge table %s (sourceId: string, _enqueued_time: datetime, _isDeleted: bool)",
             TABLE_NAME);
     private final String RENAME_COLUMN_QUERY = String.format(".rename column %s . %s to %s", TABLE_NAME, COLUMNN_NAME, NEW_COLUMNN_NAME);
     private final String RENAME_TABLE_QUERY = String.format(".rename table %s to %s", TABLE_NAME, NEW_TABLE_NAME);
+    private final String CLEAR_SCHEMA_CACHE_QUERY = String.format(".clear table %s cache streamingingestion schema", TABLE_NAME);
 
     private ADXTableManager adxTableManager;
 
@@ -122,7 +117,7 @@ public class ADXTableManagerTest {
 
                 if (!tableExists) {
                     verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(SIMPLE_TABLE_CREATION_QUERY));
-                    verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(POLICY_CREATION_QUERY));
+                    verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(BATCHING_POLICY_CREATION_QUERY));
                 }
 
                 if (!mappingExists) {
@@ -155,7 +150,7 @@ public class ADXTableManagerTest {
     @Test
     public void testPolicyCreationException() throws DataClientException, DataServiceException {
         doReturn(getSampleResults(false)).when(kustoClient).execute(eq(DB_NAME), anyString());
-        doThrow(DataClientException.class).when(kustoClient).execute(eq(DB_NAME), eq(POLICY_CREATION_QUERY));
+        doThrow(DataClientException.class).when(kustoClient).execute(eq(DB_NAME), eq(BATCHING_POLICY_CREATION_QUERY));
 
         //Exceptions when creating adx resources are wrapped as IngestionRuntimeException
         expectedException.expect(ADXClientException.class);
@@ -170,7 +165,21 @@ public class ADXTableManagerTest {
         verifyExistenceCheck();
 
         verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(SIMPLE_TABLE_CREATION_QUERY));
-        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(POLICY_CREATION_QUERY));
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(BATCHING_POLICY_CREATION_QUERY));
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(SIMPLE_MAPPING_CREATION_QUERY));
+    }
+
+    @Test
+    public void testStreamingPolicy() throws DataClientException, DataServiceException {
+        environmentVariables.set(ADXConstants.INGESTION_TYPE_PROP, IngestionType.STREAMING.getValue());
+        doReturn(getSampleResults(false)).when(kustoClient).execute(eq(DB_NAME), anyString());
+        adxTableManager.checkIfExists(getSimpleSampleSchema(), STRUCTURE_ID);
+        environmentVariables.clear(ADXConstants.INGESTION_TYPE_PROP);
+
+        verifyExistenceCheck();
+
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(SIMPLE_TABLE_CREATION_QUERY));
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(STREAMING_POLICY_CREATION_QUERY));
         verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(SIMPLE_MAPPING_CREATION_QUERY));
     }
 
@@ -190,7 +199,7 @@ public class ADXTableManagerTest {
         verifyExistenceCheck();
 
         verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(COMPLEX_TABLE_CREATION_QUERY));
-        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(POLICY_CREATION_QUERY));
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(BATCHING_POLICY_CREATION_QUERY));
         verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(COMPLEX_MAPPING_CREATION_QUERY));
     }
 
@@ -253,28 +262,6 @@ public class ADXTableManagerTest {
     }
 
     @Test
-    public void testDataExists() throws DataClientException, DataServiceException {
-        doReturn(getSampleResults(true)).when(kustoClient).execute(eq(DB_NAME), eq(DATA_EXISTS_QUERY));
-        boolean dataExists1 = adxTableManager.dataExists(STRUCTURE_ID);
-        doReturn(getSampleResults(false)).when(kustoClient).execute(eq(DB_NAME), eq(DATA_EXISTS_QUERY));
-        boolean dataExists2 = adxTableManager.dataExists(STRUCTURE_ID);
-
-        assertEquals(true, dataExists1);
-        assertEquals(false, dataExists2);
-    }
-
-    @Test
-    public void testColumnDataExists() throws DataClientException, DataServiceException {
-        doReturn(getSampleResults(true)).when(kustoClient).execute(eq(DB_NAME), eq(COLUMN_DATA_EXISTS_QUERY));
-        boolean dataExists1 = adxTableManager.dataExistsForColumn(STRUCTURE_ID, COLUMNN_NAME);
-        doReturn(getSampleResults(false)).when(kustoClient).execute(eq(DB_NAME), eq(COLUMN_DATA_EXISTS_QUERY));
-        boolean dataExists2 = adxTableManager.dataExistsForColumn(STRUCTURE_ID, COLUMNN_NAME);
-
-        assertEquals(true, dataExists1);
-        assertEquals(false, dataExists2);
-    }
-
-    @Test
     public void testRenameColumn() throws DataClientException, DataServiceException {
         doReturn(MOCK_MILLIS).when(clock).millis();
         adxTableManager.softDeleteColumn(STRUCTURE_ID, COLUMNN_NAME, getSimpleSampleSchema());
@@ -301,116 +288,59 @@ public class ADXTableManagerTest {
     }
 
     @Test
-    public void testDeleteTimeSeries() throws DataClientException, DataServiceException {
-        String sourceId = "sourceId";
-        String otherSourceId = "sourceId2";
-        String fromTimestamp = "2020-01-01T00:00:00Z";
-        String toTimestamp = "2020-01-02T00:00:00Z";
-        String ingestionTimestamp = "2020-01-03T00:00:00Z";
-        String deleteTimeSeriesQueryWithoutSourceId = String.format(".set-or-append async %s <| %s | where (_time >= datetime(\"%s\") and _time " +
-                        "<= datetime(\"%s\")) and _enqueued_time < datetime(\"%s\") | where _isDeleted != true | extend " +
-                        "_enqueued_time = now(), _isDeleted = true", TABLE_NAME,
-                TABLE_NAME, fromTimestamp, toTimestamp, ingestionTimestamp);
-        String deleteTimeSeriesQueryInclusive = String.format(".set-or-append async %s <| %s | where (_time >= datetime(\"%s\") and _time " +
-                        "<= datetime(\"%s\")) and sourceId in (\"%s\") and _enqueued_time < datetime(\"%s\") | where _isDeleted != true | extend " +
-                        "_enqueued_time = now(), _isDeleted = true", TABLE_NAME,
-                TABLE_NAME, fromTimestamp, toTimestamp, sourceId, ingestionTimestamp);
-        String deleteTimeSeriesQueryMultipleSourceIds = String.format(".set-or-append async %s <| %s | where (_time >= datetime(\"%s\") and _time " +
-                        "<= datetime(\"%s\")) and sourceId in (\"%s\", \"%s\") and _enqueued_time < datetime(\"%s\") | where _isDeleted != true | extend " +
-                        "_enqueued_time = now(), _isDeleted = true", TABLE_NAME,
-                TABLE_NAME, fromTimestamp, toTimestamp, sourceId, otherSourceId, ingestionTimestamp);
+    public void testClearSchemaCache() throws DataClientException, DataServiceException {
+        doReturn(getSampleClearSchemaResults(true)).when(kustoClient).execute(eq(DB_NAME), anyString());
+        adxTableManager.clearADXTableSchemaCache(STRUCTURE_ID);
 
-        String deleteTimeSeriesQueryNonInclusive = String.format(".set-or-append async %s <| %s | where (_time > datetime(\"%s\") and _time " +
-                        "< datetime(\"%s\")) and sourceId in (\"%s\") and _enqueued_time < datetime(\"%s\") | where _isDeleted != true | extend " +
-                        "_enqueued_time = now(), _isDeleted = true", TABLE_NAME,
-                TABLE_NAME, fromTimestamp, toTimestamp, sourceId, ingestionTimestamp);
-        DeleteInfo request = DeleteInfo.builder()
-                .structureId(STRUCTURE_ID)
-                .fromTimestamp(fromTimestamp)
-                .toTimestamp(toTimestamp)
-                .ingestionTimestamp(ingestionTimestamp)
-                .fromTimestampInclusive(true)
-                .toTimestampInclusive(true)
-                .build();
-
-        //mock results
-        doReturn(getSampleResults(true)).when(kustoClient).execute(eq(DB_NAME), anyString());
-
-        //no source ID test
-        adxTableManager.deleteTimeSeries(request);
-        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(deleteTimeSeriesQueryWithoutSourceId));
-
-        //multiple source IDs
-        request.setSourceIds(Arrays.asList(sourceId, otherSourceId));
-        adxTableManager.deleteTimeSeries(request);
-        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(deleteTimeSeriesQueryMultipleSourceIds));
-
-        //inclusive test
-        request.setSourceIds(Collections.singletonList(sourceId));
-        adxTableManager.deleteTimeSeries(request);
-        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(deleteTimeSeriesQueryInclusive));
-
-        request.setFromTimestampInclusive(false);
-        request.setToTimestampInclusive(false);
-        adxTableManager.deleteTimeSeries(request);
-        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(deleteTimeSeriesQueryNonInclusive));
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(CLEAR_SCHEMA_CACHE_QUERY));
     }
 
     @Test
-    public void testDeleteTimeSeriesNoOperationIdReturned() throws DataClientException, DataServiceException {
-        String sourceId = "sourceId";
-        String fromTimestamp = "2020-01-01T00:00:00Z";
-        String toTimestamp = "2020-01-02T00:00:00Z";
-        String ingestionTimestamp = "2020-01-03T00:00:00Z";
-        DeleteInfo request = DeleteInfo.builder()
-                .structureId(STRUCTURE_ID)
-                .fromTimestamp(fromTimestamp)
-                .toTimestamp(toTimestamp)
-                .ingestionTimestamp(ingestionTimestamp)
-                .fromTimestampInclusive(true)
-                .toTimestampInclusive(true)
-                .build();
+    public void testClearSchemaCacheRetry() throws DataClientException, DataServiceException {
+        when(kustoClient.execute(eq(DB_NAME), anyString()))
+                .thenReturn(getSampleClearSchemaResults(true, false))
+                .thenReturn(getSampleClearSchemaResults(true, true));
+        adxTableManager.clearADXTableSchemaCache(STRUCTURE_ID);
 
-        //mock empty results
-        doReturn(getSampleResults(false)).when(kustoClient).execute(eq(DB_NAME), anyString());
-
-        //ADX client exception should be thrown
-        expectedException.expect(ADXClientException.class);
-        adxTableManager.deleteTimeSeries(request);
+        verify(kustoClient, times(2)).execute(eq(DB_NAME), eq(CLEAR_SCHEMA_CACHE_QUERY));
     }
 
     @Test
-    public void testGetDeleteOperationStatus() throws DataClientException, DataServiceException {
-        String operationId = "operationId";
-        String statusQuery = String.format(".show operations %s", operationId);
+    public void testUpdateDocStringSPI() throws DataClientException, DataServiceException {
+        String getDocStringQuery = String.format(".show table %s cslschema", TABLE_NAME);
+        String docStringQuery = String.format(".alter table %s docstring \"%s\"", TABLE_NAME, AvroConstants.GDPR_CATEGORY_SPI);
 
-        doReturn(getSampleResultForOperationCheck(true, "Completed")).when(kustoClient).execute(anyString());
-        DeleteOperationStatus status = adxTableManager.getDeleteOperationStatus(operationId, STRUCTURE_ID);
+        doReturn(getSampleDocstringResults("")).when(kustoClient).execute(eq(DB_NAME), eq(getDocStringQuery));
+        adxTableManager.updateGdprDocString(STRUCTURE_ID, TestAVROSchemaConstants.SAMPLE_AVRO_SCHEMA_GDPR_RELEVANT_SPI);
 
-        verify(kustoClient, times(1)).execute(eq(statusQuery));
-        assertEquals(DeleteOperationStatus.ofType("Completed"), status);
+
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(docStringQuery));
     }
 
     @Test
-    public void testEmptyOperationStatus() throws DataClientException, DataServiceException {
-        String operationId = "operationId";
+    public void testUpdateDocStringPII() throws DataClientException, DataServiceException {
+        String getDocStringQuery = String.format(".show table %s cslschema", TABLE_NAME);
+        String docStringQuery = String.format(".alter table %s docstring \"%s\"", TABLE_NAME, AvroConstants.GDPR_CATEGORY_PII);
 
-        doReturn(getSampleResultForOperationCheck(false, "Completed")).when(kustoClient).execute(anyString());
-        //ADX client exception should be thrown
-        expectedException.expect(ADXClientException.class);
-        expectedException.expectMessage("Delete time series query did not return an operation status");
-        adxTableManager.getDeleteOperationStatus(operationId, STRUCTURE_ID);
+        doReturn(getSampleDocstringResults("")).when(kustoClient).execute(eq(DB_NAME), eq(getDocStringQuery));
+        adxTableManager.updateGdprDocString(STRUCTURE_ID, TestAVROSchemaConstants.SAMPLE_AVRO_SCHEMA_GDPR_RELEVANT_PII);
+
+
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(docStringQuery));
     }
 
     @Test
-    public void testOperationStatusException() throws DataClientException, DataServiceException {
-        String operationId = "operationId";
+    public void testUpdateExistingDocString() throws DataClientException, DataServiceException {
+        String oldDocString = "TESTMT";
+        String getDocStringQuery = String.format(".show table %s cslschema", TABLE_NAME);
+        String docStringQuery = String.format(".alter table %s docstring \"%s %s\"", TABLE_NAME, oldDocString,
+                AvroConstants.GDPR_CATEGORY_SPI);
 
-        doThrow(DataClientException.class).when(kustoClient).execute(anyString());
-        //ADX client exception should be thrown
-        expectedException.expect(ADXClientException.class);
-        expectedException.expectMessage("Exception in accessing ADX artifacts");
-        adxTableManager.getDeleteOperationStatus(operationId, STRUCTURE_ID);
+        doReturn(getSampleDocstringResults(oldDocString)).when(kustoClient).execute(eq(DB_NAME), eq(getDocStringQuery));
+        adxTableManager.updateGdprDocString(STRUCTURE_ID, TestAVROSchemaConstants.SAMPLE_AVRO_SCHEMA_GDPR_RELEVANT_SPI);
+
+
+        verify(kustoClient, times(1)).execute(eq(DB_NAME), eq(docStringQuery));
     }
 
     private void verifyExistenceCheck() throws DataClientException, DataServiceException {
@@ -445,16 +375,38 @@ public class ADXTableManagerTest {
         return results;
     }
 
-    private Results getSampleResultForOperationCheck(boolean filled, String state) {
-        ArrayList<ArrayList<String>> values = new ArrayList<>();
+    private Results getSampleDocstringResults(String docString) {
         ArrayList<String> innerValues = new ArrayList<>();
-        HashMap<String, Integer> columnNameToIndex = new HashMap<>();
+        ArrayList<ArrayList<String>> values = new ArrayList<>();
+
+        HashMap columnNameToIndex = new HashMap<>();
+        columnNameToIndex.put(ADXConstants.DOC_STRING, 0);
+
         Results results = new Results(columnNameToIndex, null, values, null);
 
-        columnNameToIndex.put("State", 0);
-        innerValues.add(state);
-        if (filled) {
-            values.add(innerValues);
+        innerValues.add(docString);
+        values.add(innerValues);
+
+        return results;
+    }
+
+    private Results getSampleClearSchemaResults(boolean... succeededEntries) {
+        ArrayList<ArrayList<String>> values = new ArrayList<>();
+
+        HashMap columnNameToIndex = new HashMap<>();
+        columnNameToIndex.put(ADXConstants.STATUS, 0);
+
+        Results results = new Results(columnNameToIndex, null, values, null);
+
+        for (boolean succeeded : succeededEntries) {
+            ArrayList<String> innerValues = new ArrayList<>();
+            if (succeeded) {
+                innerValues.add(ADXConstants.SUCCEEDED);
+                values.add(innerValues);
+            } else {
+                innerValues.add("false");
+                values.add(innerValues);
+            }
         }
 
         return results;

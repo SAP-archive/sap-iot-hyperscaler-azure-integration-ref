@@ -52,7 +52,7 @@ public class MetricsClient {
         try {
             runnable.run();
         } finally {
-            telemetryClient.trackMetric(getMetricName(metricName), (double)System.currentTimeMillis() - start);
+            trackPerfMetric(getMetricName(metricName), System.currentTimeMillis() - start);
         }
     }
 }

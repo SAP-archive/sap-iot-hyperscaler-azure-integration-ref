@@ -7,12 +7,14 @@ import com.sap.iot.azure.ref.integration.commons.exception.base.ErrorType;
  */
 public enum CommonErrorType implements ErrorType {
 
+    AUTH_TOKEN_LOOKUP_ERROR("Token Authentication Error"),
     MAPPING_LOOKUP_ERROR("Mapping Lookup Error"),
     ADX_ERROR("Azure Data Explorer Error"),
     CACHE_ACCESS_ERROR("Redis Cache Access Error"),
     AVRO_EXCEPTION("Avro Parse Exception"),
     EVENT_HUB_ERROR("Event Hub Access Error"),
-    JSON_PROCESSING_ERROR("Json Prcessing Error");
+    RUNTIME_ERROR("Runtime Error"),
+    JSON_PROCESSING_ERROR("Json Processing Error");
 
     private final String description;
 
