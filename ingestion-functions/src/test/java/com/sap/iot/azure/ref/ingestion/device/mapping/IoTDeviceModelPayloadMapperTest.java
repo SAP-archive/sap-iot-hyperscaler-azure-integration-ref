@@ -69,7 +69,7 @@ public class IoTDeviceModelPayloadMapperTest {
 
     @Test
     public void testAbstractRawMessagesWithLongTimeFormat()  {
-        DeviceMeasure deviceMeasure = iotDeviceModelPayloadMapper.process(getSampleIOTDeviceModelMessages(String.valueOf(TIMESTAMP.toEpochMilli()), true)).get(0);
+        DeviceMeasure deviceMeasure = iotDeviceModelPayloadMapper.process(getSampleIOTDeviceModelMessages(String.valueOf(TIMESTAMP), true)).get(0);
         assertIoTDeviceModelMeasure(deviceMeasure, false);
     }
 
