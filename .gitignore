@@ -66,4 +66,5 @@ springAppContext.xml
 local.settings.json
 bin/
 obj/
+.idea/azureSettings.xml
 *.trn
