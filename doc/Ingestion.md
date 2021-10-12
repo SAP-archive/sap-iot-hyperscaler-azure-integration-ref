@@ -336,7 +336,8 @@ Only Single and Batched Measure IoT Device Model Message format are supported. F
 #### Extending Supported Device Payload Formats
 
 You can extended the support for Device Payload Formats by implementing the DevicePayloadMapper Interface.
-The [IoTDeviceModelPayloadMapper](../integration-commons/src/main/java/com/sap/iot/azure/ref/ingestion/device/mapping/IoTDeviceModelPayloadMapper.java) shows how this interface is implemented.
+The [IoTDeviceModelPayloadMapper](../ingestion-functions/src/main/java/com/sap/iot/azure/ref/ingestion/device/mapping/IoTDeviceModelPayloadMapper.java) shows
+ how this interface is implemented.
 
 ```java
 public interface DevicePayloadMapper extends Processor<DeviceMessage, List<DeviceMeasure>> {

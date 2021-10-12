@@ -1254,7 +1254,9 @@
 					"ipRules": [],
 					"defaultAction": "Allow"
 				},
-				"supportsHttpsTrafficOnly": true
+				"supportsHttpsTrafficOnly": true,
+				"allowBlobPublicAccess": false,
+				"minimumTlsVersion": "TLS1_2"
 			}
 		},
 		{
@@ -1273,7 +1275,9 @@
 					"ipRules": [],
 					"defaultAction": "Allow"
 				},
-				"supportsHttpsTrafficOnly": true
+				"supportsHttpsTrafficOnly": true,
+				"allowBlobPublicAccess": false,
+				"minimumTlsVersion": "TLS1_2"
 			}
 		},
 		{
@@ -1292,7 +1296,9 @@
 					"ipRules": [],
 					"defaultAction": "Allow"
 				},
-				"supportsHttpsTrafficOnly": true
+				"supportsHttpsTrafficOnly": true,
+				"allowBlobPublicAccess": false,
+				"minimumTlsVersion": "TLS1_2"
 			}
 		},
 		{
@@ -1311,7 +1317,9 @@
 					"ipRules": [],
 					"defaultAction": "Allow"
 				},
-				"supportsHttpsTrafficOnly": true
+				"supportsHttpsTrafficOnly": true,
+				"allowBlobPublicAccess": false,
+				"minimumTlsVersion": "TLS1_2"
 			},
 			"resources": [
 				{
@@ -1366,7 +1374,9 @@
 					"defaultAction": "Allow"
 				},
 				"accessTier": "Cool",
-				"supportsHttpsTrafficOnly": true
+				"supportsHttpsTrafficOnly": true,
+				"allowBlobPublicAccess": false,
+				"minimumTlsVersion": "TLS1_2"
 			}
 		},
 		{
@@ -1385,7 +1395,9 @@
 					"ipRules": [],
 					"defaultAction": "Allow"
 				},
-				"supportsHttpsTrafficOnly": true
+				"supportsHttpsTrafficOnly": true,
+				"allowBlobPublicAccess": false,
+				"minimumTlsVersion": "TLS1_2"
 			},
 			"resources": [
 				{
