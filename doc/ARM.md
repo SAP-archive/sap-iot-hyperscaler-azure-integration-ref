@@ -69,20 +69,20 @@ Follow these steps to create and upload the zip file:
 
 * **SAP IoT Tenant Authentication Token Endpoint**
 
-  * Used for fetching the authorization token for accessing SAP IoT Abstraction Mapping and Lookup APIs. Customers can get the authentication endpoint (uaa.url) from the Service Key created for SAP IoT Service instance in the SAP Cloud Platform Cockpit. See details at [Retrieving ClientID and Client Secret](https://help.sap.com/viewer/195126f4601945cba0886cbbcbf3d364/latest/en-US/a41c28db0cf449059d48c23fa5f7b24b.html).
+  * Used for fetching the authorization token for accessing SAP IoT Abstraction Mapping and Lookup APIs. Customers can get the authentication endpoint (uaa.url) from the Service Key created for SAP IoT Service instance in the SAP Business Technology Platform Cockpit. See details at [Retrieving ClientID and Client Secret](https://help.sap.com/viewer/195126f4601945cba0886cbbcbf3d364/latest/en-US/a41c28db0cf449059d48c23fa5f7b24b.html).
 
 * **SAP IoT Tenant ID**
 
   * Used for fetching the authorization token for accessing SAP IoT Abstraction Mapping and Lookup APIs. Customers can get tenant id (uaa.tenantid) from the 
-  Service Key created for SAP IoT Service instance in the SAP Cloud Platform Cockpit. See details at [Retrieving ClientID and Client Secret](https://help.sap.com/viewer/195126f4601945cba0886cbbcbf3d364/latest/en-US/a41c28db0cf449059d48c23fa5f7b24b.html).
+  Service Key created for SAP IoT Service instance in the SAP Business Technology Platform Cockpit. See details at [Retrieving ClientID and Client Secret](https://help.sap.com/viewer/195126f4601945cba0886cbbcbf3d364/latest/en-US/a41c28db0cf449059d48c23fa5f7b24b.html).
 
 * **SAP IoT Tenant Client ID**  
 
-  * Used for fetching the authorization token for accessing SAP IoT Abstraction Mapping and Lookup APIs. Customers can get client id (uaa.clientid) from the Service Key created for SAP IoT Service instance in the SAP Cloud Platform Cockpit. See details at [Retrieving ClientID and Client Secret](https://help.sap.com/viewer/195126f4601945cba0886cbbcbf3d364/latest/en-US/a41c28db0cf449059d48c23fa5f7b24b.html).
+  * Used for fetching the authorization token for accessing SAP IoT Abstraction Mapping and Lookup APIs. Customers can get client id (uaa.clientid) from the Service Key created for SAP IoT Service instance in the SAP Business Technology Platform Cockpit. See details at [Retrieving ClientID and Client Secret](https://help.sap.com/viewer/195126f4601945cba0886cbbcbf3d364/latest/en-US/a41c28db0cf449059d48c23fa5f7b24b.html).
 
 * **SAP IoT Tenant Client Secret**  
 
-  * Used for fetching the authorization token for accessing SAP IoT Abstraction Mapping and Lookup APIs. Customers can get client secret (uaa.cientsecret) from the Service Key created for SAP IoT Service instance in the SAP Cloud Platform Cockpit. See details at [Retrieving ClientID and Client Secret](https://help.sap.com/viewer/195126f4601945cba0886cbbcbf3d364/latest/en-US/a41c28db0cf449059d48c23fa5f7b24b.html).
+  * Used for fetching the authorization token for accessing SAP IoT Abstraction Mapping and Lookup APIs. Customers can get client secret (uaa.cientsecret) from the Service Key created for SAP IoT Service instance in the SAP Business Technology Platform Cockpit. See details at [Retrieving ClientID and Client Secret](https://help.sap.com/viewer/195126f4601945cba0886cbbcbf3d364/latest/en-US/a41c28db0cf449059d48c23fa5f7b24b.html).
 
 * **Scopes to Access SAP IoT APIs**  
 
@@ -92,11 +92,11 @@ Follow these steps to create and upload the zip file:
 
 * **Model Configuration App Host**
 
-  * Used by the Ingestion Function Apps for looking up Schema and Tags information. You can get this url from the endpoints array (endpoints.i4c-model-configuration-sap) in the Service Key created for SAP IoT Service instance in the SAP Cloud Platform Cockpit.
+  * Used by the Ingestion Function Apps for looking up Schema and Tags information. You can get this url from the endpoints array (endpoints.i4c-model-configuration-sap) in the Service Key created for SAP IoT Service instance in the SAP Business Technology Platform Cockpit.
 
 * **Model Mapping App Host**
 
-  * Used by the Ingestion Function Apps for fetching mapping information. You can get this url from the endpoints array (endpoints.i4c-model-mapping-sap) in the Service Key created for SAP IoT Service instance in the SAP Cloud Platform Cockpit.
+  * Used by the Ingestion Function Apps for fetching mapping information. You can get this url from the endpoints array (endpoints.i4c-model-mapping-sap) in the Service Key created for SAP IoT Service instance in the SAP Business Technology Platform Cockpit.
 
 * **Mapping Function Zip URI**
 

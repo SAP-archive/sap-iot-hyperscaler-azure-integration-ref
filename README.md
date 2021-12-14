@@ -18,7 +18,7 @@ In this sample application, a reference for building customer-managed device man
 
 ## Prerequisites
 
-- [SAP Cloud Platform](https://cloudplatform.sap.com/index.html) account with Cloud Foundry enabled
+- [SAP Business Technology Platform](https://cloudplatform.sap.com/index.html) account with Cloud Foundry enabled
 - Subscription to SAP Business Application consuming SAP IoT Services
   - Currently only supported in SAP Enterprise Product Development application
 - [SAP Internet of Things](https://www.sap.com/products/iot-data-services.html) Service instance and service key
